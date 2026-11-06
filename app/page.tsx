@@ -11,82 +11,19 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChangeEvent, DragEvent, useMemo, useRef, useState } from "react";
-
-type Tool = {
-  name: string;
-  description: string;
-  category: string;
-  icon: typeof FileText;
-  tag?: string;
-};
-
-const tools: Tool[] = [
-  { name: "PDF to Word", description: "Make a PDF editable again.", category: "PDF", icon: FileText, tag: "Popular" },
-  { name: "Word to PDF", description: "Keep layouts tidy when you share.", category: "PDF", icon: FilePenLine },
-  { name: "Merge PDF", description: "Bring separate files into one.", category: "PDF", icon: Merge },
-  { name: "Split PDF", description: "Pull out just the pages you need.", category: "PDF", icon: Split },
-  { name: "Compress PDF", description: "Make large documents easier to send.", category: "PDF", icon: Minimize2, tag: "Popular" },
-  { name: "Organize PDF", description: "Reorder, rotate or remove pages.", category: "PDF", icon: PanelTop },
-  { name: "PDF to JPG", description: "Export every page as an image.", category: "PDF", icon: ImageIcon },
-  { name: "Protect PDF", description: "Add a password to sensitive files.", category: "PDF", icon: LockKeyhole },
-  { name: "PNG to JPG", description: "Convert images in a couple of clicks.", category: "Images", icon: FileImage, tag: "Popular" },
-  { name: "JPG to PNG", description: "Switch formats without the guesswork.", category: "Images", icon: ImageIcon },
-  { name: "Image compressor", description: "Trim file size while keeping detail.", category: "Images", icon: Minimize2 },
-  { name: "Resize image", description: "Set exact dimensions or percentages.", category: "Images", icon: SlidersHorizontal },
-  { name: "Crop & rotate", description: "Frame, straighten and flip images.", category: "Images", icon: ImageIcon },
-  { name: "WEBP converter", description: "Convert modern web image formats.", category: "Images", icon: FileImage },
-  { name: "Word editor", description: "Make quick edits to document content.", category: "Documents", icon: FilePenLine },
-  { name: "DOCX to TXT", description: "Extract clean text from documents.", category: "Documents", icon: FileText },
-  { name: "PPTX to PDF", description: "Share presentations as fixed pages.", category: "Presentations", icon: PanelTop, tag: "Popular" },
-  { name: "PDF to PPTX", description: "Turn PDF pages into slide layouts.", category: "Presentations", icon: FileText },
-  { name: "Slides to images", description: "Export slide decks as PNGs.", category: "Presentations", icon: ImageIcon },
-  { name: "Excel to PDF", description: "Prepare sheets for easy sharing.", category: "Spreadsheets", icon: FileSpreadsheet },
-  { name: "CSV to XLSX", description: "Turn raw data into a workbook.", category: "Spreadsheets", icon: FileSpreadsheet },
-  { name: "Remove duplicates", description: "Find repeated rows in a data file.", category: "Spreadsheets", icon: Check },
-  { name: "MP4 to GIF", description: "Make a loop from a video clip.", category: "Video & audio", icon: Film },
-  { name: "Video compressor", description: "Reduce video size for sharing.", category: "Video & audio", icon: FileVideo },
-  { name: "Extract audio", description: "Save a video's audio track.", category: "Video & audio", icon: FileAudio },
-  { name: "Audio converter", description: "Switch between common audio formats.", category: "Video & audio", icon: Music2 },
-  { name: "AI image enhancer", description: "Upscale and improve soft images.", category: "AI lab", icon: WandSparkles, tag: "AI" },
-  { name: "Background remover", description: "Separate a subject from its backdrop.", category: "AI lab", icon: Sparkles, tag: "AI" },
-  { name: "Photo restoration", description: "Give old photographs a careful lift.", category: "AI lab", icon: ImageIcon, tag: "AI" },
-  { name: "OCR extractor", description: "Turn scanned pages into searchable text.", category: "AI lab", icon: ScanText, tag: "AI" },
-  { name: "Create ZIP", description: "Bundle files into a single archive.", category: "Archives", icon: FileArchive },
-  { name: "Extract archive", description: "Unpack ZIP and other archive formats.", category: "Archives", icon: Download },
-  { name: "JSON formatter", description: "Format and validate JSON data.", category: "Developer", icon: Braces },
-  { name: "Base64 tools", description: "Encode and decode text or files.", category: "Developer", icon: Code2 },
-  { name: "Hash generator", description: "Create file checksums locally.", category: "Developer", icon: LockKeyhole },
-  { name: "QR generator", description: "Make QR codes for links and text.", category: "Developer", icon: QrCode },
-];
-
-const categories = [
-  { name: "All tools", detail: "The complete toolbox" },
-  { name: "PDF", detail: "Read, arrange, protect" },
-  { name: "Images", detail: "Convert, resize, refine" },
-  { name: "Documents", detail: "Write, export, extract" },
-  { name: "Spreadsheets", detail: "Clean, reshape, share" },
-  { name: "Presentations", detail: "Slides in every format" },
-  { name: "Video & audio", detail: "Trim, convert, compress" },
-  { name: "AI lab", detail: "Enhance with intelligence" },
-  { name: "Archives", detail: "Pack and unpack" },
-  { name: "Developer", detail: "Small utilities, close at hand" },
-];
-
-function formatBytes(bytes: number) {
-  if (bytes < 1024) return bytes + " B";
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
-  return (bytes / (1024 * 1024)).toFixed(2) + " MB";
-}
+import { useRouter } from "next/navigation";
+import FileActionPanel from "@/components/FileActionPanel";
+import { TOOLS, TOOL_CATEGORIES, slugify } from "@/lib/tools";
 
 export default function Home() {
   const reducedMotion = useReducedMotion();
+  const router = useRouter();
   const fileInput = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [dragging, setDragging] = useState(false);
   const [category, setCategory] = useState("All tools");
   const [query, setQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
-  const [selectedTool, setSelectedTool] = useState<Tool | null>(null);
   const [showAll, setShowAll] = useState(false);
 
   const addFiles = (incoming: FileList | File[]) => {
@@ -107,15 +44,12 @@ export default function Home() {
 
   const filteredTools = useMemo(() => {
     const search = query.trim().toLowerCase();
-    return tools.filter((tool) => {
+    return TOOLS.filter((tool) => {
       const matchesCategory = category === "All tools" || tool.category === category;
       const matchesSearch = !search || (tool.name + " " + tool.description + " " + tool.category).toLowerCase().includes(search);
       return matchesCategory && matchesSearch;
     });
   }, [category, query]);
-
-  const closeTool = () => setSelectedTool(null);
-  const SelectedToolIcon = selectedTool?.icon;
 
   return (
     <main className="app-shell">
@@ -235,15 +169,8 @@ export default function Home() {
         </div>
         <AnimatePresence>
           {files.length > 0 && (
-            <motion.div className="file-list-panel" initial={{ opacity: 0, height: 0, y: 10 }} animate={{ opacity: 1, height: "auto", y: 0 }} exit={{ opacity: 0, height: 0 }}>
-              <div className="file-list-head"><div><span className="micro-label">SESSION FILES</span><h3>{files.length} file{files.length === 1 ? "" : "s"} ready</h3></div><button className="subtle-button" onClick={() => setFiles([])}>Clear list <X size={13} /></button></div>
-              {files.map((file, index) => (
-                <div className="file-row" key={file.name + index}>
-                  <span className="file-row-icon"><FileText size={17} /></span><span className="file-row-name"><b>{file.name}</b><small>{formatBytes(file.size)} · {file.type || "Unknown file type"}</small></span><span className="file-row-state"><Check size={13} /> Added locally</span>
-                  <button className="remove-file" aria-label={"Remove " + file.name} onClick={() => setFiles((current) => current.filter((_, fileIndex) => fileIndex !== index))}><X size={15} /></button>
-                </div>
-              ))}
-              <div className="file-list-foot">This is the upload interaction preview. Conversion engines will connect in the next build phase.</div>
+            <motion.div className="file-action-reveal" initial={{ opacity: 0, height: 0, y: 12 }} animate={{ opacity: 1, height: "auto", y: 0 }} exit={{ opacity: 0, height: 0 }}>
+              <FileActionPanel files={files} onRemove={(index) => setFiles((current) => current.filter((_, fileIndex) => fileIndex !== index))} />
             </motion.div>
           )}
         </AnimatePresence>
@@ -256,13 +183,13 @@ export default function Home() {
         </div>
         <div className="tool-browser">
           <div className="tool-browser-head">
-            <div className="tool-browser-label"><span className="browser-led" /> BROWSE THE TOOL LIBRARY <span className="tool-library-count">36 TOOLS IN THE PREVIEW</span></div>
+            <div className="tool-browser-label"><span className="browser-led" /> BROWSE THE TOOL LIBRARY <span className="tool-library-count">{TOOLS.length} TOOLS IN THE LIBRARY</span></div>
             <label className="tool-search"><Search size={16} /><input value={query} onChange={(event) => { setQuery(event.target.value); setShowAll(true); }} placeholder="Search a tool or format..." /><kbd>/</kbd></label>
           </div>
           <div className="tool-browser-body">
             <aside className="category-rail">
               <span className="micro-label">CATEGORIES</span>
-              {categories.map((item) => (
+              {TOOL_CATEGORIES.map((item) => (
                 <button key={item.name} className={category === item.name ? "category-option selected" : "category-option"} onClick={() => { setCategory(item.name); setShowAll(false); }}>
                   <span>{item.name}</span><ChevronRight size={14} />
                 </button>
@@ -276,7 +203,7 @@ export default function Home() {
                   {(showAll ? filteredTools : filteredTools.slice(0, 12)).map((tool, index) => {
                     const Icon = tool.icon;
                     return (
-                      <motion.button layout key={tool.name} className="tool-result" onClick={() => setSelectedTool(tool)} initial={reducedMotion ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: .97 }} transition={{ duration: .25, delay: index * .012 }}>
+                      <motion.button layout key={tool.name} className="tool-result" onClick={() => router.push("/tools/" + slugify(tool.name))} initial={reducedMotion ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: .97 }} transition={{ duration: .25, delay: index * .012 }}>
                         <span className="tool-result-icon"><Icon size={18} strokeWidth={1.7} /></span>
                         <span className="tool-result-copy"><b>{tool.name}</b><small>{tool.description}</small></span>
                         {tool.tag && <span className={"tool-tag" + (tool.tag === "AI" ? " tag-ai" : "")}>{tool.tag}</span>}
@@ -483,21 +410,6 @@ export default function Home() {
         <div className="footer-bottom"><span>© 2026 CONVOTOOLS. MADE FOR THE WORK BETWEEN THE WORK.</span><span>EARLY INTERFACE PREVIEW <i /> PROCESSING ENGINES IN PROGRESS</span></div>
       </footer>
 
-      <AnimatePresence>
-        {selectedTool && (
-          <motion.div className="tool-modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={(event) => { if (event.target === event.currentTarget) closeTool(); }}>
-            <motion.div className="tool-modal" initial={{ opacity: 0, y: 18, scale: .98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: .98 }} transition={{ duration: .22 }}>
-              <button className="modal-close" onClick={closeTool} aria-label="Close tool preview"><X size={17} /></button>
-              <span className="section-kicker">TOOL PREVIEW / {selectedTool.category.toUpperCase()}</span>
-              <div className="modal-tool-icon">{SelectedToolIcon && <SelectedToolIcon size={22} />}</div>
-              <h2>{selectedTool.name}</h2>
-              <p>{selectedTool.description}</p>
-              <div className="modal-next-step"><span className="modal-step-icon"><UploadCloud size={17} /></span><span><b>Start with a file</b><small>Add a file in the workspace to prepare this tool.</small></span><button onClick={() => { closeTool(); document.getElementById("workspace")?.scrollIntoView({ behavior: "smooth" }); }}>Go to upload <ArrowUpRight size={13} /></button></div>
-              <div className="modal-note"><Clock3 size={14} /> This tool&apos;s processing engine is part of the next build phase. This preview demonstrates the product flow.</div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </main>
   );
 }
