@@ -2,10 +2,10 @@
 
 import {
   ArrowDownRight, ArrowRight, ArrowUpRight, AudioLines, BadgeCheck, Braces,
-  Check, ChevronRight, Clock3, Code2, Command, Copy, Download, FileArchive,
+  Check, ChevronRight, Clock3, Code2, Copy, Download, FileArchive,
   FileAudio, FileImage, FilePenLine, FileSpreadsheet, FileText, FileVideo,
   Film, Github, Image as ImageIcon, Layers3, LockKeyhole, Menu, Merge,
-  Minimize2, Music2, PanelTop, Plus, QrCode, ScanText, Search, ShieldCheck,
+  Minimize2, Music2, PanelTop, Play, Plus, QrCode, ScanText, Search, ShieldCheck,
   SlidersHorizontal, Sparkles, Split, UploadCloud, WandSparkles, Workflow,
   X, Zap
 } from "lucide-react";
@@ -72,11 +72,6 @@ const categories = [
   { name: "Developer", detail: "Small utilities, close at hand" },
 ];
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 22 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] as const } },
-};
-
 function formatBytes(bytes: number) {
   if (bytes < 1024) return bytes + " B";
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
@@ -118,8 +113,6 @@ export default function Home() {
       return matchesCategory && matchesSearch;
     });
   }, [category, query]);
-
-  const reveal = reducedMotion ? {} : { variants: fadeUp, initial: "hidden", whileInView: "visible", viewport: { once: true, amount: 0.12 } };
 
   const closeTool = () => setSelectedTool(null);
   const SelectedToolIcon = selectedTool?.icon;
@@ -232,7 +225,7 @@ export default function Home() {
           <input ref={fileInput} className="file-input" type="file" multiple onChange={onChoose} />
           <div className="drop-left">
             <div className="drop-icon"><UploadCloud size={25} /></div>
-            <div className="drop-copy"><span className="micro-label">DRAG, DROP, DONE</span><h3>{dragging ? "That's it. Let go." : "Bring your files here."}</h3><p>Drop one file or a whole batch. We'll help you find the next step.</p></div>
+            <div className="drop-copy"><span className="micro-label">DRAG, DROP, DONE</span><h3>{dragging ? "That's it. Let go." : "Bring your files here."}</h3><p>Drop one file or a whole batch. We&apos;ll help you find the next step.</p></div>
           </div>
           <div className="drop-right">
             <button className="button-dark" onClick={() => fileInput.current?.click()}>Choose files <Plus size={15} /></button>
@@ -342,7 +335,7 @@ export default function Home() {
         <div className="category-heading">
           <span className="section-kicker">04 / IMAGE LAB</span>
           <div className="category-title-row"><h2>Give every image<br /><em>a second look.</em></h2><span className="category-number">02</span></div>
-          <p>Format changes when you need them. A little restoration when you don't. Bring images into shape without opening a heavyweight editor.</p>
+          <p>Format changes when you need them. A little restoration when you don&apos;t. Bring images into shape without opening a heavyweight editor.</p>
           <div className="category-tool-list">
             {["Convert PNG, JPG, WEBP, AVIF and more", "Resize, crop, rotate and compress", "Upscale, unblur and reduce image noise", "Remove backgrounds and create transparent PNGs", "Improve scanned photos and old images"].map((item) => <div key={item}><Check size={14} /> {item}</div>)}
           </div>
@@ -453,7 +446,7 @@ export default function Home() {
         <div className="developer-copy"><span className="section-kicker">09 / DEVELOPER UTILITIES</span><h2>Little tools for<br /><em>the in-between.</em></h2><p>Not every file task needs a full editor. Keep handy utilities close by for when you need to inspect, encode or validate something quickly.</p><a className="underlined-link" href="#toolkit" onClick={() => setCategory("Developer")}>Explore developer tools <ArrowUpRight size={14} /></a></div>
         <div className="developer-console">
           <div className="developer-tabs"><span className="dev-tab-active"><Braces size={13} /> JSON</span><span><Code2 size={13} /> BASE64</span><span><LockKeyhole size={13} /> HASH</span></div>
-          <div className="code-area"><div className="code-gutter">01<br />02<br />03<br />04<br />05<br />06</div><pre><span className="code-punc">{"{"}</span>{"\n"}  <span className="code-key">"tool"</span>: <span className="code-string">"json formatter"</span>,{"\n"}  <span className="code-key">"status"</span>: <span className="code-string">"ready"</span>,{"\n"}  <span className="code-key">"clean"</span>: <span className="code-bool">true</span>,{"\n"}  <span className="code-key">"next_step"</span>: <span className="code-string">"your idea"</span>{"\n"}<span className="code-punc">{"}"}</span></pre></div>
+          <div className="code-area"><div className="code-gutter">01<br />02<br />03<br />04<br />05<br />06</div><pre><span className="code-punc">{"{"}</span>{"\n"}  <span className="code-key">&quot;tool&quot;</span>: <span className="code-string">&quot;json formatter&quot;</span>,{"\n"}  <span className="code-key">&quot;status&quot;</span>: <span className="code-string">&quot;ready&quot;</span>,{"\n"}  <span className="code-key">&quot;clean&quot;</span>: <span className="code-bool">true</span>,{"\n"}  <span className="code-key">&quot;next_step&quot;</span>: <span className="code-string">&quot;your idea&quot;</span>{"\n"}<span className="code-punc">{"}"}</span></pre></div>
           <div className="developer-console-foot"><span><span className="dev-status" /> VALID JSON</span><button onClick={() => navigator.clipboard?.writeText('{"tool":"json formatter","status":"ready","clean":true,"next_step":"your idea"}')}><Copy size={13} /> Copy sample</button></div>
         </div>
       </section>
@@ -500,7 +493,7 @@ export default function Home() {
               <h2>{selectedTool.name}</h2>
               <p>{selectedTool.description}</p>
               <div className="modal-next-step"><span className="modal-step-icon"><UploadCloud size={17} /></span><span><b>Start with a file</b><small>Add a file in the workspace to prepare this tool.</small></span><button onClick={() => { closeTool(); document.getElementById("workspace")?.scrollIntoView({ behavior: "smooth" }); }}>Go to upload <ArrowUpRight size={13} /></button></div>
-              <div className="modal-note"><Clock3 size={14} /> This tool's processing engine is part of the next build phase. This preview demonstrates the product flow.</div>
+              <div className="modal-note"><Clock3 size={14} /> This tool&apos;s processing engine is part of the next build phase. This preview demonstrates the product flow.</div>
             </motion.div>
           </motion.div>
         )}
