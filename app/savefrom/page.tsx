@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default async function SavefromPage() {
-  const configured = savefromSecretConfigured();
+  const configured = savefromCredentialsConfigured();
   const jar = await cookies();
   const authorized = configured && verifySavefromToken(jar.get(COOKIE_NAME)?.value);
   return authorized ? <PrivateSavefrom /> : <SavefromGate configured={configured} />;
