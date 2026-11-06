@@ -169,7 +169,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
             </div>
           )}
 
-          {invalidFiles.length > 0 && <div className="format-warning"><FileImage size={15} /><span>This tool expects {tool.inputLabel}. Your selection includes a different file type. Try the universal workspace for matching actions.</span><Link href="/workspace">Find compatible tools <ArrowUpRight size={12} /></Link></div>}
+          {invalidFiles.length > 0 && <div className="format-warning"><FileImage size={15} /><span>This tool expects {tool.inputLabel}. Your selection includes a different file type. Try the universal workspace for matching actions.</span><Link href="/dashboard">Open workspace <ArrowUpRight size={12} /></Link></div>}
 
           <div className="operation-divider" />
           <div className="operation-card-head settings-head"><div><span className="operation-step">STEP 02 / OUTPUT</span><h2>Choose your settings</h2><p>Adjust the output before preparing your file.</p></div><span className="settings-icon"><Settings2 size={19} /></span></div>
