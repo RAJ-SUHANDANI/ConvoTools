@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import SavefromGate from "@/components/SavefromGate";
 import PrivateSavefrom from "@/components/PrivateSavefrom";
-import { COOKIE_NAME, savefromSecretConfigured, verifySavefromToken } from "@/lib/savefrom-auth";
+import { COOKIE_NAME, savefromCredentialsConfigured, verifySavefromToken } from "@/lib/savefrom-auth";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
