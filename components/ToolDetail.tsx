@@ -194,7 +194,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
           {(tool.name.toLowerCase().includes("compress") || tool.category === "Images" || tool.category === "Video & audio") && (
             <>
               <label className="field-label" htmlFor="quality-select">Quality preset</label>
-              <div className="select-wrap"><select id="quality-select" value={quality} onChange={(event) => setQuality(event.target.value)}><option>Smaller file</option><option>Balanced</option><option>Best quality</option></select><ChevronDown size={15} /></div>
+              <div className="select-wrap"><select id="quality-select" value={quality} onChange={(event) => setQuality(event.target.value as typeof quality)}><option>Smaller file</option><option>Balanced</option><option>Best quality</option></select><ChevronDown size={15} /></div>
             </>
           )}
           {tool.name === "Resize image" && <div className="operation-dimensions"><div><label className="field-label" htmlFor="image-width">Width (px)</label><input id="image-width" className="operation-password" type="number" min="1" max="8192" value={imageWidth} onChange={(event) => setImageWidth(event.target.value)} placeholder="Auto" /></div><div><label className="field-label" htmlFor="image-height">Height (px)</label><input id="image-height" className="operation-password" type="number" min="1" max="8192" value={imageHeight} onChange={(event) => setImageHeight(event.target.value)} placeholder="Auto" /></div></div>}
