@@ -192,15 +192,30 @@ async function rawImageToBlob(raw:{data:Uint8Array|Uint8ClampedArray;width:numbe
 
 async function removeImageBackground(file:File):Promise<ProcessResult>{
  if(file.size>12*1024*1024)throw new Error("Choose an image smaller than 12 MB for local background removal.");
- const bitmap=await createImageBitmap(file);const pixels=bitmap.width*bitmap.height;bitmap.close();if(pixels>16000000)throw new Error("This image is over 16 megapixels. Resize it before using local background removal.");
+ const bitmap=await createImageBitmap(file);const pixels=bitmap.width*bitmap.height;bitmap.close();if(pixels>8000000)throw new Error("This image is over 8 megapixels. Resize it before using local background removal.");
  const {pipeline}=await import("@huggingface/transformers");
  const segmenter=await pipeline("background-removal","Xenova/modnet",{dtype:"fp32"});
  const source=URL.createObjectURL(file);
  try{
   const output=await segmenter(source);
-  const first=(Array.isArray(output)?output[0]:output) as {data:Uint8Array|Uint8ClampedArray;width:number;height:number;channels:number};
-  const blob=await rawImageToBlob(first);
-  return result(blob,name(file,"png"),"Portrait background removed locally in your browser using MODNet. The model is downloaded on first use.");
+  const matte=(Array.isArray(output)?output[0]:output) as {data:Uint8Array|Uint8ClampedArray;width:number;height:number;channels:number};
+  const original=await createImageBitmap(file);
+  try{
+   const canvas=document.createElement("canvas");canvas.width=original.width;canvas.height=original.height;
+   const ctx=canvas.getContext("2d");if(!ctx)throw new Error("Image canvas is unavailable.");
+   ctx.drawImage(original,0,0);const pixels=ctx.getImageData(0,0,canvas.width,canvas.height);
+   for(let y=0;y<canvas.height;y++)for(let x=0;x<canvas.width;x++){
+    const mx=Math.min(matte.width-1,Math.floor(x*matte.width/canvas.width));
+    const my=Math.min(matte.height-1,Math.floor(y*matte.height/canvas.height));
+    const index=(my*matte.width+mx)*matte.channels;
+    const alpha=matte.channels===1?matte.data[index]:Math.round(.299*matte.data[index]+.587*matte.data[index+1]+.114*matte.data[index+2]);
+    pixels.data[(y*canvas.width+x)*4+3]=Math.max(0,Math.min(255,alpha));
+   }
+   ctx.putImageData(pixels,0,0);
+   const blob=await new Promise<Blob>((resolve,reject)=>canvas.toBlob(value=>value?resolve(value):reject(new Error("Transparent PNG export failed.")),"image/png"));
+   canvas.width=0;canvas.height=0;
+   return result(blob,name(file,"png"),"Transparent portrait PNG created locally using MODNet matting. The model is downloaded on first use.");
+  }finally{original.close();}
  }finally{URL.revokeObjectURL(source);}
 }
 
@@ -232,7 +247,7 @@ async function pdfPagesToPptx(pages:Blob[]):Promise<Blob>{
 
 async function upscaleImage(file:File,tool:string):Promise<ProcessResult>{
  if(file.size>12*1024*1024)throw new Error("For in-browser AI processing, choose an image smaller than 12 MB.");
- const bitmap=await createImageBitmap(file);const pixels=bitmap.width*bitmap.height;bitmap.close();if(pixels>16000000)throw new Error("This image is over 16 megapixels. Resize it before using local AI enhancement.");
+ const bitmap=await createImageBitmap(file);const pixels=bitmap.width*bitmap.height;bitmap.close();const pixelLimit=tool==="Photo restoration"?2000000:8000000;if(pixels>pixelLimit)throw new Error("This image exceeds the "+(pixelLimit/1000000)+" megapixel limit for this local AI model. Resize it before processing.");
  const {pipeline}=await import("@huggingface/transformers");
  const model=tool==="Photo restoration"?"Xenova/swin2SR-realworld-sr-x4-64-bsrgan-psnr":"Xenova/swin2SR-classical-sr-x2-64";
  const upscaler=await pipeline("image-to-image",model,{device:"wasm",dtype:"q8"});

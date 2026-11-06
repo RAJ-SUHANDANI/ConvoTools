@@ -38,7 +38,7 @@ export const TOOLS: Tool[] = [
   { name: "Resize image", description: "Set exact image dimensions or scale by percentage.", category: "Images", icon: SlidersHorizontal, inputLabel: "Image", outputLabel: "Image" },
   { name: "Crop & rotate", description: "Center-crop an image to a square and rotate it in 90° increments.", category: "Images", icon: ImageIcon, inputLabel: "Image", outputLabel: "Image" },
   { name: "Image enhancer", description: "Use an AI super-resolution model to upscale images 2× and reconstruct finer detail.", category: "AI lab", icon: WandSparkles, tag: "AI", inputLabel: "Image", outputLabel: "Enhanced image" },
-  { name: "Background remover", description: "Separate a subject and export a transparent image.", category: "AI lab", icon: Sparkles, tag: "AI", inputLabel: "Image", outputLabel: "PNG" },
+  { name: "Background remover", description: "Remove the background from portrait photos and export a transparent PNG using local AI matting.", category: "AI lab", icon: Sparkles, tag: "AI", inputLabel: "Image", outputLabel: "PNG" },
   { name: "Photo restoration", description: "Apply real-world AI super-resolution to low-resolution photos at 4× output. Not scratch repair.", category: "AI lab", icon: ImageIcon, tag: "AI", inputLabel: "Image", outputLabel: "Restored image" },
   { name: "OCR extractor", description: "Turn scanned pages and screenshots into editable text.", category: "AI lab", icon: ScanText, tag: "AI", inputLabel: "Image or PDF", outputLabel: "DOCX / TXT" },
   { name: "Word editor", description: "Edit extracted Word document text and export a clean DOCX file.", category: "Documents", icon: FilePenLine, inputLabel: "DOCX", outputLabel: "DOCX" },
