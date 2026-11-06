@@ -6,7 +6,8 @@ import { Document, Packer, Paragraph, TextRun } from "docx";
 
 export type ProcessOptions = { quality?: "Smaller file" | "Balanced" | "Best quality"; output?: string; password?: string; pdfPageOrder?: string; width?: string; height?: string; rotation?: number; cropMode?: "Original" | "Square center crop" };
 export type ProcessResult = { blob: Blob; filename: string; mime: string; message: string };
-const result=(blob:Blob,filename:string,message:string):ProcessResult=>({blob,filename,mime:blob.type||"application/octet-stream",message});\nconst bytesBlob=(bytes:Uint8Array,mime:string)=>{const safe=new Uint8Array(bytes.byteLength);safe.set(bytes);return new Blob([safe.buffer],{type:mime});};
+const result=(blob:Blob,filename:string,message:string):ProcessResult=>({blob,filename,mime:blob.type||"application/octet-stream",message});
+const bytesBlob=(bytes:Uint8Array,mime:string)=>{const safe=new Uint8Array(bytes.byteLength);safe.set(bytes);return new Blob([safe.buffer],{type:mime});};
 const name=(file:File,ext:string)=>((file.name.replace(/\.[^.]+$/,"")||"output")+"."+ext);
 const textFile=(text:string,filename:string,mime="text/plain;charset=utf-8")=>result(new Blob([text],{type:mime}),filename,"Your file is ready.");
 async function image(file:File,tool:string,options:ProcessOptions):Promise<ProcessResult>{
