@@ -4,7 +4,7 @@ import { PDFDocument, degrees } from "pdf-lib";
 import * as XLSX from "xlsx";
 import { Document, Packer, Paragraph, TextRun } from "docx";
 
-export type ProcessOptions = { quality?: "Smaller file" | "Balanced" | "Best quality"; output?: string; password?: string; pdfPageOrder?: string; width?: string; height?: string; rotation?: number; cropMode?: "Original" | "Square center crop"; textContent?: string; base64Mode?: "Encode" | "Decode"; decodedFormat?: string; ocrFormat?: "DOCX" | "TXT"; ocrLanguage?: string; pdfRotation?: number };
+export type ProcessOptions = { quality?: "Smaller file" | "Balanced" | "Best quality"; output?: string; password?: string; pdfPageOrder?: string; width?: string; height?: string; rotation?: number; cropMode?: "Original" | "Square center crop"; textContent?: string; base64Mode?: "Encode" | "Decode"; decodedFormat?: string; ocrFormat?: "DOCX" | "TXT"; ocrLanguage?: string; pdfRotation?: number; qrFormat?: "PNG" | "SVG"; hashAlgorithm?: "SHA-256" | "SHA-384" | "SHA-512" };
 export type ProcessResult = { blob: Blob; filename: string; mime: string; message: string };
 const result=(blob:Blob,filename:string,message:string):ProcessResult=>({blob,filename,mime:blob.type||"application/octet-stream",message});
 const bytesBlob=(bytes:Uint8Array,mime:string)=>{const safe=new Uint8Array(bytes.byteLength);safe.set(bytes);return new Blob([safe.buffer],{type:mime});};
@@ -24,11 +24,28 @@ async function image(file:File,tool:string,options:ProcessOptions):Promise<Proce
  const blob=await new Promise<Blob>((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error("Image export failed.")),mime,quality));
  return result(blob,name(file,mime==="image/jpeg"?"jpg":mime==="image/webp"?"webp":"png"),"Image converted locally in your browser.");
 }
+
+async function compressPdfRaster(file:File,preset:ProcessOptions["quality"]):Promise<ProcessResult>{
+ const scale=preset==="Smaller file"?1:preset==="Best quality"?1.85:1.35;
+ const jpegQuality=preset==="Smaller file"?.58:preset==="Best quality"?.88:.75;
+ const original=await pdfJsDocument(file);const rendered=await renderPdfPages(file,"jpeg",scale,jpegQuality);
+ const output=await PDFDocument.create();
+ for(let i=0;i<rendered.length;i++){
+  const sourcePage=await original.getPage(i+1);const viewport=sourcePage.getViewport({scale:1});
+  const image=await output.embedJpg(await rendered[i].arrayBuffer());
+  const page=output.addPage([viewport.width,viewport.height]);
+  page.drawImage(image,{x:0,y:0,width:viewport.width,height:viewport.height});
+ }
+ const blob=bytesBlob(await output.save({useObjectStreams:true}),"application/pdf");
+ const ratio=file.size?Math.round(blob.size/file.size*100):0;
+ return result(blob,name(file,"pdf"),"Pages rasterized and recompressed as JPEG at "+Math.round(jpegQuality*100)+"% quality. Output is "+ratio+"% of the original size. Searchable text, links and form fields are flattened.");
+}
+
 async function pdf(files:File[],tool:string,options:ProcessOptions):Promise<ProcessResult[]>{
- if(tool==="Image to PDF"){const doc=await PDFDocument.create();for(const f of files){const bytes=await f.arrayBuffer();const img=f.type.includes("png")?await doc.embedPng(bytes):await doc.embedJpg(bytes);const p=doc.addPage([img.width,img.height]);p.drawImage(img,{x:0,y:0,width:img.width,height:img.height});}return [result(bytesBlob(await doc.save(),"application/pdf"),"images-combined.pdf","Images combined into one PDF.")];}
+ if(tool==="Image to PDF"){const doc=await PDFDocument.create();for(const file of files){const bitmap=await createImageBitmap(file);const canvas=document.createElement("canvas");canvas.width=bitmap.width;canvas.height=bitmap.height;const ctx=canvas.getContext("2d");if(!ctx)throw new Error("Image canvas is unavailable.");ctx.drawImage(bitmap,0,0);bitmap.close();const png=await new Promise<Blob>((resolve,reject)=>canvas.toBlob(value=>value?resolve(value):reject(new Error("Could not prepare an image for PDF.")),"image/png"));const image=await doc.embedPng(await png.arrayBuffer());const page=doc.addPage([image.width,image.height]);page.drawImage(image,{x:0,y:0,width:image.width,height:image.height});canvas.width=0;canvas.height=0;}return [result(bytesBlob(await doc.save(),"application/pdf"),"images-combined.pdf","Images converted and combined into one PDF.")];}
  if(tool==="Merge PDF"){const doc=await PDFDocument.create();for(const f of files){const src=await PDFDocument.load(await f.arrayBuffer());(await doc.copyPages(src,src.getPageIndices())).forEach(p=>doc.addPage(p));}return [result(bytesBlob(await doc.save(),"application/pdf"),"merged.pdf","PDFs merged in selection order.")];}
  if(tool==="Split PDF"){const src=await PDFDocument.load(await files[0].arrayBuffer());const zip=new JSZip();const count=src.getPageCount();const input=options.pdfPageOrder?.trim();const indices=input?input.split(/[,\s]+/).filter(Boolean).map(Number).map(n=>n-1):Array.from({length:count},(_,i)=>i);if(!indices.length||indices.some(n=>!Number.isInteger(n)||n<0||n>=count)||new Set(indices).size!==indices.length)throw new Error("Enter valid page numbers once each. Example: 1, 3, 5.");for(const i of indices){const part=await PDFDocument.create();const [page]=await part.copyPages(src,[i]);part.addPage(page);zip.file("page-"+String(i+1).padStart(3,"0")+".pdf",await part.save());}return [result(await zip.generateAsync({type:"blob"}),name(files[0],"zip"),indices.length+" selected pages exported to a ZIP.")];}
- if(tool==="Compress PDF"){const src=await PDFDocument.load(await files[0].arrayBuffer());return [result(bytesBlob(await src.save({useObjectStreams:true}),"application/pdf"),name(files[0],"pdf"),"PDF rewritten with compact object streams; embedded images are not recompressed.")];}
+ if(tool==="Compress PDF")return [await compressPdfRaster(files[0],options.quality)];
  if(tool==="Organize PDF"){const src=await PDFDocument.load(await files[0].arrayBuffer());const count=src.getPageCount();let indices=Array.from({length:count},(_,i)=>i);const requested=options.pdfPageOrder?.trim();if(requested){const nums=requested.split(/[,\s]+/).filter(Boolean).map(Number);if(!nums.length||nums.some(n=>!Number.isInteger(n)||n<1||n>count)||new Set(nums).size!==nums.length)throw new Error("Enter valid page numbers once each, separated by commas. Example: 3, 1, 2.");indices=nums.map(n=>n-1);}const out=await PDFDocument.create();const pages=await out.copyPages(src,indices);pages.forEach(p=>{p.setRotation(degrees(((p.getRotation().angle+(options.pdfRotation||0))%360+360)%360));out.addPage(p);});return [result(bytesBlob(await out.save({useObjectStreams:true}),"application/pdf"),name(files[0],"pdf"),"PDF pages reordered, removed or rotated as requested.")];}
  throw new Error(tool+" needs a specialized PDF engine not available in this build.");
 }
@@ -77,14 +94,14 @@ async function pdfJsDocument(file:File) {
  const pdfjs=await import("pdfjs-dist/legacy/build/pdf.mjs");
  return pdfjs.getDocument({data:await file.arrayBuffer()}).promise;
 }
-async function renderPdfPages(file:File,format:"png"|"jpeg"="png"):Promise<Blob[]> {
+async function renderPdfPages(file:File,format:"png"|"jpeg"="png",scale=1.65,jpegQuality=.92):Promise<Blob[]> {
  const doc=await pdfJsDocument(file);const pages:Blob[]=[];
  for(let n=1;n<=doc.numPages;n++){
-  const page=await doc.getPage(n);const viewport=page.getViewport({scale:1.65});
+  const page=await doc.getPage(n);const viewport=page.getViewport({scale});
   const canvas=document.createElement("canvas");canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);
   const ctx=canvas.getContext("2d");if(!ctx)throw new Error("Canvas is unavailable.");
   await page.render({canvasContext:ctx,viewport,canvas}).promise;
-  const blob=await new Promise<Blob>((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error("Could not export rendered PDF page.")),format==="jpeg"?"image/jpeg":"image/png",.92));
+  const blob=await new Promise<Blob>((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error("Could not export rendered PDF page.")),format==="jpeg"?"image/jpeg":"image/png",format==="jpeg"?jpegQuality:undefined));
   pages.push(blob);canvas.width=0;canvas.height=0;
  }
  return pages;
@@ -174,7 +191,7 @@ async function rawImageToBlob(raw:{data:Uint8Array|Uint8ClampedArray;width:numbe
 
 async function removeImageBackground(file:File):Promise<ProcessResult>{
  const {pipeline}=await import("@huggingface/transformers");
- const segmenter=await pipeline("background-removal","Xenova/modnet",{device:"wasm",dtype:"uint8"});
+ const segmenter=await pipeline("background-removal","Xenova/modnet",{dtype:"fp32"});
  const source=URL.createObjectURL(file);
  try{
   const output=await segmenter(source);
@@ -370,8 +387,8 @@ export async function processFiles(files:File[],tool:string,options:ProcessOptio
  if(tool==="Background remover")return [await removeImageBackground(files[0])];
  if(tool==="Image enhancer"||tool==="Photo restoration")return [await upscaleImage(files[0],tool)];
  if(["MP4 to GIF","Video compressor","Extract audio","Audio converter"].includes(tool))return [await ffmpegRun(files[0],tool,options)];
- if(tool==="Hash generator"){const digest=await crypto.subtle.digest("SHA-256",await files[0].arrayBuffer());const hash=Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,"0")).join("");return [textFile(hash+"  "+files[0].name+"\n",name(files[0],"sha256"))];}
- if(tool==="QR generator"){const QR=await import("qrcode");const url=await QR.toDataURL(await files[0].text(),{errorCorrectionLevel:"H",width:1024});const blob=await (await fetch(url)).blob();return [result(blob,"convotools-qr.png","QR generated locally.")];}
+ if(tool==="Hash generator"){const algorithm=options.hashAlgorithm||"SHA-256";const digest=await crypto.subtle.digest(algorithm,await files[0].arrayBuffer());const hash=Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,"0")).join("");return [textFile(algorithm+"  "+hash+"  "+files[0].name+"\n",name(files[0],algorithm.toLowerCase().replace("-","")))];}
+ if(tool==="QR generator"){const QR=await import("qrcode");const value=await files[0].text();if(!value.trim())throw new Error("The selected file is empty. Add a URL or text first.");if(options.qrFormat==="SVG"){const svg=await QR.toString(value,{type:"svg",errorCorrectionLevel:"H",width:1024,margin:2});return [textFile(svg,"convotools-qr.svg","image/svg+xml")];}const url=await QR.toDataURL(value,{errorCorrectionLevel:"H",width:1024,margin:2});const blob=await (await fetch(url)).blob();return [result(blob,"convotools-qr.png","QR generated locally.")];}
  if(tool==="Word editor"){const mammoth=await import("mammoth");const extracted=await mammoth.extractRawText({arrayBuffer:await files[0].arrayBuffer()});const text=options.textContent??extracted.value;return [await makeDocx(text,name(files[0],"docx"))];}
  throw new Error(tool+" is not connected to a real processing engine yet. No placeholder output was created. This operation needs a dedicated conversion or AI provider.");
 }
