@@ -45,7 +45,7 @@ async function archive(files:File[],tool:string):Promise<ProcessResult>{
 async function textTool(file:File,tool:string):Promise<ProcessResult>{
  const value=await file.text();if(tool==="JSON formatter")return textFile(JSON.stringify(JSON.parse(value),null,2)+"\n",name(file,"json"),"application/json");
  if(tool==="Base64 tools")return textFile(btoa(unescape(encodeURIComponent(value))),name(file,"b64"),"text/plain");
- if(tool==="DOCX to TXT"){const mammoth=await import("mammoth/mammoth.browser");const extracted=await mammoth.extractRawText({arrayBuffer:await file.arrayBuffer()});return textFile(extracted.value,name(file,"txt"));}
+ if(tool==="DOCX to TXT"){const mammoth=await import("mammoth");const extracted=await mammoth.extractRawText({arrayBuffer:await file.arrayBuffer()});return textFile(extracted.value,name(file,"txt"));}
  throw new Error("Unsupported text operation.");
 }
 
@@ -210,7 +210,7 @@ export async function processFiles(files:File[],tool:string,options:ProcessOptio
  if(tool==="Excel to PDF"){const wb=XLSX.read(await files[0].arrayBuffer(),{type:"array"});const csv=wb.SheetNames.map(n=>n+"\\n"+XLSX.utils.sheet_to_csv(wb.Sheets[n])).join("\\n\\n");return [await makePdf(csv,name(files[0],"pdf"))];}
  if(["Create ZIP","Extract archive"].includes(tool))return [await archive(files,tool)];
  if(["JSON formatter","Base64 tools","DOCX to TXT"].includes(tool))return [await textTool(files[0],tool)];
- if(tool==="Word to PDF"){const mammoth=await import("mammoth/mammoth.browser");const extracted=await mammoth.extractRawText({arrayBuffer:await files[0].arrayBuffer()});return [await makePdf(extracted.value,name(files[0],"pdf"))];}
+ if(tool==="Word to PDF"){const mammoth=await import("mammoth");const extracted=await mammoth.extractRawText({arrayBuffer:await files[0].arrayBuffer()});return [await makePdf(extracted.value,name(files[0],"pdf"))];}
  if(tool==="PPTX to PDF"){const text=await pptxText(files[0]);return [await makePdf(text,name(files[0],"pdf"))];}
  if(tool==="Image to Word (OCR)"||tool==="OCR extractor"){const extracted=files[0].type==="application/pdf"||files[0].name.toLowerCase().endsWith(".pdf")?await ocrPdf(files[0]):await ocrImage(files[0]);return [await makeDocx(extracted,name(files[0],"docx"))];}
  if(tool==="Background remover")return [await removeImageBackground(files[0])];
