@@ -11,7 +11,6 @@ import {
   Sparkles, Star, UploadCloud, UserRound, WandSparkles, X, Zap
 } from "lucide-react";
 import FileActionPanel from "@/components/FileActionPanel";
-import ScrollProgress from "@/components/ScrollProgress";
 import { TOOLS, slugify } from "@/lib/tools";
 import {
   clearActivity, readActivity, readFavorites, readProfile, readSettings,
@@ -153,7 +152,6 @@ export default function DashboardPage() {
 
   return (
     <main className="dashboard-shell">
-      <ScrollProgress />
       <AnimatePresence>
         {mobileSidebarOpen && <motion.button className="dash-sidebar-scrim" aria-label="Close navigation" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setMobileSidebarOpen(false)} />}
       </AnimatePresence>
