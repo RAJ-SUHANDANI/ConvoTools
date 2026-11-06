@@ -100,6 +100,18 @@ export function detectFileCategory(file: File): FileCategory {
   return "Other";
 }
 
+export function isAudioFile(file: File) {
+  const lowerName = file.name.toLowerCase();
+  return file.type.toLowerCase().startsWith("audio/") ||
+    [".mp3", ".wav", ".aac", ".flac", ".ogg", ".m4a"].some((extension) => lowerName.endsWith(extension));
+}
+
+export function isVideoFile(file: File) {
+  const lowerName = file.name.toLowerCase();
+  return file.type.toLowerCase().startsWith("video/") ||
+    [".mp4", ".mov", ".mkv", ".webm", ".avi", ".m4v"].some((extension) => lowerName.endsWith(extension));
+}
+
 export function getActionsForFile(file: File) {
   const category = detectFileCategory(file);
   if (category !== "Video & audio") return actions[category];
