@@ -142,7 +142,7 @@ export function acceptedInputForTool(inputLabel: string, category: string) {
   if (input === "csv") return ".csv,.tsv,text/csv";
   if (input === "xlsx" || input === "csv / xlsx") return ".xls,.xlsx,.csv,.tsv,.ods";
   if (input === "pptx") return ".ppt,.pptx,.odp";
-  if (input === "video") return "video/*";
+  if (input === "video" || input === "mp4") return "video/*,.mp4";
   if (input === "audio") return "audio/*";
   if (input === "zip") return ".zip,.7z,.rar,.tar,.gz";
   if (input === "json") return ".json,application/json";
