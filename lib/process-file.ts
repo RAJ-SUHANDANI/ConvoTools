@@ -140,7 +140,7 @@ async function pdfAdvanced(files:File[],tool:string):Promise<ProcessResult[]>{
  if(tool==="PDF to Word"){const text=await pdfText(files[0]);if(!text.trim())throw new Error("This PDF contains no selectable text. Try OCR extractor for scanned pages.");return [await makeDocx(text,name(files[0],"docx"))];}
  if(tool==="PDF to Excel"){const text=await pdfText(files[0]);if(!text.trim())throw new Error("No selectable text was found in this PDF.");const rows=text.split(/\r?\n/).filter(Boolean).map(line=>line.split(/\s{2,}|\t/));const sheet=XLSX.utils.aoa_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,sheet,"Extracted data");return [result(bytesBlob(XLSX.write(wb,{type:"array",bookType:"xlsx"}) as Uint8Array,"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),name(files[0],"xlsx"),"Text rows exported to a spreadsheet. PDF table structure may require manual cleanup.")];}
  if(tool==="PDF to JPG"||tool==="PDF to PNG"){const pages=await renderPdfPages(files[0],tool==="PDF to JPG"?"jpeg":"png");if(pages.length===1)return [result(pages[0],name(files[0],tool==="PDF to JPG"?"jpg":"png"),"PDF page rendered as an image.")];const zip=new JSZip();pages.forEach((p,i)=>zip.file("page-"+String(i+1).padStart(3,"0")+(tool==="PDF to JPG"?".jpg":".png"),p));return [result(await zip.generateAsync({type:"blob"}),name(files[0],"zip"),pages.length+" PDF pages rendered into image files.")];}
- if(tool==="PDF to PowerPoint"){const pages=await renderPdfPages(files[0],"jpeg");return [result(await pdfPagesToPptx(pages),name(files[0],"pptx"),"PDF pages placed as full-slide images in a PowerPoint file. Text is not editable.")];}
+ if(tool==="PDF to PowerPoint"||tool==="PDF to PPTX"){const pages=await renderPdfPages(files[0],"jpeg");return [result(await pdfPagesToPptx(pages),name(files[0],"pptx"),"PDF pages placed as full-slide images in a PowerPoint file. Text is not editable.")];}
  throw new Error("Unsupported PDF operation.");
 }
 
@@ -399,7 +399,7 @@ export async function processFiles(files:File[],tool:string,options:ProcessOptio
  if(["PNG to JPG","JPG to PNG","PNG to WEBP","WEBP converter","Image compressor","Resize image","Crop & rotate"].includes(tool))return Promise.all(files.map(f=>image(f,tool,options)));
  if(["Image to PDF","Merge PDF","Split PDF","Compress PDF","Organize PDF"].includes(tool))return pdf(files,tool,options);
  if(tool==="Protect PDF"){const password=options.password?.trim();if(!password||password.length<6)throw new Error("Enter a password with at least 6 characters.");const {PDFDocument:SecurePDF}=await import("@cantoo/pdf-lib");const doc=await SecurePDF.load(await files[0].arrayBuffer());doc.encrypt({userPassword:password,ownerPassword:password+"-"+crypto.randomUUID()});return [result(bytesBlob(await doc.save(),"application/pdf"),name(files[0],"pdf"),"PDF encrypted with AES-256 password protection.")];}
- if(["PDF to Word","PDF to Excel","PDF to JPG","PDF to PNG","PDF to PowerPoint"].includes(tool))return pdfAdvanced(files,tool);
+ if(["PDF to Word","PDF to Excel","PDF to JPG","PDF to PNG","PDF to PowerPoint","PDF to PPTX"].includes(tool))return pdfAdvanced(files,tool);
  if(tool==="PPTX to PDF"||tool==="Slides to images"){if(tool==="PPTX to PDF"){const pages=await renderPresentationSlides(files[0]);return [await presentationToPdf(pages,name(files[0],"pdf"))];}return slidesToImageFiles(files[0]);}
  if(["CSV to XLSX","Remove duplicates"].includes(tool))return spreadsheet(files[0],tool);
  if(tool==="Excel to PDF")return [await workbookToPdf(files[0])];
