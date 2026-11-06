@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import BrandLogo from "@/components/BrandLogo";
 import {
-  ArrowRight, ArrowUpRight, FileImage,
+  ArrowRight, ArrowUpRight,
   Github, Image as ImageIcon,
   LockKeyhole, Menu, ScanText, Sparkles, WandSparkles,
   Workflow, X
@@ -309,5 +309,76 @@ export function ApproachWaypoints() {
       <div className="waypoint-map-mark">CONVOTOOLS <i /> PRINCIPLES / 2026</div>
     </div>
     <div className="waypoint-stage-bottom"><span>USEFUL FIRST. BEAUTIFUL BY DESIGN.</span><span>TRUST · CLARITY · CRAFT <Sparkles size={12} /></span></div>
+  </div>;
+}
+
+
+const liveCodeLines = [
+  "const workspace = {",
+  '  privacy: "local-first",',
+  "  batch: true,",
+  "};",
+  "",
+  "async function prepareFile(file: File) {",
+  "  const format = detectFormat(file);",
+  "  const actions = getActionsForFile(file);",
+  "  return actions.map((action) => ({",
+  "    ...action,",
+  "    ready: true,",
+  "  }));",
+  "}",
+  "",
+  "await workspace.ready();",
+];
+
+function highlightLiveCode(line: string) {
+  const parts = line.split(/("[^"]*"|'[^']*'|\b(?:const|async|function|return|await|true|false)\b|\b[A-Z][A-Za-z0-9_]*\b|=>|[{}().,:;])/g);
+  return parts.map((part, index) => {
+    let className = "";
+    if (/^("|')/.test(part)) className = "terminal-token-string";
+    else if (/^(const|async|function|return|await|true|false)$/.test(part)) className = "terminal-token-keyword";
+    else if (/^[A-Z][A-Za-z0-9_]*$/.test(part)) className = "terminal-token-type";
+    else if (/^(=>|[{}().,:;])$/.test(part)) className = "terminal-token-punct";
+    return className ? <span className={className} key={index}>{part}</span> : part;
+  });
+}
+
+export function LiveCodeTerminal() {
+  const reducedMotion = useReducedMotion();
+  const totalCharacters = liveCodeLines.reduce((sum, line) => sum + line.length + 1, 0);
+  const [frame, setFrame] = useState(0);
+
+  useEffect(() => {
+    if (reducedMotion) {
+      setFrame(totalCharacters + 30);
+      return;
+    }
+    const interval = window.setInterval(() => {
+      setFrame((current) => current >= totalCharacters + 46 ? 0 : current + 1);
+    }, 36);
+    return () => window.clearInterval(interval);
+  }, [reducedMotion, totalCharacters]);
+
+  let remaining = Math.min(frame, totalCharacters);
+  const rows = liveCodeLines.map((line, index) => {
+    if (remaining > line.length) {
+      remaining -= line.length + 1;
+      return { line, visible: line, active: false, index };
+    }
+    if (remaining >= 0) {
+      const visible = line.slice(0, remaining);
+      remaining = -1;
+      return { line, visible, active: true, index };
+    }
+    return { line, visible: "", active: false, index };
+  });
+
+  return <div className="live-code-editor" aria-label="Animated TypeScript code preview">
+    <div className="live-code-toolbar"><span className="live-code-file"><i /> src / workspace.ts</span><span className="live-code-language">TYPESCRIPT</span><span className="live-code-run"><i /> LIVE PREVIEW</span></div>
+    <div className="live-code-body">
+      <div className="live-code-gutter">{rows.map((row) => <span key={row.index}>{String(row.index + 1).padStart(2, "0")}</span>)}</div>
+      <pre className="live-code-source">{rows.map((row) => <span className={row.active ? "live-code-line active" : "live-code-line"} key={row.index}>{highlightLiveCode(row.visible)}{row.active && <i className="live-code-caret" />}</span>)}</pre>
+    </div>
+    <div className="live-code-status"><span><i /> CODE STREAM ACTIVE</span><span>UTF-8 <b>·</b> SPACES: 2 <b>·</b> TS</span></div>
   </div>;
 }

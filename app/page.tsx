@@ -1,10 +1,10 @@
 "use client";
 
 import {
-  ArrowDownRight, ArrowRight, ArrowUpRight, AudioLines, BadgeCheck, Braces,
-  Check, ChevronRight, Code2, Copy, FileImage, FilePenLine, FileSpreadsheet, FileText, Film, Image as ImageIcon, Layers3, LockKeyhole, Merge,
+  ArrowDownRight, ArrowRight, ArrowUpRight, AudioLines, Braces,
+  Check, ChevronRight, FileImage, FileSpreadsheet, FileText, Film, Image as ImageIcon, Layers3, LockKeyhole, Merge,
   Minimize2, PanelTop, Plus, ScanText, Search, ShieldCheck,
-  SlidersHorizontal, Sparkles, UploadCloud, Zap
+  SlidersHorizontal, Sparkles, UploadCloud
 } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ChangeEvent, DragEvent, useMemo, useRef, useState } from "react";
@@ -14,7 +14,7 @@ import ImageComparison from "@/components/ImageComparison";
 import BrandLogo from "@/components/BrandLogo";
 import { recordActivity } from "@/lib/activity";
 import { TOOLS, TOOL_CATEGORIES, slugify } from "@/lib/tools";
-import { AIGallery, ApproachWaypoints, FooterReveal, LandingNav, ScrollTextLines, TypewriterHeading, WorkflowWaypoints } from "@/components/LandingEnhancements";
+import { AIGallery, ApproachWaypoints, FooterReveal, LandingNav, LiveCodeTerminal, ScrollTextLines, TypewriterHeading, WorkflowWaypoints } from "@/components/LandingEnhancements";
 
 export default function Home() {
   const reducedMotion = useReducedMotion();
@@ -81,35 +81,41 @@ export default function Home() {
             </div>
             <div className="hero-note"><span className="hero-note-mark"><LockKeyhole size={14} /></span><span><strong>Private by default.</strong> Local-first tools wherever practical.</span></div>
           </motion.div>
-          <motion.div className="hero-product" initial={reducedMotion ? false : { opacity: 0, y: 30, rotate: 1.5 }} animate={{ opacity: 1, y: 0, rotate: 0 }} transition={{ duration: 0.9, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}>
-            <div className="product-window">
-              <div className="window-topbar">
-                <div className="window-dots"><i /><i /><i /></div>
-                <span className="window-path">CONVOTOOLS <b>/</b> WORKSPACE</span>
-                <span className="window-avatar">R</span>
+          <motion.div className="hero-product hero-workspace-stage" initial={reducedMotion ? false : { opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.85, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}>
+            <div className="hero-index">01 <span>—</span> YOUR FILE WORKSPACE</div>
+            <div className="hero-workspace-card">
+              <div className="hero-workspace-chrome">
+                <span className="hero-chrome-dots"><i /><i /><i /></span>
+                <span className="hero-chrome-path">CONVOTOOLS <b>/</b> WORKSPACE</span>
+                <span className="hero-chrome-avatar">R</span>
               </div>
-              <div className="window-content">
-                <div className="window-heading">
-                  <div><span className="micro-label">YOUR FILE DESK</span><h3>What are we working on?</h3></div>
-                  <span className="window-live"><i /> READY</span>
+              <div className="hero-workspace-layout">
+                <aside className="hero-workspace-sidebar">
+                  <span className="hero-sidebar-label">WORKSPACE</span>
+                  <span className="hero-sidebar-link active"><Layers3 size={14} /> Overview</span>
+                  <span className="hero-sidebar-link"><FileText size={14} /> Documents</span>
+                  <span className="hero-sidebar-link"><ImageIcon size={14} /> Images</span>
+                  <span className="hero-sidebar-link"><Film size={14} /> Media</span>
+                  <div className="hero-sidebar-storage"><span>LOCAL STORAGE</span><div><i /></div><small>Private session</small></div>
+                </aside>
+                <div className="hero-workspace-main">
+                  <div className="hero-workspace-heading">
+                    <div><span className="micro-label">YOUR FILE DESK</span><h3>Everything, within reach.</h3><p>Your recent work, ready for its next step.</p></div>
+                    <span className="hero-workspace-add"><Plus size={13} /> Add files</span>
+                  </div>
+                  <div className="hero-workspace-upload">
+                    <span className="hero-workspace-upload-icon"><UploadCloud size={17} /></span>
+                    <span><b>Drop a file to get started</b><small>PDF, image, document, spreadsheet & more</small></span>
+                    <span className="hero-workspace-upload-action">BROWSE</span>
+                  </div>
+                  <div className="hero-workspace-list-head"><span>RECENT FILES</span><span>3 ITEMS <ArrowRight size={11} /></span></div>
+                  <div className="hero-workspace-file"><span className="hero-workspace-file-icon pdf"><FileText size={15} /></span><span className="hero-workspace-file-copy"><b>Project-brief.pdf</b><small>PDF DOCUMENT</small></span><span className="hero-workspace-file-size">2.4 MB</span><span className="hero-workspace-file-state"><i /> READY</span></div>
+                  <div className="hero-workspace-file"><span className="hero-workspace-file-icon image"><FileImage size={15} /></span><span className="hero-workspace-file-copy"><b>Campaign-cover.png</b><small>IMAGE ASSET</small></span><span className="hero-workspace-file-size">4.8 MB</span><span className="hero-workspace-file-state"><i /> READY</span></div>
+                  <div className="hero-workspace-file"><span className="hero-workspace-file-icon sheet"><FileSpreadsheet size={15} /></span><span className="hero-workspace-file-copy"><b>Q4-report.xlsx</b><small>SPREADSHEET</small></span><span className="hero-workspace-file-size">860 KB</span><span className="hero-workspace-file-state"><i /> READY</span></div>
+                  <div className="hero-workspace-foot"><span><LockKeyhole size={11} /> FILES STAY IN YOUR SESSION</span><span><i /> PRIVATE BY DEFAULT</span></div>
                 </div>
-                <div className="window-dropzone">
-                  <div className="window-upload-icon"><UploadCloud size={23} /></div>
-                  <div><strong>Drop anything here</strong><small>PDF, image, document, spreadsheet & more</small></div>
-                  <span className="window-plus"><Plus size={17} /></span>
-                </div>
-                <div className="window-or">OR PICK A STARTING POINT</div>
-                <div className="window-quick-actions">
-                  <div><span className="quick-icon pdf"><FileText size={17} /></span><b>PDF tools</b><small>Merge, compress, edit</small></div>
-                  <div><span className="quick-icon image"><ImageIcon size={17} /></span><b>Image lab</b><small>Convert, sharpen, resize</small></div>
-                  <div><span className="quick-icon doc"><FilePenLine size={17} /></span><b>Documents</b><small>Export, extract, edit</small></div>
-                </div>
-                <div className="window-footer"><span><ShieldCheck size={12} /> FILES STAY YOURS</span><span>SESSION READY <i /></span></div>
               </div>
             </div>
-            <div className="floating-file floating-file-a"><span className="floating-file-icon f-pdf"><FileText size={18} /></span><span><b>brief-final.pdf</b><small>PDF · 2.4 MB</small></span><BadgeCheck size={15} /></div>
-            <div className="floating-file floating-file-b"><span className="floating-file-icon f-img"><ImageIcon size={18} /></span><span><b>campaign_hero.png</b><small>IMAGE · 4.8 MB</small></span></div>
-            <div className="hero-index">01 <span>—</span> THE NEW FILE DESK</div>
           </motion.div>
         </div>
         <div className="hero-bottom">
@@ -287,23 +293,36 @@ export default function Home() {
           <p>Trim the extra, pull out a soundtrack, make a lightweight GIF or find a better format for the way you share.</p>
           <a className="underlined-link" href="#toolkit" onClick={() => setCategory("Video & audio")}>Explore media tools <ArrowUpRight size={14} /></a>
         </div>
-        <div className="media-console">
-          <div className="media-console-head"><span><Film size={14} /> MEDIA WORKBENCH</span><span>DEMO / TIMELINE</span></div>
-          <div className="media-screen media-screen-real">
-            <video
-              className="media-demo-video"
-              src="https://videos.pexels.com/video-files/34528660/14629544_2160_3840_30fps.mp4"
-              poster="https://images.unsplash.com/photo-1747671688812-76d7bca21f34?auto=format&fit=crop&w=1100&q=82"
-              controls
-              playsInline
-              preload="none"
-            />
+        <div className="media-console media-studio">
+          <div className="media-console-head"><span><Film size={14} /> MEDIA WORKBENCH <i className="media-header-led" /></span><span>PROJECT / CAMPAIGN CUT 03</span></div>
+          <div className="media-studio-main">
+            <div className="media-studio-preview">
+              <video
+                className="media-studio-video"
+                src="https://videos.pexels.com/video-files/34528660/14629544_2160_3840_30fps.mp4"
+                poster="https://images.unsplash.com/photo-1747671688812-76d7bca21f34?auto=format&fit=crop&w=700&q=82"
+                controls
+                playsInline
+                preload="none"
+              />
+              <span className="media-preview-format">SOURCE VIDEO / 9:16</span>
+            </div>
+            <div className="media-studio-details">
+              <div className="media-studio-file-top"><span>VIDEO FILE / READY TO EDIT</span><span><i /> 00:24</span></div>
+              <h3>Campaign cut — v03</h3>
+              <p>A short portrait clip, ready for trimming, conversion or audio extraction.</p>
+              <div className="media-studio-facts"><span><b>FORMAT</b> MP4</span><span><b>RESOLUTION</b> 2160 × 3840</span><span><b>FRAME RATE</b> 30 FPS</span></div>
+              <div className="media-studio-actions"><span><Film size={13} /> TRIM VIDEO</span><span><AudioLines size={13} /> EXTRACT AUDIO</span><span><ArrowRight size={13} /> CONVERT</span></div>
+              <div className="media-studio-wave-head"><span>AUDIO WAVEFORM</span><small>TRACK 01 / ORIGINAL AUDIO</small></div>
+              <div className="media-studio-wave">{Array.from({length:58}, (_, index) => <i key={index} style={{height: (7 + ((index * 19 + 11) % 31)) + "px", animationDelay: ((index * 37) % 900) + "ms"}} />)}</div>
+            </div>
           </div>
-          <div className="media-demo-credit"><a href="https://www.pexels.com/video/close-up-portrait-of-a-woman-outdoors-34528660/" target="_blank" rel="noreferrer">Video by Zulfugar Karimov / Pexels <ArrowUpRight size={11} /></a><span>Free stock footage</span></div>
-          <div className="timeline-ruler"><span>00:00</span><span>00:15</span><span>00:30</span><span>00:45</span></div>
-          <div className="timeline-track"><span className="track-label"><Film size={13} /> VIDEO</span><div className="track-segments"><i /><i /><i /><i /></div></div>
-          <div className="timeline-track audio-track"><span className="track-label"><AudioLines size={13} /> AUDIO</span><div className="audio-wave">{Array.from({length:44}, (_, index) => <i key={index} style={{height: (8 + ((index * 17) % 23)) + "px"}} />)}</div></div>
-          <div className="media-export"><span><Check size={13} /> Trim & export</span><b>MP4 <ChevronRight size={12} /> GIF <ChevronRight size={12} /> MP3</b></div>
+          <div className="media-studio-timeline">
+            <div className="media-studio-ruler"><span>00:00</span><span>00:06</span><span>00:12</span><span>00:18</span><span>00:24</span></div>
+            <div className="media-studio-track"><span><Film size={12} /> VIDEO</span><div className="media-studio-video-clips"><i /><i /><i /><i /></div></div>
+            <div className="media-studio-track"><span><AudioLines size={12} /> AUDIO</span><div className="media-studio-audio-clip"><i /></div></div>
+          </div>
+          <div className="media-studio-foot"><a href="https://www.pexels.com/video/close-up-portrait-of-a-woman-outdoors-34528660/" target="_blank" rel="noreferrer">Video by Zulfugar Karimov / Pexels <ArrowUpRight size={11} /></a><span>PREVIEW FOOTAGE · NOT A USER UPLOAD</span></div>
         </div>
       </motion.section>
 
@@ -326,10 +345,14 @@ export default function Home() {
 
       <motion.section initial={reducedMotion ? false : { opacity: 0, y: 26 }} whileInView={reducedMotion ? {} : { opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.12 }} transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }} className="developer-section section-pad" id="developer">
         <div className="developer-copy"><span className="section-kicker">09 / DEVELOPER UTILITIES</span><h2>Little tools for<br /><em>the in-between.</em></h2><p>Not every file task needs a full editor. Keep handy utilities close by for when you need to inspect, encode or validate something quickly.</p><a className="underlined-link" href="#toolkit" onClick={() => setCategory("Developer")}>Explore developer tools <ArrowUpRight size={14} /></a></div>
-        <div className="developer-console">
-          <div className="developer-tabs"><span className="dev-tab-active"><Braces size={13} /> JSON</span><span><Code2 size={13} /> BASE64</span><span><LockKeyhole size={13} /> HASH</span></div>
-          <div className="code-area"><div className="code-gutter">01<br />02<br />03<br />04<br />05<br />06</div><pre><span className="code-punc">{"{"}</span>{"\n"}  <span className="code-key">&quot;tool&quot;</span>: <span className="code-string">&quot;json formatter&quot;</span>,{"\n"}  <span className="code-key">&quot;status&quot;</span>: <span className="code-string">&quot;ready&quot;</span>,{"\n"}  <span className="code-key">&quot;clean&quot;</span>: <span className="code-bool">true</span>,{"\n"}  <span className="code-key">&quot;next_step&quot;</span>: <span className="code-string">&quot;your idea&quot;</span>{"\n"}<span className="code-punc">{"}"}</span></pre></div>
-          <div className="developer-console-foot"><span><span className="dev-status" /> VALID JSON</span><button onClick={() => navigator.clipboard?.writeText('{"tool":"json formatter","status":"ready","clean":true,"next_step":"your idea"}')}><Copy size={13} /> Copy sample</button></div>
+        <div className="developer-console live-developer-console">
+          <div className="developer-tabs">
+            <span className="dev-tab-active"><Braces size={13} /> WORKSPACE.TS</span>
+            <span className="dev-tab-path">SRC / LIB / WORKSPACE</span>
+            <span className="dev-tab-live"><i /> LIVE PREVIEW</span>
+          </div>
+          <LiveCodeTerminal />
+          <div className="developer-console-foot"><span><span className="dev-status" /> CODE STREAM ACTIVE</span><span className="developer-console-meta">TYPESCRIPT <b>·</b> LOCAL-FIRST WORKSPACE</span></div>
         </div>
       </motion.section>
 

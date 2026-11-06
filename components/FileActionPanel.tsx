@@ -69,11 +69,7 @@ export default function FileActionPanel({ files, onRemove }: Props) {
                 <span className="detected-badge"><span /> DETECTED</span>
                 {onRemove && <button className="detected-remove" aria-label={"Remove " + file.name} onClick={() => onRemove(index)}><X size={15} /></button>}
               </div>
-              <div className="action-picker">
-                <div className="action-picker-heading">
-                  <span>CHOOSE AN ACTION</span>
-                  <small>{options.length} SUGGESTED</small>
-                </div>
+              <div className="action-picker action-picker-expanded">
                 <FileActionRadial options={options} activeId={activeId} onSelect={(action) => setSelected((current) => ({ ...current, [key]: action.id }))} />
                 {options.length === 0 && <div className="no-file-actions">We couldn&apos;t match this file to a supported action yet. Try another format or browse the tool library.</div>}
                 {activeAction && (
