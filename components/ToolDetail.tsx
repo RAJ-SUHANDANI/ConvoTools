@@ -7,7 +7,7 @@ import {
   FileText, FileType2, LockKeyhole, Plus, Settings2, ShieldCheck,
   Sparkles, UploadCloud, X
 } from "lucide-react";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import BrandLogo from "@/components/BrandLogo";
 import { processFiles, saveProcessedFile, type ProcessResult } from "@/lib/process-file";
 import { acceptedInputForTool, detectFileCategory, formatFileSize, isAudioFile, isVideoFile } from "@/lib/file-actions";
@@ -52,7 +52,7 @@ function compatible(tool: ToolData, file: File) {
   if (expected.includes("pptx")) return category === "Presentations";
   if (expected.includes("video") || expected.includes("mp4")) return category === "Video & audio" && isVideoFile(file);
   if (expected.includes("audio")) return category === "Video & audio" && isAudioFile(file);
-  if (expected.includes("zip")) return category === "Archives";
+  if (expected.includes("zip")) return category === "Archives" && file.name.toLowerCase().endsWith(".zip");
   if (expected.includes("json")) return file.name.toLowerCase().endsWith(".json");
   return true;
 }
@@ -62,7 +62,6 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
   const [files, setFiles] = useState<File[]>([]);
   const [output, setOutput] = useState(defaultOutput(tool));
   const [quality, setQuality] = useState<"Smaller file" | "Balanced" | "Best quality">("Balanced");
-  const [keepMetadata, setKeepMetadata] = useState(true);
   const [password, setPassword] = useState("");
   const [pdfPageOrder, setPdfPageOrder] = useState("");
   const [pdfRotation, setPdfRotation] = useState(0);
@@ -181,7 +180,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
           </motion.button>
         </motion.div>
 
-        <motion.div className="operation-card" variants={{ hidden: { opacity: 0, y: 18, scale: 0.99 }, visible: { opacity: 1, y: 0, scale: 1 } }}>
+        <motion.div className="operation-card" variants={{ hidden: { opacity: 0, y: 18, scale: 0.99 }, visible: { opacity: 1, y: 0, scale: 1 } }} onMouseMove={(event) => { const rect = event.currentTarget.getBoundingClientRect(); event.currentTarget.style.setProperty("--pointer-x", ((event.clientX - rect.left) / rect.width * 100) + "%"); event.currentTarget.style.setProperty("--pointer-y", ((event.clientY - rect.top) / rect.height * 100) + "%"); }} onMouseLeave={(event) => { event.currentTarget.style.setProperty("--pointer-x", "50%"); event.currentTarget.style.setProperty("--pointer-y", "0%"); }}>
           <div className="operation-card-head"><div><span className="operation-step">STEP 01 / INPUT</span><h2>Add your file</h2><p>Expected format: <b>{tool.inputLabel || "Supported file"}</b></p></div><span className="operation-file-icon"><FileType2 size={21} /></span></div>
           <input ref={inputRef} type="file" accept={accept} multiple className="operation-input" onChange={onChoose} />
           <motion.button className={"operation-drop " + (files.length ? "has-files" : "")} onClick={() => inputRef.current?.click()} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); addFiles(event.dataTransfer.files); }} whileHover={{ scale: 1.006, borderColor: "#5259d8" }} whileTap={{ scale: 0.995 }}>
@@ -193,14 +192,14 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
 
           {files.length > 0 && (
             <div className="operation-file-list">
-              {files.map((file, index) => (
-                <div className="operation-file-row" key={file.name + file.size + index}>
+              <AnimatePresence initial={false}>{files.map((file, index) => (
+                <motion.div layout initial={{ opacity: 0, y: 8, scale: .99 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, x: 18, height: 0 }} transition={{ duration: .22 }} className="operation-file-row" key={file.name + file.size + index}>
                   <span className="operation-file-thumb"><FileText size={16} /></span>
                   <span className="operation-file-info"><b>{file.name}</b><small>{detectFileCategory(file)} · {formatFileSize(file.size)}</small></span>
                   <span className={compatible(tool, file) ? "file-valid" : "file-invalid"}>{compatible(tool, file) ? <><Check size={12} /> Compatible</> : <>Wrong type</>}</span>
                   <button onClick={() => setFiles((current) => current.filter((_, fileIndex) => fileIndex !== index))} aria-label={"Remove " + file.name}><X size={14} /></button>
-                </div>
-              ))}
+                </motion.div>
+              ))}</AnimatePresence>
             </div>
           )}
 
@@ -216,17 +215,19 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
               <div className="select-wrap"><select id="quality-select" value={quality} onChange={(event) => setQuality(event.target.value as typeof quality)}><option>Smaller file</option><option>Balanced</option><option>Best quality</option></select><ChevronDown size={15} /></div>
             </>
           )}
-          {tool.name === "Base64 tools" && <><label className="field-label" htmlFor="base64-mode">Operation</label><div className="select-wrap"><select id="base64-mode" value={base64Mode} onChange={(event) => setBase64Mode(event.target.value as "Encode" | "Decode")}><option value="Encode">Encode file to Base64</option><option value="Decode">Decode Base64 to file</option></select><ChevronDown size={15} /></div>{base64Mode === "Decode" && <><label className="field-label" htmlFor="decode-format">Decoded file type</label><div className="select-wrap"><select id="decode-format" value={decodedFormat} onChange={(event) => setDecodedFormat(event.target.value)}>{["BIN","TXT","JSON","PNG","JPG","PDF"].map(value=><option key={value}>{value}</option>)}</select><ChevronDown size={15} /></div></>}</>}\n          {tool.name === "OCR extractor" && <><label className="field-label" htmlFor="ocr-language">OCR language</label><div className="select-wrap"><select id="ocr-language" value={ocrLanguage} onChange={(event) => setOcrLanguage(event.target.value)}><option value="eng">English</option><option value="hin">Hindi</option><option value="guj">Gujarati</option><option value="eng+hin">English + Hindi</option><option value="eng+guj">English + Gujarati</option><option value="spa">Spanish</option><option value="fra">French</option></select><ChevronDown size={15} /></div><label className="field-label" htmlFor="ocr-format">Output document</label><div className="select-wrap"><select id="ocr-format" value={ocrFormat} onChange={(event) => setOcrFormat(event.target.value as "DOCX" | "TXT")}><option value="DOCX">Word document (DOCX)</option><option value="TXT">Plain text (TXT)</option></select><ChevronDown size={15} /></div></>}\n          {tool.name === "Split PDF" && <><label className="field-label" htmlFor="pdf-page-order">Pages to split (optional)</label><input id="pdf-page-order" className="operation-password" type="text" value={pdfPageOrder} onChange={(event) => setPdfPageOrder(event.target.value)} placeholder="All pages or 1, 3, 5" /><small className="operation-hint">Enter page numbers separated by commas. Leave blank to split every page.</small></>}\n          {tool.name === "Word editor" && files.length > 0 && <div className="operation-document-editor"><label className="field-label" htmlFor="document-content">Document content</label>{documentLoading ? <small className="operation-hint">Reading document text…</small> : <textarea id="document-content" value={documentText} onChange={(event) => setDocumentText(event.target.value)} rows={12} spellCheck className="operation-document-textarea" />}</div>}
+          {tool.name === "Base64 tools" && <><label className="field-label" htmlFor="base64-mode">Operation</label><div className="select-wrap"><select id="base64-mode" value={base64Mode} onChange={(event) => setBase64Mode(event.target.value as "Encode" | "Decode")}><option value="Encode">Encode file to Base64</option><option value="Decode">Decode Base64 to file</option></select><ChevronDown size={15} /></div>{base64Mode === "Decode" && <><label className="field-label" htmlFor="decode-format">Decoded file type</label><div className="select-wrap"><select id="decode-format" value={decodedFormat} onChange={(event) => setDecodedFormat(event.target.value)}>{["BIN","TXT","JSON","PNG","JPG","PDF"].map(value=><option key={value}>{value}</option>)}</select><ChevronDown size={15} /></div></>}</>}
+          {tool.name === "OCR extractor" && <><label className="field-label" htmlFor="ocr-language">OCR language</label><div className="select-wrap"><select id="ocr-language" value={ocrLanguage} onChange={(event) => setOcrLanguage(event.target.value)}><option value="eng">English</option><option value="hin">Hindi</option><option value="guj">Gujarati</option><option value="eng+hin">English + Hindi</option><option value="eng+guj">English + Gujarati</option><option value="spa">Spanish</option><option value="fra">French</option></select><ChevronDown size={15} /></div><label className="field-label" htmlFor="ocr-format">Output document</label><div className="select-wrap"><select id="ocr-format" value={ocrFormat} onChange={(event) => setOcrFormat(event.target.value as "DOCX" | "TXT")}><option value="DOCX">Word document (DOCX)</option><option value="TXT">Plain text (TXT)</option></select><ChevronDown size={15} /></div></>}
+          {tool.name === "Split PDF" && <><label className="field-label" htmlFor="pdf-page-order">Pages to split (optional)</label><input id="pdf-page-order" className="operation-password" type="text" value={pdfPageOrder} onChange={(event) => setPdfPageOrder(event.target.value)} placeholder="All pages or 1, 3, 5" /><small className="operation-hint">Enter page numbers separated by commas. Leave blank to split every page.</small></>}
+          {tool.name === "Word editor" && files.length > 0 && <div className="operation-document-editor"><label className="field-label" htmlFor="document-content">Document content</label>{documentLoading ? <small className="operation-hint">Reading document text…</small> : <textarea id="document-content" value={documentText} onChange={(event) => setDocumentText(event.target.value)} rows={12} spellCheck className="operation-document-textarea" />}</div>}
           {tool.name === "Resize image" && <div className="operation-dimensions"><div><label className="field-label" htmlFor="image-width">Width (px)</label><input id="image-width" className="operation-password" type="number" min="1" max="8192" value={imageWidth} onChange={(event) => setImageWidth(event.target.value)} placeholder="Auto" /></div><div><label className="field-label" htmlFor="image-height">Height (px)</label><input id="image-height" className="operation-password" type="number" min="1" max="8192" value={imageHeight} onChange={(event) => setImageHeight(event.target.value)} placeholder="Auto" /></div></div>}
           {tool.name === "Crop & rotate" && <><label className="field-label" htmlFor="crop-mode">Crop</label><div className="select-wrap"><select id="crop-mode" value={cropMode} onChange={(event) => setCropMode(event.target.value as "Original" | "Square center crop")}><option>Original</option><option>Square center crop</option></select><ChevronDown size={15} /></div><label className="field-label" htmlFor="image-rotation">Rotation</label><div className="select-wrap"><select id="image-rotation" value={rotation} onChange={(event) => setRotation(Number(event.target.value))}><option value={0}>No rotation</option><option value={90}>90° clockwise</option><option value={180}>180°</option><option value={270}>90° counter-clockwise</option></select><ChevronDown size={15} /></div></>}
           {tool.name === "Protect PDF" && <><label className="field-label" htmlFor="pdf-password">PDF password</label><input id="pdf-password" className="operation-password" type="password" autoComplete="new-password" minLength={6} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="At least 6 characters" /><small className="operation-hint">The password is applied locally. Keep it safe; it cannot be recovered.</small></>}
           {tool.name === "Organize PDF" && <><label className="field-label" htmlFor="pdf-page-order">Page order / pages to keep</label><input id="pdf-page-order" className="operation-password" type="text" value={pdfPageOrder} onChange={(event) => setPdfPageOrder(event.target.value)} placeholder="Example: 3, 1, 2" /><small className="operation-hint">Enter page numbers in the desired order. Omit a page to remove it. Leave blank to keep the original order.</small><label className="field-label" htmlFor="pdf-rotation">Rotate selected pages</label><div className="select-wrap"><select id="pdf-rotation" value={pdfRotation} onChange={(event) => setPdfRotation(Number(event.target.value))}><option value={0}>No rotation</option><option value={90}>90° clockwise</option><option value={180}>180°</option><option value={270}>270° clockwise</option></select><ChevronDown size={15} /></div></>}
-          <label className="metadata-toggle"><input type="checkbox" checked={keepMetadata} onChange={(event) => setKeepMetadata(event.target.checked)} /><span className="fake-check"><Check size={11} /></span><span><b>Keep original metadata when possible</b><small>Preserve dates, orientation and other available file information.</small></span></label>
 
           <motion.button className="operation-submit" onClick={startOperation} disabled={processing || documentLoading || (files.length > 0 && invalidFiles.length > 0)} whileHover={{ y: -2, boxShadow: "0 10px 24px rgba(82,89,216,.18)" }} whileTap={{ scale: 0.99 }}><span>{processing ? "Processing…" : isAI ? "Run tool" : "Process & download"}</span><ArrowRight size={16} /></motion.button>
           {processing && <div className="operation-progress"><motion.i initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut" }} /></div>}
           {notice && <div className="operation-notice"><Sparkles size={14} /> {notice}</div>}
-          {results.length > 0 && <div className="operation-results"><b><Check size={14} /> Output ready</b>{results.map((result) => <button key={result.filename} onClick={() => saveProcessedFile(result)}><FileText size={14} /><span>{result.filename}<small>{result.message}</small></span><ArrowUpRight size={13} /></button>)}</div>}
+          {results.length > 0 && <motion.div className="operation-results" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .32 }}><b><Check size={14} /> {results.length} output {results.length===1?"file":"files"} ready</b>{results.map((result,index) => <motion.button key={result.filename+index} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: Math.min(index*.035,.35) }} onClick={() => saveProcessedFile(result)}><FileText size={14} /><span>{result.filename}<small>{result.message}</small></span><ArrowUpRight size={13} /></motion.button>)}</motion.div>}
           <div className="operation-secure"><LockKeyhole size={12} /> Supported tools process locally in this browser. Files are not uploaded to a server.</div>
         </motion.div>
       </motion.section>
