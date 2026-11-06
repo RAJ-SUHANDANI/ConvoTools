@@ -62,7 +62,8 @@ export default function Home() {
   }, [category, query]);
 
   return (
-    <main className="app-shell">\n      <div className="announcement-bar">
+    <main className="app-shell">
+      <div className="announcement-bar">
         <span className="announcement-pulse" />
         <span>THE FILE WORKSPACE FOR PEOPLE WHO MAKE THINGS</span>
         <span className="announcement-divider" />
