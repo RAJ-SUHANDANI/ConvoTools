@@ -1039,3 +1039,14 @@ button,a,.tool-result,.format-panel,.ai-card,.dash-stat-card,.dash-quick-tool{ -
  .dash-favorite-grid{grid-template-columns:1fr}
  .dash-quiet-button{font-size:7px}
 }
+
+.comparison-demo-note{display:none}
+.tool-favorite-button{height:32px;margin-top:20px;padding:0 10px;display:inline-flex;align-items:center;gap:7px;border:1px solid #e0dfe8;background:#faf9f5;color:#6666b3;font-size:8px}
+.tool-favorite-button:hover{border-color:#bfc1ed;background:#f0f0ff;color:#4e54bd}
+.media-demo-credit{height:22px;padding:0 15px;display:flex;align-items:center;justify-content:space-between;background:#20232a;color:#8f939c;font:7px var(--mono)}
+.media-demo-credit a{display:flex;align-items:center;gap:5px;color:#c6c6ef}
+.media-demo-credit a:hover{color:#fff}
+.media-demo-credit span{color:#777d87}
+.comparison-credit{gap:8px}
+.comparison-demo-note{color:#96989c}
+@media(max-width:560px){.media-demo-credit{padding:0 9px;font-size:6px}.tool-favorite-button{margin-top:16px}}
