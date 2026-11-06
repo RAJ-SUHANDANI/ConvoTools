@@ -141,7 +141,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
           <span className="tool-detail-kicker">{tool.category.toUpperCase()} TOOL <i /> CONVOTOOLS WORKSPACE</span>
           <h1>{tool.name.split(" to ").length > 1 ? <>{tool.name.split(" to ")[0]} <em>to</em><br />{tool.name.split(" to ")[1]}</> : <>{tool.name.split(" ").slice(0, -1).join(" ")} <em>{tool.name.split(" ").slice(-1)}</em></>}</h1>
           <p>{tool.description} Add your file, review the settings and choose how you want the output prepared.</p>
-          <motion.div className="tool-detail-benefits" variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}><span><ShieldCheck size={14} /> Local-first where supported</span><span><LockKeyhole size={14} /> No account required</span><span><Sparkles size={14} /> Batch-ready interface</span></div>
+          <motion.div className="tool-detail-benefits" variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}><span><ShieldCheck size={14} /> Local-first where supported</span><span><LockKeyhole size={14} /> No account required</span><span><Sparkles size={14} /> Batch-ready interface</span></motion.div>
           <div className="tool-detail-tip"><span>01</span><div><b>A focused page for this job.</b><p>No crowded dashboard. The controls here are dedicated to {tool.name.toLowerCase()}.</p></div></div>
           <motion.button className="tool-favorite-button" onClick={toggleFavorite} whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }}>
             <Heart size={14} fill={isFavorite ? "currentColor" : "none"} /> {isFavorite ? "Saved to favorites" : "Save this tool"}
