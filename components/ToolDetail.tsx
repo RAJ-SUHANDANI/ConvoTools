@@ -144,6 +144,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
 
   const startOperation = async () => {
     if (!files.length) { setNotice("Choose a file first to configure this operation."); inputRef.current?.click(); return; }
+    if (tool.name === "Word editor" && files.length > 1) { setNotice("The text editor works with one DOCX file at a time. Choose a single document."); return; }
     if (invalidFiles.length) { setNotice("One or more files do not match this tool's expected input format."); return; }
     setProcessing(true); setResults([]); setNotice("Processing locally in your browser…");
     try {
@@ -185,7 +186,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
 
         <motion.div className="operation-card" variants={{ hidden: { opacity: 0, y: 18, scale: 0.99 }, visible: { opacity: 1, y: 0, scale: 1 } }} onMouseMove={(event) => { const rect = event.currentTarget.getBoundingClientRect(); event.currentTarget.style.setProperty("--pointer-x", ((event.clientX - rect.left) / rect.width * 100) + "%"); event.currentTarget.style.setProperty("--pointer-y", ((event.clientY - rect.top) / rect.height * 100) + "%"); }} onMouseLeave={(event) => { event.currentTarget.style.setProperty("--pointer-x", "50%"); event.currentTarget.style.setProperty("--pointer-y", "0%"); }}>
           <div className="operation-card-head"><div><span className="operation-step">STEP 01 / INPUT</span><h2>Add your file</h2><p>Expected format: <b>{tool.inputLabel || "Supported file"}</b></p></div><span className="operation-file-icon"><FileType2 size={21} /></span></div>
-          <input ref={inputRef} type="file" accept={accept} multiple className="operation-input" onChange={onChoose} />
+          <input ref={inputRef} type="file" accept={accept} multiple={tool.name !== "Word editor"} className="operation-input" onChange={onChoose} />
           <motion.button className={"operation-drop " + (files.length ? "has-files" : "")} onClick={() => inputRef.current?.click()} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); addFiles(event.dataTransfer.files); }} whileHover={{ scale: 1.006, borderColor: "#5259d8" }} whileTap={{ scale: 0.995 }}>
             <span className="operation-upload-icon"><UploadCloud size={25} /></span>
             <b>{files.length ? "Replace selected files" : "Choose files or drop them here"}</b>

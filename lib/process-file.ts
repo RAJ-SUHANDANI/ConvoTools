@@ -394,27 +394,30 @@ async function extractDocumentText(file:File):Promise<string>{
  throw new Error("This document format is not supported by the local converter.");
 }
 
+async function mapFileResults(files:File[],operation:(file:File)=>Promise<ProcessResult[]>):Promise<ProcessResult[]>{const output:ProcessResult[]=[];for(const file of files)output.push(...await operation(file));return output;}
+
 export async function processFiles(files:File[],tool:string,options:ProcessOptions={}):Promise<ProcessResult[]>{
  if(!files.length)throw new Error("Choose at least one file.");
  if(["PNG to JPG","JPG to PNG","PNG to WEBP","WEBP converter","Image compressor","Resize image","Crop & rotate"].includes(tool))return Promise.all(files.map(f=>image(f,tool,options)));
- if(["Image to PDF","Merge PDF","Split PDF","Compress PDF","Organize PDF"].includes(tool))return pdf(files,tool,options);
- if(tool==="Protect PDF"){const password=options.password?.trim();if(!password||password.length<6)throw new Error("Enter a password with at least 6 characters.");const {PDFDocument:SecurePDF}=await import("@cantoo/pdf-lib");const doc=await SecurePDF.load(await files[0].arrayBuffer());doc.encrypt({userPassword:password,ownerPassword:password+"-"+crypto.randomUUID()});return [result(bytesBlob(await doc.save(),"application/pdf"),name(files[0],"pdf"),"PDF encrypted with AES-256 password protection.")];}
+ if(["Image to PDF","Merge PDF"].includes(tool))return pdf(files,tool,options);
+ if(["Split PDF","Compress PDF","Organize PDF"].includes(tool))return mapFileResults(files,file=>pdf([file],tool,options));
+ if(tool==="Protect PDF"){const password=options.password?.trim();if(!password||password.length<6)throw new Error("Enter a password with at least 6 characters.");return mapFileResults(files,async file=>{const {PDFDocument:SecurePDF}=await import("@cantoo/pdf-lib");const doc=await SecurePDF.load(await file.arrayBuffer());doc.encrypt({userPassword:password,ownerPassword:password+"-"+crypto.randomUUID()});return [result(bytesBlob(await doc.save(),"application/pdf"),name(file,"pdf"),"PDF encrypted with AES-256 password protection.")];});}
  if(["PDF to Word","PDF to Excel","PDF to JPG","PDF to PNG","PDF to PowerPoint","PDF to PPTX"].includes(tool))return pdfAdvanced(files,tool);
- if(tool==="PPTX to PDF"||tool==="Slides to images"){if(tool==="PPTX to PDF"){const pages=await renderPresentationSlides(files[0]);return [await presentationToPdf(pages,name(files[0],"pdf"))];}return slidesToImageFiles(files[0]);}
- if(["CSV to XLSX","Remove duplicates"].includes(tool))return spreadsheet(files[0],tool);
- if(tool==="Excel to PDF")return [await workbookToPdf(files[0])];
+ if(tool==="PPTX to PDF"||tool==="Slides to images")return mapFileResults(files,async file=>{if(tool==="PPTX to PDF"){const pages=await renderPresentationSlides(file);return [await presentationToPdf(pages,name(file,"pdf"))];}return slidesToImageFiles(file);});
+ if(["CSV to XLSX","Remove duplicates"].includes(tool))return mapFileResults(files,file=>spreadsheet(file,tool));
+ if(tool==="Excel to PDF")return mapFileResults(files,async file=>[await workbookToPdf(file)]);
  if(["Create ZIP","Extract archive"].includes(tool))return archive(files,tool);
- if(tool==="Base64 tools")return processBase64(files[0],options);
- if(["JSON formatter","DOCX to TXT"].includes(tool))return [await textTool(files[0],tool)];
- if(tool==="Word to PDF"){const extracted=await extractDocumentText(files[0]);return [await makePdf(extracted,name(files[0],"pdf"))];}
+ if(tool==="Base64 tools")return mapFileResults(files,file=>processBase64(file,options));
+ if(["JSON formatter","DOCX to TXT"].includes(tool))return mapFileResults(files,async file=>[await textTool(file,tool)]);
+ if(tool==="Word to PDF")return mapFileResults(files,async file=>{const extracted=await extractDocumentText(file);return [await makePdf(extracted,name(file,"pdf"))];});
  if(tool==="PPTX to PDF"){const pages=await renderPresentationSlides(files[0]);return [await presentationToPdf(pages,name(files[0],"pdf"))];}
- if(tool==="Image to Word (OCR)"||tool==="OCR extractor"){const language=options.ocrLanguage||"eng";const extracted=files[0].type==="application/pdf"||files[0].name.toLowerCase().endsWith(".pdf")?await ocrPdf(files[0],language):await ocrImage(files[0],language);return options.ocrFormat==="TXT"?[textFile(extracted,name(files[0],"txt"))]:[await makeDocx(extracted,name(files[0],"docx"))];}
+ if(tool==="Image to Word (OCR)"||tool==="OCR extractor"){const language=options.ocrLanguage||"eng";return mapFileResults(files,async file=>{const extracted=file.type==="application/pdf"||file.name.toLowerCase().endsWith(".pdf")?await ocrPdf(file,language):await ocrImage(file,language);return options.ocrFormat==="TXT"?[textFile(extracted,name(file,"txt"))]:[await makeDocx(extracted,name(file,"docx"))];});}
  if(tool==="Slides to images")return slidesToImageFiles(files[0]);
- if(tool==="Background remover")return [await removeImageBackground(files[0])];
- if(tool==="Image enhancer"||tool==="Photo restoration")return [await upscaleImage(files[0],tool)];
- if(["MP4 to GIF","Video compressor","Extract audio","Audio converter"].includes(tool))return [await ffmpegRun(files[0],tool,options)];
- if(tool==="Hash generator"){const algorithm=options.hashAlgorithm||"SHA-256";const digest=await crypto.subtle.digest(algorithm,await files[0].arrayBuffer());const hash=Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,"0")).join("");return [textFile(algorithm+"  "+hash+"  "+files[0].name+"\n",name(files[0],algorithm.toLowerCase().replace("-","")))];}
- if(tool==="QR generator"){const QR=await import("qrcode");const value=await files[0].text();if(!value.trim())throw new Error("The selected file is empty. Add a URL or text first.");if(options.qrFormat==="SVG"){const svg=await QR.toString(value,{type:"svg",errorCorrectionLevel:"H",width:1024,margin:2});return [textFile(svg,"convotools-qr.svg","image/svg+xml")];}const url=await QR.toDataURL(value,{errorCorrectionLevel:"H",width:1024,margin:2});const blob=await (await fetch(url)).blob();return [result(blob,"convotools-qr.png","QR generated locally.")];}
+ if(tool==="Background remover")return mapFileResults(files,async file=>[await removeImageBackground(file)]);
+ if(tool==="Image enhancer"||tool==="Photo restoration")return mapFileResults(files,async file=>[await upscaleImage(file,tool)]);
+ if(["MP4 to GIF","Video compressor","Extract audio","Audio converter"].includes(tool))return mapFileResults(files,async file=>[await ffmpegRun(file,tool,options)]);
+ if(tool==="Hash generator"){const algorithm=options.hashAlgorithm||"SHA-256";return mapFileResults(files,async file=>{const digest=await crypto.subtle.digest(algorithm,await file.arrayBuffer());const hash=Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,"0")).join("");return [textFile(algorithm+"  "+hash+"  "+file.name+"\n",name(file,algorithm.toLowerCase().replace("-","")))];});}
+ if(tool==="QR generator"){const QR=await import("qrcode");return mapFileResults(files,async file=>{const value=await file.text();if(!value.trim())throw new Error("The selected file is empty. Add a URL or text first.");if(options.qrFormat==="SVG"){const svg=await QR.toString(value,{type:"svg",errorCorrectionLevel:"H",width:1024,margin:2});return [textFile(svg,name(file,"svg"),"image/svg+xml")];}const url=await QR.toDataURL(value,{errorCorrectionLevel:"H",width:1024,margin:2});const blob=await (await fetch(url)).blob();return [result(blob,name(file,"png"),"QR generated locally.")];});}
  if(tool==="Word editor"){const mammoth=await import("mammoth");const extracted=await mammoth.extractRawText({arrayBuffer:await files[0].arrayBuffer()});const text=options.textContent??extracted.value;return [await makeDocx(text,name(files[0],"docx"))];}
  throw new Error(tool+" is not connected to a real processing engine yet. No placeholder output was created. This operation needs a dedicated conversion or AI provider.");
 }
