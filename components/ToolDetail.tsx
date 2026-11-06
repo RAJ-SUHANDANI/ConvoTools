@@ -64,7 +64,11 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
   const [quality, setQuality] = useState<"Smaller file" | "Balanced" | "Best quality">("Balanced");
   const [keepMetadata, setKeepMetadata] = useState(true);
   const [password, setPassword] = useState("");
-  const [pdfPageOrder, setPdfPageOrder] = useState("");\n  const [imageWidth, setImageWidth] = useState("");\n  const [imageHeight, setImageHeight] = useState("");\n  const [rotation, setRotation] = useState(0);\n  const [cropMode, setCropMode] = useState<"Original" | "Square center crop">("Original");
+  const [pdfPageOrder, setPdfPageOrder] = useState("");
+  const [imageWidth, setImageWidth] = useState("");
+  const [imageHeight, setImageHeight] = useState("");
+  const [rotation, setRotation] = useState(0);
+  const [cropMode, setCropMode] = useState<"Original" | "Square center crop">("Original");
   const [notice, setNotice] = useState("");
   const [processing, setProcessing] = useState(false);
   const [results, setResults] = useState<ProcessResult[]>([]);
