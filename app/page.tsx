@@ -415,7 +415,7 @@ export default function Home() {
           <p>A more considered way to get<br />the everyday file jobs done.</p>
           <div className="footer-nav"><div><b>EXPLORE</b><a href="#toolkit">All tools</a><a href="#pdf">PDF</a><a href="#image-lab">Image lab</a><a href="#ai">AI lab</a></div><div><b>WORKSPACE</b><a href="/dashboard">Dashboard</a><a href="#workflow">Workflows</a><a href="#developer">Developer tools</a><a href="#faq">FAQ</a></div><div><b>PROJECT</b><a href="https://github.com/RAJ-SUHANDANI/ConvoTools" target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={12} /></a><a href="#principles">Our approach</a></div></div>
         </div>
-        <div className="footer-bottom"><span>© 2026 CONVOTOOLS. MADE FOR THE WORK BETWEEN THE WORK.</span><span>EARLY INTERFACE PREVIEW <i /> PROCESSING ENGINES IN PROGRESS</span></div>
+        <div className="footer-bottom"><span>© 2026 CONVOTOOLS. MADE FOR THE WORK BETWEEN THE WORK.</span><span>LOCAL-FIRST FILE WORKSPACE <i /> 42 TOOLS · BROWSER PROCESSING</span></div>
       </footer>
 
     </main>
