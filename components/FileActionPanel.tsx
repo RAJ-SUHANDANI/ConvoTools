@@ -91,6 +91,7 @@ export default function FileActionPanel({ files, onRemove }: Props) {
                     );
                   })}
                 </div>
+                {options.length === 0 && <div className="no-file-actions">We couldn&apos;t match this file to a supported action yet. Try another format or browse the tool library.</div>}
                 {activeAction && (
                   <div className="chosen-action">
                     <div><b>{activeAction.label}</b><span>{activeAction.detail}</span></div>
