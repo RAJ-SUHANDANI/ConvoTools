@@ -81,6 +81,8 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
   const [documentLoading, setDocumentLoading] = useState(false);
   const [notice, setNotice] = useState("");
   const [processing, setProcessing] = useState(false);
+  const [mediaProgress, setMediaProgress] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [results, setResults] = useState<ProcessResult[]>([]);
   const [isFavorite, setIsFavorite] = useState(false);
   const accept = useMemo(() => acceptedInputForTool(tool.inputLabel || "", tool.category), [tool]);
@@ -147,7 +149,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
     if (!files.length && !(tool.name === "QR generator" && qrText.trim())) { setNotice("Choose a file or enter text before processing."); inputRef.current?.click(); return; }
     if (tool.name === "Word editor" && files.length > 1) { setNotice("The text editor works with one DOCX file at a time. Choose a single document."); return; }
     if (invalidFiles.length) { setNotice("One or more files do not match this tool's expected input format."); return; }
-    setProcessing(true); setResults([]); setNotice("Processing locally in your browser…");
+    setProcessing(true); setProgress(0); setMediaProgress(["MP4 to GIF","Video compressor","Extract audio","Audio converter"].includes(tool.name)); setResults([]); setNotice("Processing locally in your browser…");
     try {
       const completed = await processFiles(files, tool.name, { output, quality, password, pdfPageOrder, width: imageWidth, height: imageHeight, rotation, cropMode, textContent: documentText, base64Mode, decodedFormat, ocrFormat, ocrLanguage, pdfRotation, qrFormat, hashAlgorithm, qrText });
       setResults(completed);
@@ -155,7 +157,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
         saveProcessedFile(result);
         recordActivity({ type: "tool", title: tool.name + " completed", description: result.filename + " · " + result.message, category: tool.category, toolSlug: slugify(tool.name) });
       });
-      setNotice(completed.length + " output " + (completed.length === 1 ? "file is" : "files are") + " ready. Your download" + (completed.length === 1 ? " has" : "s have") + " started.");
+      setProgress(1); setNotice(completed.length + " output " + (completed.length === 1 ? "file is" : "files are") + " ready. Your download" + (completed.length === 1 ? " has" : "s have") + " started.");
     } catch (error) { setNotice(error instanceof Error ? error.message : "Something went wrong while processing this file."); }
     finally { setProcessing(false); }
   };
@@ -232,7 +234,8 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
           {tool.name === "Organize PDF" && <><label className="field-label" htmlFor="pdf-page-order">Page order / pages to keep</label><input id="pdf-page-order" className="operation-password" type="text" value={pdfPageOrder} onChange={(event) => setPdfPageOrder(event.target.value)} placeholder="Example: 3, 1, 2" /><small className="operation-hint">Enter page numbers in the desired order. Omit a page to remove it. Leave blank to keep the original order.</small><label className="field-label" htmlFor="pdf-rotation">Rotate selected pages</label><div className="select-wrap"><select id="pdf-rotation" value={pdfRotation} onChange={(event) => setPdfRotation(Number(event.target.value))}><option value={0}>No rotation</option><option value={90}>90° clockwise</option><option value={180}>180°</option><option value={270}>270° clockwise</option></select><ChevronDown size={15} /></div></>}
 
           <motion.button className="operation-submit" onClick={startOperation} disabled={processing || documentLoading || (files.length > 0 && invalidFiles.length > 0)} whileHover={{ y: -2, boxShadow: "0 10px 24px rgba(82,89,216,.18)" }} whileTap={{ scale: 0.99 }}><span>{processing ? "Processing…" : isAI ? "Run tool" : "Process & download"}</span><ArrowRight size={16} /></motion.button>
-          {processing && <div className="operation-progress"><motion.i initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut" }} /></div>}
+          {processing && <div className="operation-progress"><motion.i initial={{ scaleX: 0 }} animate={mediaProgress ? { scaleX: progress } : { scaleX: 1 }} transition={mediaProgress ? { duration: .18, ease: "linear" } : { duration: 1.1, repeat: Infinity, ease: "easeInOut" }} /></div>}
+          {processing && mediaProgress && <small className="operation-hint" aria-live="polite">{Math.round(progress*100)}% encoded</small>}
           {notice && <div className="operation-notice"><Sparkles size={14} /> {notice}</div>}
           {results.length > 0 && <motion.div className="operation-results" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .32 }}><b><Check size={14} /> {results.length} output {results.length===1?"file":"files"} ready</b>{results.map((result,index) => <motion.button key={result.filename+index} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: Math.min(index*.035,.35) }} onClick={() => saveProcessedFile(result)}><FileText size={14} /><span>{result.filename}<small>{result.message}</small></span><ArrowUpRight size={13} /></motion.button>)}</motion.div>}
           <div className="operation-secure"><LockKeyhole size={12} /> Supported tools process locally in this browser. Files are not uploaded to a server.</div>

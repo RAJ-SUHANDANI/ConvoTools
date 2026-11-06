@@ -4,7 +4,7 @@ import { PDFDocument, degrees } from "pdf-lib";
 import * as XLSX from "xlsx";
 import { Document, Packer, Paragraph, TextRun } from "docx";
 
-export type ProcessOptions = { quality?: "Smaller file" | "Balanced" | "Best quality"; output?: string; password?: string; pdfPageOrder?: string; width?: string; height?: string; rotation?: number; cropMode?: "Original" | "Square center crop"; textContent?: string; base64Mode?: "Encode" | "Decode"; decodedFormat?: string; ocrFormat?: "DOCX" | "TXT"; ocrLanguage?: string; pdfRotation?: number; qrFormat?: "PNG" | "SVG"; hashAlgorithm?: "SHA-256" | "SHA-384" | "SHA-512"; qrText?: string };
+export type ProcessOptions = { quality?: "Smaller file" | "Balanced" | "Best quality"; output?: string; password?: string; pdfPageOrder?: string; width?: string; height?: string; rotation?: number; cropMode?: "Original" | "Square center crop"; textContent?: string; base64Mode?: "Encode" | "Decode"; decodedFormat?: string; ocrFormat?: "DOCX" | "TXT"; ocrLanguage?: string; pdfRotation?: number; qrFormat?: "PNG" | "SVG"; hashAlgorithm?: "SHA-256" | "SHA-384" | "SHA-512"; qrText?: string; onProgress?: (progress: number) => void };
 export type ProcessResult = { blob: Blob; filename: string; mime: string; message: string };
 const result=(blob:Blob,filename:string,message:string):ProcessResult=>({blob,filename,mime:blob.type||"application/octet-stream",message});
 const bytesBlob=(bytes:Uint8Array,mime:string)=>{const safe=new Uint8Array(bytes.byteLength);safe.set(bytes);return new Blob([safe.buffer],{type:mime});};
@@ -28,7 +28,7 @@ async function image(file:File,tool:string,options:ProcessOptions):Promise<Proce
 async function compressPdfRaster(file:File,preset:ProcessOptions["quality"]):Promise<ProcessResult>{
  const scale=preset==="Smaller file"?1:preset==="Best quality"?1.85:1.35;
  const jpegQuality=preset==="Smaller file"?.58:preset==="Best quality"?.88:.75;
- const original=await pdfJsDocument(file);const rendered=await renderPdfPages(file,"jpeg",scale,jpegQuality);
+ const original=await pdfJsDocument(file);if(original.numPages>150)throw new Error("PDF image compression is limited to 150 pages per file to protect browser memory.");const rendered=await renderPdfPages(file,"jpeg",scale,jpegQuality);
  const output=await PDFDocument.create();
  for(let i=0;i<rendered.length;i++){
   const sourcePage=await original.getPage(i+1);const viewport=sourcePage.getViewport({scale:1});
@@ -150,6 +150,7 @@ async function ffmpegRun(file:File,tool:string,options:ProcessOptions):Promise<P
  const {FFmpeg}=await import("@ffmpeg/ffmpeg");
  const {fetchFile,toBlobURL}=await import("@ffmpeg/util");
  const ffmpeg=new FFmpeg();
+ ffmpeg.on("progress",({progress})=>options.onProgress?.(Math.max(0,Math.min(.995,progress))));
  const core="https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/umd";
  await ffmpeg.load({coreURL:await toBlobURL(core+"/ffmpeg-core.js","text/javascript"),wasmURL:await toBlobURL(core+"/ffmpeg-core.wasm","application/wasm")});
  const input="input-"+(file.name.split(".").pop()||"bin").replace(/[^a-z0-9]/gi,"");
@@ -190,6 +191,8 @@ async function rawImageToBlob(raw:{data:Uint8Array|Uint8ClampedArray;width:numbe
 }
 
 async function removeImageBackground(file:File):Promise<ProcessResult>{
+ if(file.size>12*1024*1024)throw new Error("Choose an image smaller than 12 MB for local background removal.");
+ const bitmap=await createImageBitmap(file);const pixels=bitmap.width*bitmap.height;bitmap.close();if(pixels>16000000)throw new Error("This image is over 16 megapixels. Resize it before using local background removal.");
  const {pipeline}=await import("@huggingface/transformers");
  const segmenter=await pipeline("background-removal","Xenova/modnet",{dtype:"fp32"});
  const source=URL.createObjectURL(file);
@@ -229,6 +232,7 @@ async function pdfPagesToPptx(pages:Blob[]):Promise<Blob>{
 
 async function upscaleImage(file:File,tool:string):Promise<ProcessResult>{
  if(file.size>12*1024*1024)throw new Error("For in-browser AI processing, choose an image smaller than 12 MB.");
+ const bitmap=await createImageBitmap(file);const pixels=bitmap.width*bitmap.height;bitmap.close();if(pixels>16000000)throw new Error("This image is over 16 megapixels. Resize it before using local AI enhancement.");
  const {pipeline}=await import("@huggingface/transformers");
  const model=tool==="Photo restoration"?"Xenova/swin2SR-realworld-sr-x4-64-bsrgan-psnr":"Xenova/swin2SR-classical-sr-x2-64";
  const upscaler=await pipeline("image-to-image",model,{device:"wasm",dtype:"q8"});
@@ -402,7 +406,7 @@ export async function processFiles(files:File[],tool:string,options:ProcessOptio
  if(["Image to PDF","Merge PDF"].includes(tool))return pdf(files,tool,options);
  if(["Split PDF","Compress PDF","Organize PDF"].includes(tool))return mapFileResults(files,file=>pdf([file],tool,options));
  if(tool==="Protect PDF"){const password=options.password?.trim();if(!password||password.length<6)throw new Error("Enter a password with at least 6 characters.");return mapFileResults(files,async file=>{const {PDFDocument:SecurePDF}=await import("@cantoo/pdf-lib");const doc=await SecurePDF.load(await file.arrayBuffer());doc.encrypt({userPassword:password,ownerPassword:password+"-"+crypto.randomUUID()});return [result(bytesBlob(await doc.save(),"application/pdf"),name(file,"pdf"),"PDF encrypted with AES-256 password protection.")];});}
- if(["PDF to Word","PDF to Excel","PDF to JPG","PDF to PNG","PDF to PowerPoint","PDF to PPTX"].includes(tool))return pdfAdvanced(files,tool);
+ if(["PDF to Word","PDF to Excel","PDF to JPG","PDF to PNG","PDF to PowerPoint","PDF to PPTX"].includes(tool))return mapFileResults(files,file=>pdfAdvanced([file],tool));
  if(tool==="PPTX to PDF"||tool==="Slides to images")return mapFileResults(files,async file=>{if(tool==="PPTX to PDF"){const pages=await renderPresentationSlides(file);return [await presentationToPdf(pages,name(file,"pdf"))];}return slidesToImageFiles(file);});
  if(["CSV to XLSX","Remove duplicates"].includes(tool))return mapFileResults(files,file=>spreadsheet(file,tool));
  if(tool==="Excel to PDF")return mapFileResults(files,async file=>[await workbookToPdf(file)]);
@@ -418,7 +422,22 @@ export async function processFiles(files:File[],tool:string,options:ProcessOptio
  if(tool==="Image enhancer"||tool==="Photo restoration")return mapFileResults(files,async file=>[await upscaleImage(file,tool)]);
  if(["MP4 to GIF","Video compressor","Extract audio","Audio converter"].includes(tool))return mapFileResults(files,async file=>[await ffmpegRun(file,tool,options)]);
  if(tool==="Hash generator"){const algorithm=options.hashAlgorithm||"SHA-256";return mapFileResults(files,async file=>{const digest=await crypto.subtle.digest(algorithm,await file.arrayBuffer());const hash=Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,"0")).join("");return [textFile(algorithm+"  "+hash+"  "+file.name+"\n",name(file,algorithm.toLowerCase().replace("-","")))];});}
- if(tool==="QR generator"){const QR=await import("qrcode");const inputs=files.length?await Promise.all(files.map(async file=>({name:file.name,value:await file.text()}))):[{name:"convotools-qr",value:options.qrText||""}];return mapFileResults(inputs.map(input=>new File([input.value],input.name+".txt",{type:"text/plain"})),async file=>{const value=await file.text();if(!value.trim())throw new Error("Enter a URL or text before generating a QR code.");if(options.qrFormat==="SVG"){const svg=await QR.toString(value,{type:"svg",errorCorrectionLevel:"H",width:1024,margin:2});return [textFile(svg,name(file,"svg"),"image/svg+xml")];}const url=await QR.toDataURL(value,{errorCorrectionLevel:"H",width:1024,margin:2});const blob=await (await fetch(url)).blob();return [result(blob,name(file,"png"),"QR generated locally.")];});}
+ if(tool==="QR generator"){
+  const QR=await import("qrcode");
+  const items=files.length?await Promise.all(files.map(async file=>({baseName:file.name.replace(/\.[^.]+$/,"")||"qr-code",value:await file.text()}))):[{baseName:"convotools-qr",value:options.qrText||""}];
+  const outputs:ProcessResult[]=[];
+  for(const item of items){
+   if(!item.value.trim())throw new Error("Enter a URL or text before generating a QR code.");
+   if(options.qrFormat==="SVG"){
+    const svg=await QR.toString(item.value,{type:"svg",errorCorrectionLevel:"H",width:1024,margin:2});
+    outputs.push(textFile(svg,item.baseName+".svg","image/svg+xml"));
+   }else{
+    const url=await QR.toDataURL(item.value,{errorCorrectionLevel:"H",width:1024,margin:2});
+    outputs.push(result(await (await fetch(url)).blob(),item.baseName+".png","QR generated locally."));
+   }
+  }
+  return outputs;
+ }
  if(tool==="Word editor"){const mammoth=await import("mammoth");const extracted=await mammoth.extractRawText({arrayBuffer:await files[0].arrayBuffer()});const text=options.textContent??extracted.value;return [await makeDocx(text,name(files[0],"docx"))];}
  throw new Error(tool+" is not connected to a real processing engine yet. No placeholder output was created. This operation needs a dedicated conversion or AI provider.");
 }
