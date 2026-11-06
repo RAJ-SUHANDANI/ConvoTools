@@ -67,7 +67,7 @@ async function renderPdfPages(file:File,format:"png"|"jpeg"="png"):Promise<Blob[
 }
 async function pdfText(file:File):Promise<string>{
  const doc=await pdfJsDocument(file);const output:string[]=[];
- for(let n=1;n<=doc.numPages;n++){const page=await doc.getPage(n);const content=await page.getTextContent();output.push(content.items.map((item)=>"str" in item?item.str+("hasEOL" in item&&item.hasEOL?"\\n":" "):"").join(""));}
+ for(let n=1;n<=doc.numPages;n++){const page=await doc.getPage(n);const content=await page.getTextContent();output.push(content.items.map((item)=>"str" in item?item.str+("hasEOL" in item&&item.hasEOL?"\n":" "):"").join(""));}
  return output.join("\n\n");
 }
 async function ocrImage(file:File):Promise<string>{
