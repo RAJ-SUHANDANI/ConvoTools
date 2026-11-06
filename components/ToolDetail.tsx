@@ -7,7 +7,7 @@ import {
   FileText, FileType2, LockKeyhole, Plus, Settings2, ShieldCheck,
   Sparkles, UploadCloud, X
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { acceptedInputForTool, detectFileCategory, formatFileSize, isAudioFile, isVideoFile } from "@/lib/file-actions";
 import { clearPendingFiles, getPendingFiles } from "@/lib/file-session";
 import { readFavorites, recordActivity, saveFavorites } from "@/lib/activity";
