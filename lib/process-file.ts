@@ -64,7 +64,7 @@ async function renderPdfPages(file:File,format:"png"|"jpeg"="png"):Promise<Blob[
 async function pdfText(file:File):Promise<string>{
  const doc=await pdfJsDocument(file);const output:string[]=[];
  for(let n=1;n<=doc.numPages;n++){const page=await doc.getPage(n);const content=await page.getTextContent();output.push(content.items.map((item)=>"str" in item?item.str:"").join(" "));}
- return output.join("\\n\\n");
+ return output.join("\n\n");
 }
 async function ocrImage(file:File):Promise<string>{
  const Tesseract=await import("tesseract.js");const worker=await Tesseract.createWorker("eng");
@@ -73,10 +73,10 @@ async function ocrImage(file:File):Promise<string>{
 async function ocrPdf(file:File):Promise<string>{
  const pages=await renderPdfPages(file,"png");const Tesseract=await import("tesseract.js");const worker=await Tesseract.createWorker("eng");const text:string[]=[];
  try{for(const page of pages){const {data}=await worker.recognize(page);text.push(data.text);}}finally{await worker.terminate();}
- return text.join("\\n\\n");
+ return text.join("\n\n");
 }
 async function makeDocx(text:string,filename:string):Promise<ProcessResult>{
- const doc=new Document({sections:[{children:text.split(/\\r?\\n/).map(line=>new Paragraph({children:[new TextRun(line)]}))}]});
+ const doc=new Document({sections:[{children:text.split(/\r?\n/).map(line=>new Paragraph({children:[new TextRun(line)]}))}]});
  return result(await Packer.toBlob(doc),filename,"Editable Word document generated from extracted text.");
 }
 async function makePdf(text:string,filename:string):Promise<ProcessResult>{
@@ -85,15 +85,15 @@ async function makePdf(text:string,filename:string):Promise<ProcessResult>{
  return result(pdf.output("blob"),filename,"PDF generated from extracted text. Original page layout and styling are not retained.");
 }
 async function pptxText(file:File):Promise<string>{
- const zip=await JSZip.loadAsync(file);const slideFiles=Object.keys(zip.files).filter(k=>/^ppt\\/slides\\/slide\\d+\\.xml$/.test(k)).sort((a,b)=>Number(a.match(/slide(\\d+)/)?.[1])-Number(b.match(/slide(\\d+)/)?.[1]));
+ const zip=await JSZip.loadAsync(file);const slideFiles=Object.keys(zip.files).filter(k=>/^ppt\/slides\/slide\d+\.xml$/.test(k)).sort((a,b)=>Number(a.match(/slide(\d+)/)?.[1])-Number(b.match(/slide(\d+)/)?.[1]));
  if(!slideFiles.length)throw new Error("No readable slides were found in this PowerPoint file.");
  const slides:string[]=[];
- for(const path of slideFiles){const xml=await zip.file(path)!.async("text");const parts=[...xml.matchAll(/<a:t>([\\s\\S]*?)<\\/a:t>/g)].map(m=>m[1].replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&apos;/g,"'"));slides.push(parts.join(" "));}
- return slides.map((s,i)=>"SLIDE "+(i+1)+"\\n"+s).join("\\n\\n");
+ for(const path of slideFiles){const xml=await zip.file(path)!.async("text");const parts=[...xml.matchAll(/<a:t>([\s\S]*?)<\/a:t>/g)].map(m=>m[1].replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&apos;/g,"'"));slides.push(parts.join(" "));}
+ return slides.map((s,i)=>"SLIDE "+(i+1)+"\n"+s).join("\n\n");
 }
 async function pdfAdvanced(files:File[],tool:string):Promise<ProcessResult[]>{
  if(tool==="PDF to Word"){const text=await pdfText(files[0]);if(!text.trim())throw new Error("This PDF contains no selectable text. Try OCR extractor for scanned pages.");return [await makeDocx(text,name(files[0],"docx"))];}
- if(tool==="PDF to Excel"){const text=await pdfText(files[0]);if(!text.trim())throw new Error("No selectable text was found in this PDF.");const rows=text.split(/\\r?\\n/).filter(Boolean).map(line=>line.split(/\\s{2,}|\\t/));const sheet=XLSX.utils.aoa_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,sheet,"Extracted data");return [result(new Blob([XLSX.write(wb,{type:"array",bookType:"xlsx"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),name(files[0],"xlsx"),"Text rows exported to a spreadsheet. PDF table structure may require manual cleanup.")];}
+ if(tool==="PDF to Excel"){const text=await pdfText(files[0]);if(!text.trim())throw new Error("No selectable text was found in this PDF.");const rows=text.split(/\r?\n/).filter(Boolean).map(line=>line.split(/\s{2,}|\t/));const sheet=XLSX.utils.aoa_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,sheet,"Extracted data");return [result(new Blob([XLSX.write(wb,{type:"array",bookType:"xlsx"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),name(files[0],"xlsx"),"Text rows exported to a spreadsheet. PDF table structure may require manual cleanup.")];}
  if(tool==="PDF to JPG"||tool==="PDF to PNG"||tool==="Slides to images"){const pages=await renderPdfPages(files[0],tool==="PDF to JPG"?"jpeg":"png");if(pages.length===1)return [result(pages[0],name(files[0],tool==="PDF to JPG"?"jpg":"png"),"PDF page rendered as an image.")];const zip=new JSZip();pages.forEach((p,i)=>zip.file("page-"+String(i+1).padStart(3,"0")+(tool==="PDF to JPG"?".jpg":".png"),p));return [result(await zip.generateAsync({type:"blob"}),name(files[0],"zip"),pages.length+" PDF pages rendered into image files.")];}
  if(tool==="PDF to PowerPoint"){const pages=await renderPdfPages(files[0],"jpeg");const PptxGenJS=(await import("pptxgenjs")).default;const pptx=new PptxGenJS();pptx.layout="LAYOUT_WIDE";for(const page of pages){const data=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=()=>reject(new Error("Image conversion failed."));reader.readAsDataURL(page);});const slide=pptx.addSlide();slide.addImage({data,x:0,y:0,w:13.333,h:7.5});}return [result(await pptx.write({outputType:"blob"}) as Blob,name(files[0],"pptx"),"PDF pages placed as full-slide images in a PowerPoint file. Text is not editable.")];}
  throw new Error("Unsupported PDF operation.");
@@ -101,7 +101,8 @@ async function pdfAdvanced(files:File[],tool:string):Promise<ProcessResult[]>{
 \nexport async function processFiles(files:File[],tool:string,options:ProcessOptions={}):Promise<ProcessResult[]>{
  if(!files.length)throw new Error("Choose at least one file.");
  if(["PNG to JPG","JPG to PNG","PNG to WEBP","WEBP converter","Image compressor","Resize image","Crop & rotate"].includes(tool))return Promise.all(files.map(f=>image(f,tool,options)));
- if(["Image to PDF","Merge PDF","Split PDF","Compress PDF","Organize PDF"].includes(tool))return pdf(files,tool);\n if(["PDF to Word","PDF to Excel","PDF to JPG","PDF to PNG","PDF to PowerPoint"].includes(tool))return pdfAdvanced(files,tool);
+ if(["Image to PDF","Merge PDF","Split PDF","Compress PDF","Organize PDF"].includes(tool))return pdf(files,tool);
+ if(["PDF to Word","PDF to Excel","PDF to JPG","PDF to PNG","PDF to PowerPoint"].includes(tool))return pdfAdvanced(files,tool);
  if(["CSV to XLSX","Remove duplicates"].includes(tool))return spreadsheet(files[0],tool);\n if(tool==="Excel to PDF"){const wb=XLSX.read(await files[0].arrayBuffer(),{type:"array"});const csv=wb.SheetNames.map(n=>n+"\\n"+XLSX.utils.sheet_to_csv(wb.Sheets[n])).join("\\n\\n");return [await makePdf(csv,name(files[0],"pdf"))];}
  if(["Create ZIP","Extract archive"].includes(tool))return [await archive(files,tool)];
  if(["JSON formatter","Base64 tools","DOCX to TXT"].includes(tool))return [await textTool(files[0],tool)];\n if(tool==="Word to PDF"){const mammoth=await import("mammoth/mammoth.browser");const extracted=await mammoth.extractRawText({arrayBuffer:await files[0].arrayBuffer()});return [await makePdf(extracted.value,name(files[0],"pdf"))];}\n if(tool==="PPTX to PDF"){const text=await pptxText(files[0]);return [await makePdf(text,name(files[0],"pdf"))];}\n if(tool==="Image to Word (OCR)"||tool==="OCR extractor"){const extracted=files[0].type==="application/pdf"||files[0].name.toLowerCase().endsWith(".pdf")?await ocrPdf(files[0]):await ocrImage(files[0]);return [await makeDocx(extracted,name(files[0],"docx"))];}
