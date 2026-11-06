@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import BrandLogo from "@/components/BrandLogo";
+import { processFiles, saveProcessedFile, type ProcessResult } from "@/lib/process-file";
 import { acceptedInputForTool, detectFileCategory, formatFileSize, isAudioFile, isVideoFile } from "@/lib/file-actions";
 import { clearPendingFiles, getPendingFiles } from "@/lib/file-session";
 import { readFavorites, recordActivity, saveFavorites } from "@/lib/activity";
@@ -63,6 +64,8 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
   const [quality, setQuality] = useState("Balanced");
   const [keepMetadata, setKeepMetadata] = useState(true);
   const [notice, setNotice] = useState("");
+  const [processing, setProcessing] = useState(false);
+  const [results, setResults] = useState<ProcessResult[]>([]);
   const [isFavorite, setIsFavorite] = useState(false);
   const accept = useMemo(() => acceptedInputForTool(tool.inputLabel || "", tool.category), [tool]);
 
@@ -93,6 +96,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
       description: "Added to " + tool.name,
     }));
     setFiles(next);
+    setResults([]);
     setNotice("");
   };
 
@@ -111,17 +115,20 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
 
   const invalidFiles = files.filter((file) => !compatible(tool, file));
 
-  const startOperation = () => {
-    if (!files.length) {
-      setNotice("Choose a file first to configure this operation.");
-      inputRef.current?.click();
-      return;
-    }
-    if (invalidFiles.length) {
-      setNotice("One or more files do not match this tool's expected input format.");
-      return;
-    }
-    setNotice("Your settings are ready. The " + tool.name + " processing engine will be connected in the next implementation phase.");
+  const startOperation = async () => {
+    if (!files.length) { setNotice("Choose a file first to configure this operation."); inputRef.current?.click(); return; }
+    if (invalidFiles.length) { setNotice("One or more files do not match this tool's expected input format."); return; }
+    setProcessing(true); setResults([]); setNotice("Processing locally in your browser…");
+    try {
+      const completed = await processFiles(files, tool.name, { output, quality });
+      setResults(completed);
+      completed.forEach((result) => {
+        saveProcessedFile(result);
+        recordActivity({ type: "tool", title: tool.name + " completed", description: result.filename + " · " + result.message, category: tool.category, toolSlug: slugify(tool.name) });
+      });
+      setNotice(completed.length + " output " + (completed.length === 1 ? "file is" : "files are") + " ready. Your download" + (completed.length === 1 ? " has" : "s have") + " started.");
+    } catch (error) { setNotice(error instanceof Error ? error.message : "Something went wrong while processing this file."); }
+    finally { setProcessing(false); }
   };
 
   const options = [defaultOutput(tool)];
@@ -186,9 +193,11 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
           )}
           <label className="metadata-toggle"><input type="checkbox" checked={keepMetadata} onChange={(event) => setKeepMetadata(event.target.checked)} /><span className="fake-check"><Check size={11} /></span><span><b>Keep original metadata when possible</b><small>Preserve dates, orientation and other available file information.</small></span></label>
 
-          <motion.button className="operation-submit" onClick={startOperation} disabled={files.length > 0 && invalidFiles.length > 0} whileHover={{ y: -2, boxShadow: "0 10px 24px rgba(82,89,216,.18)" }} whileTap={{ scale: 0.99 }}><span>{isAI ? "Prepare enhancement" : "Prepare conversion"}</span><ArrowRight size={16} /></motion.button>
+          <motion.button className="operation-submit" onClick={startOperation} disabled={processing || (files.length > 0 && invalidFiles.length > 0)} whileHover={{ y: -2, boxShadow: "0 10px 24px rgba(82,89,216,.18)" }} whileTap={{ scale: 0.99 }}><span>{processing ? "Processing…" : isAI ? "Run tool" : "Process & download"}</span><ArrowRight size={16} /></motion.button>
+          {processing && <div className="operation-progress"><motion.i initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut" }} /></div>}
           {notice && <div className="operation-notice"><Sparkles size={14} /> {notice}</div>}
-          <div className="operation-secure"><LockKeyhole size={12} /> Files are only held in this browser preview. Processing is not yet enabled.</div>
+          {results.length > 0 && <div className="operation-results"><b><Check size={14} /> Output ready</b>{results.map((result) => <button key={result.filename} onClick={() => saveProcessedFile(result)}><FileText size={14} /><span>{result.filename}<small>{result.message}</small></span><ArrowUpRight size={13} /></button>)}</div>}
+          <div className="operation-secure"><LockKeyhole size={12} /> Supported tools process locally in this browser. Files are not uploaded to a server.</div>
         </motion.div>
       </motion.section>
       <motion.section className="tool-page-bottom" initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.55 }}>

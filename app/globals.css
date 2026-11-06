@@ -1082,3 +1082,11 @@ button,a,.tool-result,.format-panel,.ai-card,.dash-stat-card,.dash-quick-tool{ -
 @media(max-width:1100px){.dash-tool-library-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:760px){.dash-tool-library-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.brand-dashboard{--brand-width:170px}}
 @media(max-width:520px){.dash-tool-library-grid{grid-template-columns:1fr}.dash-tool-library-card{min-height:170px}.dash-tool-count{align-self:flex-start}}
+
+/* Layer two — output states and tactile depth */
+.operation-progress{height:4px;margin-top:13px;overflow:hidden;background:#e9e8f0}.operation-progress i{display:block;width:42%;height:100%;transform-origin:left;background:linear-gradient(90deg,#656be4,#a58aff,#656be4)}
+.operation-results{display:grid;gap:8px;margin-top:14px;padding:12px;border:1px solid #d9e6dc;background:#f5faf6}.operation-results>b{display:flex;align-items:center;gap:7px;color:#477b5b;font-size:9px}
+.operation-results>button{display:flex;align-items:center;gap:9px;min-width:0;padding:9px;background:#fff;border:1px solid #e3e9e3;color:#53575d;text-align:left}.operation-results>button>span{min-width:0;flex:1;font-size:9px;font-weight:600;overflow-wrap:anywhere}.operation-results>button small{display:block;margin-top:3px;color:#858991;font-size:7px;font-weight:400}.operation-results>button:hover{border-color:#a9c7b0;transform:translateY(-1px)}
+.operation-card{transform-style:preserve-3d;perspective:1200px}.dash-tool-library-card,.dash-quick-tool,.dash-stat-card{transform-style:preserve-3d;perspective:900px;will-change:transform}
+.dash-tool-library-card:focus-visible,.dash-quick-tool:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+@media(prefers-reduced-motion:reduce){.dash-tool-library-card,.dash-quick-tool,.dash-stat-card{transform:none!important;transition:none!important}}
