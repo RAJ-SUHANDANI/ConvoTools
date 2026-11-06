@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import ScrollProgress from "@/components/ScrollProgress";
+import { AmbientCursor } from "@/components/LandingEnhancements";
 
 export const metadata: Metadata = {
   title: "ConvoTools — Make files work for you",
@@ -32,7 +33,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body><ScrollProgress />{children}</body>
+      <body><ScrollProgress /><AmbientCursor />{children}</body>
     </html>
   );
 }

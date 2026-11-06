@@ -3,10 +3,11 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  ArrowRight, ArrowUpRight, FileArchive, FileAudio, FileImage,
-  FileSpreadsheet, FileText, FileVideo, ScanText, Sparkles, X
+  ArrowUpRight, FileArchive, FileImage,
+  FileSpreadsheet, FileText, FileVideo, X
 } from "lucide-react";
 import { detectFileCategory, formatFileSize, getActionsForFile, type FileAction } from "@/lib/file-actions";
+import FileActionRadial from "@/components/FileActionRadial";
 import { setPendingFiles } from "@/lib/file-session";
 
 type Props = {
@@ -22,12 +23,6 @@ function fileIcon(category: string) {
   if (category === "Video & audio") return FileVideo;
   if (category === "Archives") return FileArchive;
   return FileText;
-}
-
-function actionIcon(action: FileAction) {
-  if (action.kind === "ai") return Sparkles;
-  if (action.kind === "extract") return ScanText;
-  return ArrowRight;
 }
 
 export default function FileActionPanel({ files, onRemove }: Props) {
@@ -79,18 +74,7 @@ export default function FileActionPanel({ files, onRemove }: Props) {
                   <span>CHOOSE AN ACTION</span>
                   <small>{options.length} SUGGESTED</small>
                 </div>
-                <div className="file-action-options">
-                  {options.map((action) => {
-                    const ActionIcon = actionIcon(action);
-                    return (
-                      <button key={action.id} className={activeId === action.id ? "file-action-option active" : "file-action-option"} onClick={() => setSelected((current) => ({ ...current, [key]: action.id }))}>
-                        <span className="action-option-icon"><ActionIcon size={14} /></span>
-                        <span><b>{action.label}</b><small>{action.output}</small></span>
-                        <i className="action-radio" />
-                      </button>
-                    );
-                  })}
-                </div>
+                <FileActionRadial options={options} activeId={activeId} onSelect={(action) => setSelected((current) => ({ ...current, [key]: action.id }))} />
                 {options.length === 0 && <div className="no-file-actions">We couldn&apos;t match this file to a supported action yet. Try another format or browse the tool library.</div>}
                 {activeAction && (
                   <div className="chosen-action">

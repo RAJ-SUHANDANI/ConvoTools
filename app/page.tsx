@@ -2,12 +2,9 @@
 
 import {
   ArrowDownRight, ArrowRight, ArrowUpRight, AudioLines, BadgeCheck, Braces,
-  Check, ChevronRight, Clock3, Code2, Copy, Download, FileArchive,
-  FileAudio, FileImage, FilePenLine, FileSpreadsheet, FileText, FileVideo,
-  Film, Github, Image as ImageIcon, Layers3, LockKeyhole, Menu, Merge,
-  Minimize2, Music2, PanelTop, Play, Plus, QrCode, ScanText, Search, ShieldCheck,
-  SlidersHorizontal, Sparkles, Split, UploadCloud, WandSparkles, Workflow,
-  X, Zap
+  Check, ChevronRight, Code2, Copy, FileImage, FilePenLine, FileSpreadsheet, FileText, Film, Image as ImageIcon, Layers3, LockKeyhole, Merge,
+  Minimize2, PanelTop, Plus, ScanText, Search, ShieldCheck,
+  SlidersHorizontal, Sparkles, UploadCloud, Zap
 } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ChangeEvent, DragEvent, useMemo, useRef, useState } from "react";
@@ -17,6 +14,7 @@ import ImageComparison from "@/components/ImageComparison";
 import BrandLogo from "@/components/BrandLogo";
 import { recordActivity } from "@/lib/activity";
 import { TOOLS, TOOL_CATEGORIES, slugify } from "@/lib/tools";
+import { AIGallery, FooterReveal, LandingNav, ScrollTextLines, TypewriterHeading, WorkflowWaypoints } from "@/components/LandingEnhancements";
 
 export default function Home() {
   const reducedMotion = useReducedMotion();
@@ -26,7 +24,6 @@ export default function Home() {
   const [dragging, setDragging] = useState(false);
   const [category, setCategory] = useState("All tools");
   const [query, setQuery] = useState("");
-  const [menuOpen, setMenuOpen] = useState(false);
   const [showAll, setShowAll] = useState(false);
 
   const addFiles = (incoming: FileList | File[]) => {
@@ -62,7 +59,7 @@ export default function Home() {
   }, [category, query]);
 
   return (
-    <main className="app-shell">
+    <main className="app-shell" id="top">
       <div className="announcement-bar">
         <span className="announcement-pulse" />
         <span>THE FILE WORKSPACE FOR PEOPLE WHO MAKE THINGS</span>
@@ -70,36 +67,13 @@ export default function Home() {
         <a href="#toolkit">Explore the toolkit <ArrowUpRight size={12} /></a>
       </div>
 
-      <header className="site-header">
-        <BrandLogo className="brand-header" width={205} priority />
-        <nav className="desktop-nav">
-          <a href="#toolkit">Tools</a>
-          <a href="#pdf">PDF</a>
-          <a href="#image-lab">Image lab</a>
-          <a href="#workflow">Workflows</a>
-          <a href="#why">About</a>
-        </nav>
-        <div className="header-actions">
-          <a className="header-github" href="https://github.com/RAJ-SUHANDANI/ConvoTools" target="_blank" rel="noreferrer"><Github size={15} /> <span>GitHub</span></a>
-          <a className="header-button" href="/dashboard">Open workspace <ArrowUpRight size={14} /></a>
-          <button className="mobile-toggle" onClick={() => setMenuOpen((value) => !value)} aria-label="Toggle navigation">{menuOpen ? <X size={19} /> : <Menu size={19} />}</button>
-        </div>
-      </header>
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.nav className="mobile-nav" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
-            {["#toolkit", "#pdf", "#image-lab", "#workflow", "#principles"].map((href, index) => (
-              <a key={href} href={href} onClick={() => setMenuOpen(false)}>{["All tools", "PDF tools", "Image lab", "Workflows", "About"][index]} <ArrowUpRight size={13} /></a>
-            ))}
-          </motion.nav>
-        )}
-      </AnimatePresence>
+      <LandingNav />
 
       <motion.section initial={reducedMotion ? false : { opacity: 0, y: 26 }} whileInView={reducedMotion ? {} : { opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.12 }} transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }} className="hero-section">
         <div className="hero-main">
           <motion.div className="hero-copy" initial={reducedMotion ? false : { opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}>
             <div className="eyebrow"><span className="eyebrow-rule" /> ONE WORKSPACE. A LOT LESS BUSYWORK.</div>
-            <h1>Make files<br /><em>work for you.</em></h1>
+            <TypewriterHeading />
             <p className="hero-lede">Convert, refine, organize and edit the files that keep your day moving. One considered toolkit, from quick fixes to bigger workflows.</p>
             <div className="hero-ctas">
               <a className="button-primary" href="/dashboard">Start with a file <ArrowUpRight size={16} /></a>
@@ -150,6 +124,7 @@ export default function Home() {
           <p>THE SMALL STUFF ADDS UP.</p>
           <h2>One file. Five detours. <em>Not anymore.</em></h2>
           <span>ConvoTools brings the everyday file jobs together, so you can spend less time searching for a converter and more time getting on with your work.</span>
+          <ScrollTextLines />
         </div>
       </motion.section>
 
@@ -335,47 +310,18 @@ export default function Home() {
       <motion.section initial={reducedMotion ? false : { opacity: 0, y: 26 }} whileInView={reducedMotion ? {} : { opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.12 }} transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }} className="ai-section section-pad" id="ai">
         <div className="ai-top">
           <div><span className="section-kicker">07 / THE AI LAB</span><h2>When a file needs<br /><em>a little more.</em></h2></div>
-          <p>The AI Lab is temporarily locked while these experiences are being prepared. AI tool pages and processing access are disabled until release.</p>
+          <p>The AI Lab is temporarily locked while these experiences are being prepared. Explore what is planned and see what is coming next.</p>
         </div>
-        <div className="ai-grid">
-          <article className="ai-card ai-card-main">
-            <div className="ai-card-meta"><span>01 / RESTORE · COMING SOON</span><WandSparkles size={17} /></div>
-            <div className="ai-restore-art"><div className="restore-photo"><div className="restore-person-head" /><div className="restore-person-body" /><span className="restore-grain" /></div><div className="restore-arrow"><ArrowRight size={17} /></div><div className="restore-photo restore-sharp"><div className="restore-person-head" /><div className="restore-person-body" /></div><span className="restore-label restore-before">ORIGINAL</span><span className="restore-label restore-after">ENHANCED</span></div>
-            <h3>Restore the detail.</h3><p>Upscale, sharpen and reduce noise in photos that need a second chance.</p><div className="ai-chips"><span>Upscale</span><span>Unblur</span><span>Denoise</span><span>Face restore</span></div>
-          </article>
-          <article className="ai-card">
-            <div className="ai-card-meta"><span>02 / EXTRACT · COMING SOON</span><ScanText size={17} /></div>
-            <div className="ai-icon-art ocr-art"><div className="ocr-paper"><i /><i /><i /><i /><span>Recognize text</span></div><div className="ocr-scanline" /></div>
-            <h3>Find the words inside.</h3><p>OCR for scans and screenshots. Turn image-based pages into useful text.</p>
-            <span className="ai-card-foot">OCR / TABLE EXTRACTION</span>
-          </article>
-          <article className="ai-card">
-            <div className="ai-card-meta"><span>03 / ISOLATE · COMING SOON</span><Sparkles size={17} /></div>
-            <div className="ai-icon-art remove-art"><div className="remove-grid" /><div className="remove-subject"><div /><span /></div><span className="remove-sticker">PNG</span></div>
-            <h3>Keep what matters.</h3><p>Remove backgrounds and export clean transparent assets.</p>
-            <span className="ai-card-foot">BACKGROUND / OBJECT</span>
-          </article>
-        </div>
+        <AIGallery />
         <div className="ai-disclosure"><ShieldCheck size={15} /><span>AI access is currently locked. Model processing will be enabled only after the tools are ready for release.</span></div>
       </motion.section>
 
       <motion.section initial={reducedMotion ? false : { opacity: 0, y: 26 }} whileInView={reducedMotion ? {} : { opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.12 }} transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }} className="workflow-section section-pad" id="workflow">
-        <div className="section-topline">
+        <div className="section-topline workflow-waypoint-heading">
           <div><span className="section-kicker">08 / WORKFLOWS</span><h2>One task at a time.<br /><em>Or link them up.</em></h2></div>
-          <p>Turn repeat work into a small pipeline. Arrange a few steps once, then reuse the same flow whenever you need it.</p>
+          <p>Follow a file through four clear waypoints. From the first upload to a finished export, every step has a purpose.</p>
         </div>
-        <div className="workflow-board">
-          <div className="workflow-board-head"><span><Workflow size={15} /> VISUAL WORKFLOW / UNTITLED</span><span className="workflow-draft">CONCEPT PREVIEW</span></div>
-          <div className="workflow-canvas">
-            <div className="workflow-node node-input"><div className="workflow-node-top"><span className="node-icon"><UploadCloud size={15} /></span><small>01 / INPUT</small></div><b>Drop images</b><span>12 PNG files</span><div className="node-port" /></div>
-            <div className="workflow-connector"><i /><i /><i /></div>
-            <div className="workflow-node node-edit"><div className="workflow-node-top"><span className="node-icon"><SlidersHorizontal size={15} /></span><small>02 / TRANSFORM</small></div><b>Resize & optimize</b><span>1200 px · quality 82</span><div className="node-port" /></div>
-            <div className="workflow-connector"><i /><i /><i /></div>
-            <div className="workflow-node node-output"><div className="workflow-node-top"><span className="node-icon"><FileText size={15} /></span><small>03 / EXPORT</small></div><b>Combine as PDF</b><span>One document</span><div className="node-port" /></div>
-            <div className="workflow-cursor"><span /><b>Raj</b></div>
-          </div>
-          <div className="workflow-board-foot"><span><span className="workflow-status-dot" /> THREE STEPS / ONE REPEATABLE FLOW</span><span>ADD STEP <Plus size={13} /></span></div>
-        </div>
+        <WorkflowWaypoints />
       </motion.section>
 
       <motion.section initial={reducedMotion ? false : { opacity: 0, y: 26 }} whileInView={reducedMotion ? {} : { opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.12 }} transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }} className="developer-section section-pad" id="developer">
@@ -410,15 +356,7 @@ export default function Home() {
         <div className="final-cta-card"><div className="final-cta-copy"><span className="section-kicker">A BETTER PLACE FOR FILE WORK</span><h2>Make the next file task<br /><em>the easy one.</em></h2><p>Bring a file. Pick a task. Keep moving.</p><a className="button-light" href="/dashboard">Open your workspace <ArrowUpRight size={15} /></a></div><div className="final-cta-mark"><div className="cta-mark-grid" /><div className="cta-file cta-file-one"><FileImage size={25} /></div><div className="cta-file cta-file-two"><FileText size={25} /></div><div className="cta-file cta-file-three"><FileSpreadsheet size={25} /></div><div className="cta-center"><span /><span /><span /></div></div></div>
       </motion.section>
 
-      <footer className="site-footer">
-        <div className="footer-main">
-          <BrandLogo variant="inverse" className="brand-footer" width={190} />
-          <p>A more considered way to get<br />the everyday file jobs done.</p>
-          <div className="footer-nav"><div><b>EXPLORE</b><a href="#toolkit">All tools</a><a href="#pdf">PDF</a><a href="#image-lab">Image lab</a><a href="#ai">AI lab</a></div><div><b>WORKSPACE</b><a href="/dashboard">Dashboard</a><a href="#workflow">Workflows</a><a href="#developer">Developer tools</a><a href="#faq">FAQ</a></div><div><b>PROJECT</b><a href="https://github.com/RAJ-SUHANDANI/ConvoTools" target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={12} /></a><a href="#principles">Our approach</a></div></div>
-        </div>
-        <div className="footer-bottom"><span>© 2026 CONVOTOOLS. MADE FOR THE WORK BETWEEN THE WORK.</span><span>LOCAL-FIRST FILE WORKSPACE <i /> 42 TOOLS · BROWSER PROCESSING</span></div>
-      </footer>
-
+      <FooterReveal />
     </main>
   );
 }
