@@ -4,7 +4,7 @@ import { PDFDocument, degrees } from "pdf-lib";
 import * as XLSX from "xlsx";
 import { Document, Packer, Paragraph, TextRun } from "docx";
 
-export type ProcessOptions = { quality?: "Smaller file" | "Balanced" | "Best quality"; output?: string; password?: string; pdfPageOrder?: string; width?: string; height?: string; rotation?: number; cropMode?: "Original" | "Square center crop"; textContent?: string; base64Mode?: "Encode" | "Decode"; decodedFormat?: string; ocrFormat?: "DOCX" | "TXT"; ocrLanguage?: string; pdfRotation?: number; qrFormat?: "PNG" | "SVG"; hashAlgorithm?: "SHA-256" | "SHA-384" | "SHA-512" };
+export type ProcessOptions = { quality?: "Smaller file" | "Balanced" | "Best quality"; output?: string; password?: string; pdfPageOrder?: string; width?: string; height?: string; rotation?: number; cropMode?: "Original" | "Square center crop"; textContent?: string; base64Mode?: "Encode" | "Decode"; decodedFormat?: string; ocrFormat?: "DOCX" | "TXT"; ocrLanguage?: string; pdfRotation?: number; qrFormat?: "PNG" | "SVG"; hashAlgorithm?: "SHA-256" | "SHA-384" | "SHA-512"; qrText?: string };
 export type ProcessResult = { blob: Blob; filename: string; mime: string; message: string };
 const result=(blob:Blob,filename:string,message:string):ProcessResult=>({blob,filename,mime:blob.type||"application/octet-stream",message});
 const bytesBlob=(bytes:Uint8Array,mime:string)=>{const safe=new Uint8Array(bytes.byteLength);safe.set(bytes);return new Blob([safe.buffer],{type:mime});};
@@ -397,7 +397,7 @@ async function extractDocumentText(file:File):Promise<string>{
 async function mapFileResults(files:File[],operation:(file:File)=>Promise<ProcessResult[]>):Promise<ProcessResult[]>{const output:ProcessResult[]=[];for(const file of files)output.push(...await operation(file));return output;}
 
 export async function processFiles(files:File[],tool:string,options:ProcessOptions={}):Promise<ProcessResult[]>{
- if(!files.length)throw new Error("Choose at least one file.");
+ if(!files.length&&!(tool==="QR generator"&&options.qrText?.trim()))throw new Error("Choose at least one file or enter text to generate a QR code.");
  if(["PNG to JPG","JPG to PNG","PNG to WEBP","WEBP converter","Image compressor","Resize image","Crop & rotate"].includes(tool))return Promise.all(files.map(f=>image(f,tool,options)));
  if(["Image to PDF","Merge PDF"].includes(tool))return pdf(files,tool,options);
  if(["Split PDF","Compress PDF","Organize PDF"].includes(tool))return mapFileResults(files,file=>pdf([file],tool,options));
@@ -406,7 +406,8 @@ export async function processFiles(files:File[],tool:string,options:ProcessOptio
  if(tool==="PPTX to PDF"||tool==="Slides to images")return mapFileResults(files,async file=>{if(tool==="PPTX to PDF"){const pages=await renderPresentationSlides(file);return [await presentationToPdf(pages,name(file,"pdf"))];}return slidesToImageFiles(file);});
  if(["CSV to XLSX","Remove duplicates"].includes(tool))return mapFileResults(files,file=>spreadsheet(file,tool));
  if(tool==="Excel to PDF")return mapFileResults(files,async file=>[await workbookToPdf(file)]);
- if(["Create ZIP","Extract archive"].includes(tool))return archive(files,tool);
+ if(tool==="Create ZIP")return archive(files,tool);
+ if(tool==="Extract archive")return mapFileResults(files,file=>archive([file],tool));
  if(tool==="Base64 tools")return mapFileResults(files,file=>processBase64(file,options));
  if(["JSON formatter","DOCX to TXT"].includes(tool))return mapFileResults(files,async file=>[await textTool(file,tool)]);
  if(tool==="Word to PDF")return mapFileResults(files,async file=>{const extracted=await extractDocumentText(file);return [await makePdf(extracted,name(file,"pdf"))];});
@@ -417,8 +418,8 @@ export async function processFiles(files:File[],tool:string,options:ProcessOptio
  if(tool==="Image enhancer"||tool==="Photo restoration")return mapFileResults(files,async file=>[await upscaleImage(file,tool)]);
  if(["MP4 to GIF","Video compressor","Extract audio","Audio converter"].includes(tool))return mapFileResults(files,async file=>[await ffmpegRun(file,tool,options)]);
  if(tool==="Hash generator"){const algorithm=options.hashAlgorithm||"SHA-256";return mapFileResults(files,async file=>{const digest=await crypto.subtle.digest(algorithm,await file.arrayBuffer());const hash=Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,"0")).join("");return [textFile(algorithm+"  "+hash+"  "+file.name+"\n",name(file,algorithm.toLowerCase().replace("-","")))];});}
- if(tool==="QR generator"){const QR=await import("qrcode");return mapFileResults(files,async file=>{const value=await file.text();if(!value.trim())throw new Error("The selected file is empty. Add a URL or text first.");if(options.qrFormat==="SVG"){const svg=await QR.toString(value,{type:"svg",errorCorrectionLevel:"H",width:1024,margin:2});return [textFile(svg,name(file,"svg"),"image/svg+xml")];}const url=await QR.toDataURL(value,{errorCorrectionLevel:"H",width:1024,margin:2});const blob=await (await fetch(url)).blob();return [result(blob,name(file,"png"),"QR generated locally.")];});}
+ if(tool==="QR generator"){const QR=await import("qrcode");const inputs=files.length?await Promise.all(files.map(async file=>({name:file.name,value:await file.text()}))):[{name:"convotools-qr",value:options.qrText||""}];return mapFileResults(inputs.map(input=>new File([input.value],input.name+".txt",{type:"text/plain"})),async file=>{const value=await file.text();if(!value.trim())throw new Error("Enter a URL or text before generating a QR code.");if(options.qrFormat==="SVG"){const svg=await QR.toString(value,{type:"svg",errorCorrectionLevel:"H",width:1024,margin:2});return [textFile(svg,name(file,"svg"),"image/svg+xml")];}const url=await QR.toDataURL(value,{errorCorrectionLevel:"H",width:1024,margin:2});const blob=await (await fetch(url)).blob();return [result(blob,name(file,"png"),"QR generated locally.")];});}
  if(tool==="Word editor"){const mammoth=await import("mammoth");const extracted=await mammoth.extractRawText({arrayBuffer:await files[0].arrayBuffer()});const text=options.textContent??extracted.value;return [await makeDocx(text,name(files[0],"docx"))];}
  throw new Error(tool+" is not connected to a real processing engine yet. No placeholder output was created. This operation needs a dedicated conversion or AI provider.");
 }
-export function saveProcessedFile(item:ProcessResult){const url=URL.createObjectURL(item.blob);const a=document.createElement("a");a.href=url;a.download=item.filename;document.body.appendChild(a);a.click();a.remove();window.setTimeout(()=>URL.revokeObjectURL(url),1500);}
+export function saveProcessedFile(item:ProcessResult){const url=URL.createObjectURL(item.blob);const a=document.createElement("a");a.href=url;a.download=item.filename;document.body.appendChild(a);a.click();a.remove();window.setTimeout(()=>URL.revokeObjectURL(url),60000);}

@@ -71,6 +71,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
   const [ocrFormat, setOcrFormat] = useState<"DOCX" | "TXT">("DOCX");
   const [ocrLanguage, setOcrLanguage] = useState("eng");
   const [qrFormat, setQrFormat] = useState<"PNG" | "SVG">("PNG");
+  const [qrText, setQrText] = useState("");
   const [hashAlgorithm, setHashAlgorithm] = useState<"SHA-256" | "SHA-384" | "SHA-512">("SHA-256");
   const [imageWidth, setImageWidth] = useState("");
   const [imageHeight, setImageHeight] = useState("");
@@ -143,12 +144,12 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
   const invalidFiles = files.filter((file) => !compatible(tool, file));
 
   const startOperation = async () => {
-    if (!files.length) { setNotice("Choose a file first to configure this operation."); inputRef.current?.click(); return; }
+    if (!files.length && !(tool.name === "QR generator" && qrText.trim())) { setNotice("Choose a file or enter text before processing."); inputRef.current?.click(); return; }
     if (tool.name === "Word editor" && files.length > 1) { setNotice("The text editor works with one DOCX file at a time. Choose a single document."); return; }
     if (invalidFiles.length) { setNotice("One or more files do not match this tool's expected input format."); return; }
     setProcessing(true); setResults([]); setNotice("Processing locally in your browser…");
     try {
-      const completed = await processFiles(files, tool.name, { output, quality, password, pdfPageOrder, width: imageWidth, height: imageHeight, rotation, cropMode, textContent: documentText, base64Mode, decodedFormat, ocrFormat, ocrLanguage, pdfRotation, qrFormat, hashAlgorithm });
+      const completed = await processFiles(files, tool.name, { output, quality, password, pdfPageOrder, width: imageWidth, height: imageHeight, rotation, cropMode, textContent: documentText, base64Mode, decodedFormat, ocrFormat, ocrLanguage, pdfRotation, qrFormat, hashAlgorithm, qrText });
       setResults(completed);
       completed.forEach((result) => {
         saveProcessedFile(result);
@@ -219,7 +220,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
               <div className="select-wrap"><select id="quality-select" value={quality} onChange={(event) => setQuality(event.target.value as typeof quality)}><option>Smaller file</option><option>Balanced</option><option>Best quality</option></select><ChevronDown size={15} /></div>
             </>
           )}
-          {tool.name === "QR generator" && <><label className="field-label" htmlFor="qr-format">QR output</label><div className="select-wrap"><select id="qr-format" value={qrFormat} onChange={(event) => setQrFormat(event.target.value as "PNG" | "SVG")}><option value="PNG">PNG image</option><option value="SVG">SVG vector</option></select><ChevronDown size={15} /></div></>}
+          {tool.name === "QR generator" && <><label className="field-label" htmlFor="qr-text">Text or URL</label><textarea id="qr-text" className="operation-document-textarea" rows={4} value={qrText} onChange={(event) => setQrText(event.target.value)} placeholder="https://example.com or any text you want to encode" /><label className="field-label" htmlFor="qr-format">QR output</label><div className="select-wrap"><select id="qr-format" value={qrFormat} onChange={(event) => setQrFormat(event.target.value as "PNG" | "SVG")}><option value="PNG">PNG image</option><option value="SVG">SVG vector</option></select><ChevronDown size={15} /></div></>}
           {tool.name === "Hash generator" && <><label className="field-label" htmlFor="hash-algorithm">Hash algorithm</label><div className="select-wrap"><select id="hash-algorithm" value={hashAlgorithm} onChange={(event) => setHashAlgorithm(event.target.value as "SHA-256" | "SHA-384" | "SHA-512")}><option>SHA-256</option><option>SHA-384</option><option>SHA-512</option></select><ChevronDown size={15} /></div></>}
           {tool.name === "Base64 tools" && <><label className="field-label" htmlFor="base64-mode">Operation</label><div className="select-wrap"><select id="base64-mode" value={base64Mode} onChange={(event) => setBase64Mode(event.target.value as "Encode" | "Decode")}><option value="Encode">Encode file to Base64</option><option value="Decode">Decode Base64 to file</option></select><ChevronDown size={15} /></div>{base64Mode === "Decode" && <><label className="field-label" htmlFor="decode-format">Decoded file type</label><div className="select-wrap"><select id="decode-format" value={decodedFormat} onChange={(event) => setDecodedFormat(event.target.value)}>{["BIN","TXT","JSON","PNG","JPG","PDF"].map(value=><option key={value}>{value}</option>)}</select><ChevronDown size={15} /></div></>}</>}
           {tool.name === "OCR extractor" && <><label className="field-label" htmlFor="ocr-language">OCR language</label><div className="select-wrap"><select id="ocr-language" value={ocrLanguage} onChange={(event) => setOcrLanguage(event.target.value)}><option value="eng">English</option><option value="hin">Hindi</option><option value="guj">Gujarati</option><option value="eng+hin">English + Hindi</option><option value="eng+guj">English + Gujarati</option><option value="spa">Spanish</option><option value="fra">French</option></select><ChevronDown size={15} /></div><label className="field-label" htmlFor="ocr-format">Output document</label><div className="select-wrap"><select id="ocr-format" value={ocrFormat} onChange={(event) => setOcrFormat(event.target.value as "DOCX" | "TXT")}><option value="DOCX">Word document (DOCX)</option><option value="TXT">Plain text (TXT)</option></select><ChevronDown size={15} /></div></>}
