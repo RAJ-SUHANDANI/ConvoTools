@@ -146,15 +146,15 @@ export default function Home() {
         </div>
       </motion.section>
 
-      <section className="intro-band">
+      <motion.section initial={reducedMotion ? false : { opacity: 0, y: 26 }} whileInView={reducedMotion ? {} : { opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.12 }} transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }} className="intro-band">
         <div className="intro-band-inner">
           <p>THE SMALL STUFF ADDS UP.</p>
           <h2>One file. Five detours. <em>Not anymore.</em></h2>
           <span>ConvoTools brings the everyday file jobs together, so you can spend less time searching for a converter and more time getting on with your work.</span>
         </div>
-      </section>
+      </motion.section>
 
-      <section className="workspace-section section-pad" id="workspace">
+      <motion.section initial={reducedMotion ? false : { opacity: 0, y: 26 }} whileInView={reducedMotion ? {} : { opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.12 }} transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }} className="workspace-section section-pad" id="workspace">
         <div className="section-topline">
           <div><span className="section-kicker">01 / YOUR WORKSPACE</span><h2>Start with what<br /><em>you have.</em></h2></div>
           <p>No need to pick a tool first. Add a file and choose what you want to do next.</p>
@@ -182,9 +182,9 @@ export default function Home() {
             </motion.div>
           )}
         </AnimatePresence>
-      </section>
+      </motion.section>
 
-      <section className="toolkit-section section-pad" id="toolkit">
+      <motion.section initial={reducedMotion ? false : { opacity: 0, y: 26 }} whileInView={reducedMotion ? {} : { opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.12 }} transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }} className="toolkit-section section-pad" id="toolkit">
         <div className="section-topline toolkit-heading">
           <div><span className="section-kicker">02 / THE TOOLKIT</span><h2>Every format has<br /><em>a next move.</em></h2></div>
           <p>From everyday conversions to the jobs that usually need three different websites. Explore by task or search for exactly what you need.</p>
@@ -226,9 +226,9 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
-      <section className="category-feature section-pad" id="pdf">
+      <motion.section initial={reducedMotion ? false : { opacity: 0, y: 26 }} whileInView={reducedMotion ? {} : { opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.12 }} transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }} className="category-feature section-pad" id="pdf">
         <div className="category-heading">
           <span className="section-kicker">03 / PDF WORKBENCH</span>
           <div className="category-title-row"><h2>PDFs, without<br /><em>the paperwork.</em></h2><span className="category-number">01</span></div>
@@ -251,9 +251,9 @@ export default function Home() {
           </div>
           <div className="pdf-visual-footer"><span><Layers3 size={14} /> Page management</span><span><Minimize2 size={14} /> Compression options</span><span><ScanText size={14} /> Text recognition</span></div>
         </div>
-      </section>
+      </motion.section>
 
-      <section className="category-feature image-feature section-pad" id="image-lab">
+      <motion.section initial={reducedMotion ? false : { opacity: 0, y: 26 }} whileInView={reducedMotion ? {} : { opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.12 }} transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }} className="category-feature image-feature section-pad" id="image-lab">
         <div className="image-visual">
           <div className="image-visual-top"><span>IMAGE LAB / ENHANCEMENT</span><span className="visual-status"><i /> EXAMPLE WORKSPACE</span></div>
           <ImageComparison />
@@ -268,9 +268,9 @@ export default function Home() {
           </div>
           <a className="underlined-link" href="#toolkit" onClick={() => setCategory("Images")}>Explore image tools <ArrowUpRight size={14} /></a>
         </div>
-      </section>
+      </motion.section>
 
-      <section className="document-section section-pad" id="documents">
+      <motion.section initial={reducedMotion ? false : { opacity: 0, y: 26 }} whileInView={reducedMotion ? {} : { opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.12 }} transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }} className="document-section section-pad" id="documents">
         <div className="section-topline">
           <div><span className="section-kicker">05 / DOCUMENTS & DATA</span><h2>Keep the format.<br /><em>Keep the flow.</em></h2></div>
           <p>Move between office formats and make quick changes without losing your place.</p>
@@ -304,9 +304,9 @@ export default function Home() {
             <a href="#toolkit" onClick={() => setCategory("Presentations")}>Explore presentation tools <ArrowUpRight size={13} /></a>
           </div>
         </div>
-      </section>
+      </motion.section>
 
-      <section className="media-section section-pad" id="media">
+      <motion.section initial={reducedMotion ? false : { opacity: 0, y: 26 }} whileInView={reducedMotion ? {} : { opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.12 }} transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }} className="media-section section-pad" id="media">
         <div className="media-copy">
           <span className="section-kicker">06 / VIDEO & AUDIO</span>
           <h2>Make media<br /><em>more manageable.</em></h2>
@@ -330,9 +330,9 @@ export default function Home() {
           <div className="timeline-track audio-track"><span className="track-label"><AudioLines size={13} /> AUDIO</span><div className="audio-wave">{Array.from({length:44}, (_, index) => <i key={index} style={{height: (8 + ((index * 17) % 23)) + "px"}} />)}</div></div>
           <div className="media-export"><span><Check size={13} /> Trim & export</span><b>MP4 <ChevronRight size={12} /> GIF <ChevronRight size={12} /> MP3</b></div>
         </div>
-      </section>
+      </motion.section>
 
-      <section className="ai-section section-pad" id="ai">
+      <motion.section initial={reducedMotion ? false : { opacity: 0, y: 26 }} whileInView={reducedMotion ? {} : { opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.12 }} transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }} className="ai-section section-pad" id="ai">
         <div className="ai-top">
           <div><span className="section-kicker">07 / THE AI LAB</span><h2>When a file needs<br /><em>a little more.</em></h2></div>
           <p>Optional AI-powered tools for the jobs that go beyond format conversion. Choose the improvement, compare the result and keep control of the original.</p>
@@ -357,9 +357,9 @@ export default function Home() {
           </article>
         </div>
         <div className="ai-disclosure"><ShieldCheck size={15} /><span>AI provider transparency: image enhancement may use an external API. The final product will show when a file leaves your device and which provider processes it.</span></div>
-      </section>
+      </motion.section>
 
-      <section className="workflow-section section-pad" id="workflow">
+      <motion.section initial={reducedMotion ? false : { opacity: 0, y: 26 }} whileInView={reducedMotion ? {} : { opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.12 }} transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }} className="workflow-section section-pad" id="workflow">
         <div className="section-topline">
           <div><span className="section-kicker">08 / WORKFLOWS</span><h2>One task at a time.<br /><em>Or link them up.</em></h2></div>
           <p>Turn repeat work into a small pipeline. Arrange a few steps once, then reuse the same flow whenever you need it.</p>
@@ -376,27 +376,27 @@ export default function Home() {
           </div>
           <div className="workflow-board-foot"><span><span className="workflow-status-dot" /> THREE STEPS / ONE REPEATABLE FLOW</span><span>ADD STEP <Plus size={13} /></span></div>
         </div>
-      </section>
+      </motion.section>
 
-      <section className="developer-section section-pad" id="developer">
+      <motion.section initial={reducedMotion ? false : { opacity: 0, y: 26 }} whileInView={reducedMotion ? {} : { opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.12 }} transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }} className="developer-section section-pad" id="developer">
         <div className="developer-copy"><span className="section-kicker">09 / DEVELOPER UTILITIES</span><h2>Little tools for<br /><em>the in-between.</em></h2><p>Not every file task needs a full editor. Keep handy utilities close by for when you need to inspect, encode or validate something quickly.</p><a className="underlined-link" href="#toolkit" onClick={() => setCategory("Developer")}>Explore developer tools <ArrowUpRight size={14} /></a></div>
         <div className="developer-console">
           <div className="developer-tabs"><span className="dev-tab-active"><Braces size={13} /> JSON</span><span><Code2 size={13} /> BASE64</span><span><LockKeyhole size={13} /> HASH</span></div>
           <div className="code-area"><div className="code-gutter">01<br />02<br />03<br />04<br />05<br />06</div><pre><span className="code-punc">{"{"}</span>{"\n"}  <span className="code-key">&quot;tool&quot;</span>: <span className="code-string">&quot;json formatter&quot;</span>,{"\n"}  <span className="code-key">&quot;status&quot;</span>: <span className="code-string">&quot;ready&quot;</span>,{"\n"}  <span className="code-key">&quot;clean&quot;</span>: <span className="code-bool">true</span>,{"\n"}  <span className="code-key">&quot;next_step&quot;</span>: <span className="code-string">&quot;your idea&quot;</span>{"\n"}<span className="code-punc">{"}"}</span></pre></div>
           <div className="developer-console-foot"><span><span className="dev-status" /> VALID JSON</span><button onClick={() => navigator.clipboard?.writeText('{"tool":"json formatter","status":"ready","clean":true,"next_step":"your idea"}')}><Copy size={13} /> Copy sample</button></div>
         </div>
-      </section>
+      </motion.section>
 
-      <section className="principles-section section-pad" id="why">
+      <motion.section initial={reducedMotion ? false : { opacity: 0, y: 26 }} whileInView={reducedMotion ? {} : { opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.12 }} transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }} className="principles-section section-pad" id="why">
         <div className="principles-heading"><span className="section-kicker">10 / THE CONVOTOOLS APPROACH</span><h2>Useful first.<br /><em>Beautiful by design.</em></h2></div>
         <div className="principles-grid">
           <article><span className="principle-num">01</span><div className="principle-icon"><ShieldCheck size={20} /></div><h3>Privacy is a product feature.</h3><p>Prefer local processing for everyday tasks. When a server or AI provider is needed, make that choice clear.</p></article>
           <article><span className="principle-num">02</span><div className="principle-icon"><Layers3 size={20} /></div><h3>Batch work is normal work.</h3><p>Handle collections of files in one go, with consistent settings and one final download.</p></article>
           <article><span className="principle-num">03</span><div className="principle-icon"><Zap size={20} /></div><h3>Fast should feel effortless.</h3><p>Keep the interface calm, the controls obvious and motion purposeful rather than distracting.</p></article>
         </div>
-      </section>
+      </motion.section>
 
-      <section className="faq-section section-pad" id="faq">
+      <motion.section initial={reducedMotion ? false : { opacity: 0, y: 26 }} whileInView={reducedMotion ? {} : { opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.12 }} transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }} className="faq-section section-pad" id="faq">
         <div><span className="section-kicker">11 / GOOD TO KNOW</span><h2>A few things,<br /><em>answered.</em></h2></div>
         <div className="faq-list">
           <details><summary>Will ConvoTools be free? <span>+</span></summary><p>The goal is a free-first product without subscriptions or watermarks. Some AI providers may have their own free usage limits, and heavy server processing has real infrastructure costs.</p></details>
@@ -404,11 +404,11 @@ export default function Home() {
           <details><summary>Can I process multiple files at once? <span>+</span></summary><p>Batch operations are a core part of the product direction. The workspace preview already demonstrates multi-file selection; processing will be connected tool by tool.</p></details>
           <details><summary>Are all the tools working already? <span>+</span></summary><p>This is the interface foundation. The upload interaction and tool discovery work in this preview, while conversion, editing and AI processing engines are being built in later phases.</p></details>
         </div>
-      </section>
+      </motion.section>
 
-      <section className="final-cta section-pad">
+      <motion.section initial={reducedMotion ? false : { opacity: 0, y: 26 }} whileInView={reducedMotion ? {} : { opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.12 }} transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }} className="final-cta section-pad">
         <div className="final-cta-card"><div className="final-cta-copy"><span className="section-kicker">A BETTER PLACE FOR FILE WORK</span><h2>Make the next file task<br /><em>the easy one.</em></h2><p>Bring a file. Pick a task. Keep moving.</p><a className="button-light" href="/dashboard">Open your workspace <ArrowUpRight size={15} /></a></div><div className="final-cta-mark"><div className="cta-mark-grid" /><div className="cta-file cta-file-one"><FileImage size={25} /></div><div className="cta-file cta-file-two"><FileText size={25} /></div><div className="cta-file cta-file-three"><FileSpreadsheet size={25} /></div><div className="cta-center"><span /><span /><span /></div></div></div>
-      </section>
+      </motion.section>
 
       <footer className="site-footer">
         <div className="footer-main">
