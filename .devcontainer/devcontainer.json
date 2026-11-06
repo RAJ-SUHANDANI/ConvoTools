@@ -1,0 +1,11 @@
+{
+  "name": "ConvoTools",
+  "secrets": {
+    "SAVEFROM_USERNAME": {
+      "description": "Private ConvoTools /savefrom login username. Stored as a Codespaces secret, never in source."
+    },
+    "SAVEFROM_PASSWORD": {
+      "description": "Private ConvoTools /savefrom login password. Stored as a Codespaces secret, never in source."
+    }
+  }
+}
