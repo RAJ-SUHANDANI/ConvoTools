@@ -1,111 +1,105 @@
 "use client";
 
 import {
-  ArrowDown,
-  ArrowRight,
-  ArrowUpRight,
-  AudioLines,
-  BadgeCheck,
-  Blocks,
-  Check,
-  Command,
-  FileArchive,
-  FileImage,
-  FileSpreadsheet,
-  FileText,
-  FileType2,
-  Film,
-  Github,
-  Globe2,
-  Image as ImageIcon,
-  Layers3,
-  LockKeyhole,
-  Menu,
-  MousePointer2,
-  PanelTop,
-  Plus,
-  Search,
-  ShieldCheck,
-  Sparkles,
-  UploadCloud,
-  WandSparkles,
-  X,
-  Zap,
+  ArrowDownRight, ArrowRight, ArrowUpRight, AudioLines, BadgeCheck, Braces,
+  Check, ChevronRight, Clock3, Code2, Command, Copy, Download, FileArchive,
+  FileAudio, FileImage, FilePenLine, FileSpreadsheet, FileText, FileVideo,
+  Film, Github, Image as ImageIcon, Layers3, LockKeyhole, Menu, Merge,
+  Minimize2, Music2, PanelTop, Plus, QrCode, ScanText, Search, ShieldCheck,
+  SlidersHorizontal, Sparkles, Split, UploadCloud, WandSparkles, Workflow,
+  X, Zap
 } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import {
-  ChangeEvent,
-  DragEvent,
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { ChangeEvent, DragEvent, useMemo, useRef, useState } from "react";
 
 type Tool = {
   name: string;
   description: string;
   category: string;
   icon: typeof FileText;
-  tint: string;
-  popular?: boolean;
-  status?: string;
+  tag?: string;
 };
 
 const tools: Tool[] = [
-  { name: "PDF to Word", description: "Turn PDFs into editable documents.", category: "PDF", icon: FileText, tint: "violet", popular: true },
-  { name: "Image to PDF", description: "Bundle images into one clean PDF.", category: "PDF", icon: FileImage, tint: "blue", popular: true },
-  { name: "Compress PDF", description: "Make PDFs smaller without the fuss.", category: "PDF", icon: Layers3, tint: "rose", popular: true },
-  { name: "Merge PDF", description: "Bring multiple documents together.", category: "PDF", icon: Blocks, tint: "orange" },
-  { name: "Split PDF", description: "Separate pages into individual files.", category: "PDF", icon: PanelTop, tint: "cyan" },
-  { name: "PNG to JPG", description: "Switch image formats in a moment.", category: "Images", icon: ImageIcon, tint: "green", popular: true },
-  { name: "Image enhancer", description: "Bring a little more clarity to photos.", category: "AI lab", icon: WandSparkles, tint: "violet", popular: true, status: "AI" },
-  { name: "Background remover", description: "Make the subject the whole picture.", category: "AI lab", icon: Sparkles, tint: "pink", status: "AI" },
-  { name: "Image compressor", description: "Smaller images, still looking good.", category: "Images", icon: FileImage, tint: "amber" },
-  { name: "JPG to PNG", description: "Convert images with transparency support.", category: "Images", icon: FileImage, tint: "blue" },
-  { name: "Word to PDF", description: "Share documents that stay in place.", category: "Documents", icon: FileType2, tint: "blue", popular: true },
-  { name: "PDF to PowerPoint", description: "Turn pages into presentation slides.", category: "Documents", icon: FileText, tint: "orange" },
-  { name: "Excel to PDF", description: "Create a neat, shareable spreadsheet PDF.", category: "Spreadsheets", icon: FileSpreadsheet, tint: "green" },
-  { name: "CSV to XLSX", description: "Make flat data easier to work with.", category: "Spreadsheets", icon: FileSpreadsheet, tint: "emerald" },
-  { name: "MP4 to GIF", description: "Clip a moment into a looping GIF.", category: "Video & audio", icon: Film, tint: "pink" },
-  { name: "Extract audio", description: "Save the soundtrack from a video.", category: "Video & audio", icon: AudioLines, tint: "cyan" },
-  { name: "Create ZIP", description: "Pack files into one smaller bundle.", category: "Archives", icon: FileArchive, tint: "amber" },
-  { name: "OCR text", description: "Make scanned pages searchable.", category: "AI lab", icon: ScanIcon, tint: "violet", status: "AI" },
+  { name: "PDF to Word", description: "Make a PDF editable again.", category: "PDF", icon: FileText, tag: "Popular" },
+  { name: "Word to PDF", description: "Keep layouts tidy when you share.", category: "PDF", icon: FilePenLine },
+  { name: "Merge PDF", description: "Bring separate files into one.", category: "PDF", icon: Merge },
+  { name: "Split PDF", description: "Pull out just the pages you need.", category: "PDF", icon: Split },
+  { name: "Compress PDF", description: "Make large documents easier to send.", category: "PDF", icon: Minimize2, tag: "Popular" },
+  { name: "Organize PDF", description: "Reorder, rotate or remove pages.", category: "PDF", icon: PanelTop },
+  { name: "PDF to JPG", description: "Export every page as an image.", category: "PDF", icon: ImageIcon },
+  { name: "Protect PDF", description: "Add a password to sensitive files.", category: "PDF", icon: LockKeyhole },
+  { name: "PNG to JPG", description: "Convert images in a couple of clicks.", category: "Images", icon: FileImage, tag: "Popular" },
+  { name: "JPG to PNG", description: "Switch formats without the guesswork.", category: "Images", icon: ImageIcon },
+  { name: "Image compressor", description: "Trim file size while keeping detail.", category: "Images", icon: Minimize2 },
+  { name: "Resize image", description: "Set exact dimensions or percentages.", category: "Images", icon: SlidersHorizontal },
+  { name: "Crop & rotate", description: "Frame, straighten and flip images.", category: "Images", icon: ImageIcon },
+  { name: "WEBP converter", description: "Convert modern web image formats.", category: "Images", icon: FileImage },
+  { name: "Word editor", description: "Make quick edits to document content.", category: "Documents", icon: FilePenLine },
+  { name: "DOCX to TXT", description: "Extract clean text from documents.", category: "Documents", icon: FileText },
+  { name: "PPTX to PDF", description: "Share presentations as fixed pages.", category: "Presentations", icon: PanelTop, tag: "Popular" },
+  { name: "PDF to PPTX", description: "Turn PDF pages into slide layouts.", category: "Presentations", icon: FileText },
+  { name: "Slides to images", description: "Export slide decks as PNGs.", category: "Presentations", icon: ImageIcon },
+  { name: "Excel to PDF", description: "Prepare sheets for easy sharing.", category: "Spreadsheets", icon: FileSpreadsheet },
+  { name: "CSV to XLSX", description: "Turn raw data into a workbook.", category: "Spreadsheets", icon: FileSpreadsheet },
+  { name: "Remove duplicates", description: "Find repeated rows in a data file.", category: "Spreadsheets", icon: Check },
+  { name: "MP4 to GIF", description: "Make a loop from a video clip.", category: "Video & audio", icon: Film },
+  { name: "Video compressor", description: "Reduce video size for sharing.", category: "Video & audio", icon: FileVideo },
+  { name: "Extract audio", description: "Save a video's audio track.", category: "Video & audio", icon: FileAudio },
+  { name: "Audio converter", description: "Switch between common audio formats.", category: "Video & audio", icon: Music2 },
+  { name: "AI image enhancer", description: "Upscale and improve soft images.", category: "AI lab", icon: WandSparkles, tag: "AI" },
+  { name: "Background remover", description: "Separate a subject from its backdrop.", category: "AI lab", icon: Sparkles, tag: "AI" },
+  { name: "Photo restoration", description: "Give old photographs a careful lift.", category: "AI lab", icon: ImageIcon, tag: "AI" },
+  { name: "OCR extractor", description: "Turn scanned pages into searchable text.", category: "AI lab", icon: ScanText, tag: "AI" },
+  { name: "Create ZIP", description: "Bundle files into a single archive.", category: "Archives", icon: FileArchive },
+  { name: "Extract archive", description: "Unpack ZIP and other archive formats.", category: "Archives", icon: Download },
+  { name: "JSON formatter", description: "Format and validate JSON data.", category: "Developer", icon: Braces },
+  { name: "Base64 tools", description: "Encode and decode text or files.", category: "Developer", icon: Code2 },
+  { name: "Hash generator", description: "Create file checksums locally.", category: "Developer", icon: LockKeyhole },
+  { name: "QR generator", description: "Make QR codes for links and text.", category: "Developer", icon: QrCode },
 ];
-
-function ScanIcon(props: React.ComponentProps<typeof FileText>) {
-  return <FileText {...props} />;
-}
 
 const categories = [
-  { name: "All tools", count: "40+", icon: Blocks },
-  { name: "PDF", count: "12", icon: FileText },
-  { name: "Images", count: "10", icon: ImageIcon },
-  { name: "Documents", count: "8", icon: FileType2 },
-  { name: "Spreadsheets", count: "6", icon: FileSpreadsheet },
-  { name: "Video & audio", count: "8", icon: Film },
-  { name: "AI lab", count: "6", icon: WandSparkles },
-  { name: "Archives", count: "4", icon: FileArchive },
+  { name: "All tools", detail: "The complete toolbox" },
+  { name: "PDF", detail: "Read, arrange, protect" },
+  { name: "Images", detail: "Convert, resize, refine" },
+  { name: "Documents", detail: "Write, export, extract" },
+  { name: "Spreadsheets", detail: "Clean, reshape, share" },
+  { name: "Presentations", detail: "Slides in every format" },
+  { name: "Video & audio", detail: "Trim, convert, compress" },
+  { name: "AI lab", detail: "Enhance with intelligence" },
+  { name: "Archives", detail: "Pack and unpack" },
+  { name: "Developer", detail: "Small utilities, close at hand" },
 ];
 
-const ease = [0.22, 1, 0.36, 1] as const;
+const fadeUp = {
+  hidden: { opacity: 0, y: 22 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] as const } },
+};
+
+function formatBytes(bytes: number) {
+  if (bytes < 1024) return bytes + " B";
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+  return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+}
 
 export default function Home() {
   const reducedMotion = useReducedMotion();
-  const [activeCategory, setActiveCategory] = useState("All tools");
-  const [query, setQuery] = useState("");
+  const fileInput = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [dragging, setDragging] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [category, setCategory] = useState("All tools");
+  const [query, setQuery] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [selectedTool, setSelectedTool] = useState<Tool | null>(null);
   const [showAll, setShowAll] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
 
-  const addFiles = useCallback((incoming: FileList | File[]) => {
-    const accepted = Array.from(incoming).filter((file) => file.size > 0);
-    setFiles((current) => [...current, ...accepted].slice(0, 30));
-  }, []);
+  const addFiles = (incoming: FileList | File[]) => {
+    const next = Array.from(incoming).filter((file) => file.size > 0);
+    setFiles((current) => [...current, ...next].slice(0, 30));
+  };
 
-  const onInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const onChoose = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) addFiles(event.target.files);
     event.target.value = "";
   };
@@ -117,250 +111,403 @@ export default function Home() {
   };
 
   const filteredTools = useMemo(() => {
-    const normalized = query.trim().toLowerCase();
+    const search = query.trim().toLowerCase();
     return tools.filter((tool) => {
-      const categoryMatch =
-        activeCategory === "All tools" || tool.category === activeCategory;
-      const queryMatch =
-        !normalized ||
-        `${tool.name} ${tool.description} ${tool.category}`
-          .toLowerCase()
-          .includes(normalized);
-      return categoryMatch && queryMatch;
+      const matchesCategory = category === "All tools" || tool.category === category;
+      const matchesSearch = !search || (tool.name + " " + tool.description + " " + tool.category).toLowerCase().includes(search);
+      return matchesCategory && matchesSearch;
     });
-  }, [activeCategory, query]);
+  }, [category, query]);
 
-  const visibleTools = showAll ? filteredTools : filteredTools.slice(0, 8);
+  const reveal = reducedMotion ? {} : { variants: fadeUp, initial: "hidden", whileInView: "visible", viewport: { once: true, amount: 0.12 } };
 
-  const motionProps = reducedMotion
-    ? {}
-    : {
-        initial: { opacity: 0, y: 22 },
-        whileInView: { opacity: 1, y: 0 },
-        viewport: { once: true, amount: 0.16 },
-        transition: { duration: 0.7, ease },
-      };
+  const closeTool = () => setSelectedTool(null);
 
   return (
-    <main className="site-shell">
-      <div className="ambient ambient-one" />
-      <div className="ambient ambient-two" />
-      <header className="topbar">
-        <a className="brand" href="#" aria-label="ConvoTools home">
-          <span className="brand-mark"><Command size={19} strokeWidth={2.4} /></span>
-          <span>convo<span className="brand-light">tools</span><i>.</i></span>
+    <main className="app-shell">
+      <div className="announcement-bar">
+        <span className="announcement-pulse" />
+        <span>THE FILE WORKSPACE FOR PEOPLE WHO MAKE THINGS</span>
+        <span className="announcement-divider" />
+        <a href="#toolkit">Explore the toolkit <ArrowUpRight size={12} /></a>
+      </div>
+
+      <header className="site-header">
+        <a className="wordmark" href="#" aria-label="ConvoTools home">
+          <span className="wordmark-symbol"><span /><span /><span /></span>
+          <span>convo<span className="wordmark-light">tools</span></span>
         </a>
-        <nav className="desktop-nav" aria-label="Main navigation">
-          <a className="nav-active" href="#tools">Tools</a>
-          <a href="#workspace">Workspace</a>
-          <a href="#why">Why ConvoTools</a>
+        <nav className="desktop-nav">
+          <a href="#toolkit">Tools</a>
+          <a href="#pdf">PDF</a>
+          <a href="#image-lab">Image lab</a>
+          <a href="#workflow">Workflows</a>
+          <a href="#principles">About</a>
         </nav>
-        <div className="nav-actions">
-          <a className="github-link" href="https://github.com/RAJ-SUHANDANI/ConvoTools" target="_blank" rel="noreferrer"><Github size={16} /> <span>GitHub</span></a>
-          <a className="nav-cta" href="#workspace">Try it free <ArrowUpRight size={15} /></a>
-          <button className="mobile-menu" onClick={() => setMobileOpen((v) => !v)} aria-label="Toggle menu">{mobileOpen ? <X /> : <Menu />}</button>
+        <div className="header-actions">
+          <a className="header-github" href="https://github.com/RAJ-SUHANDANI/ConvoTools" target="_blank" rel="noreferrer"><Github size={15} /> <span>GitHub</span></a>
+          <a className="header-button" href="#workspace">Open workspace <ArrowUpRight size={14} /></a>
+          <button className="mobile-toggle" onClick={() => setMenuOpen((value) => !value)} aria-label="Toggle navigation">{menuOpen ? <X size={19} /> : <Menu size={19} />}</button>
         </div>
       </header>
       <AnimatePresence>
-        {mobileOpen && (
-          <motion.nav className="mobile-nav" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
-            <a href="#tools" onClick={() => setMobileOpen(false)}>Tools</a>
-            <a href="#workspace" onClick={() => setMobileOpen(false)}>Workspace</a>
-            <a href="#why" onClick={() => setMobileOpen(false)}>Why ConvoTools</a>
+        {menuOpen && (
+          <motion.nav className="mobile-nav" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
+            {["#toolkit", "#pdf", "#image-lab", "#workflow", "#principles"].map((href, index) => (
+              <a key={href} href={href} onClick={() => setMenuOpen(false)}>{["All tools", "PDF tools", "Image lab", "Workflows", "About"][index]} <ArrowUpRight size={13} /></a>
+            ))}
           </motion.nav>
         )}
       </AnimatePresence>
 
-      <section className="hero">
-        <div className="hero-grid" />
-        <div className="hero-copy">
-          <motion.div className="announcement" {...(reducedMotion ? {} : { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0 }, transition: { delay: 0.1, duration: 0.6 } })}>
-            <span className="announcement-dot" /> YOUR FILE TOOLKIT, REIMAGINED <ArrowUpRight size={13} />
+      <section className="hero-section">
+        <div className="hero-main">
+          <motion.div className="hero-copy" initial={reducedMotion ? false : { opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}>
+            <div className="eyebrow"><span className="eyebrow-rule" /> ONE WORKSPACE. A LOT LESS BUSYWORK.</div>
+            <h1>Make files<br /><em>work for you.</em></h1>
+            <p className="hero-lede">Convert, refine, organize and edit the files that keep your day moving. One considered toolkit, from quick fixes to bigger workflows.</p>
+            <div className="hero-ctas">
+              <a className="button-primary" href="#workspace">Start with a file <ArrowUpRight size={16} /></a>
+              <a className="button-text" href="#toolkit">See everything you can do <ArrowDownRight size={16} /></a>
+            </div>
+            <div className="hero-note"><span className="hero-note-mark"><LockKeyhole size={14} /></span><span><strong>Private by default.</strong> Local-first tools wherever practical.</span></div>
           </motion.div>
-          <motion.h1 {...(reducedMotion ? {} : { initial: { opacity: 0, y: 24 }, animate: { opacity: 1, y: 0 }, transition: { delay: 0.18, duration: 0.8, ease } })}>
-            Files, meet your<br /><span className="headline-gradient">better workflow.</span>
-          </motion.h1>
-          <motion.p className="hero-subtitle" {...(reducedMotion ? {} : { initial: { opacity: 0, y: 18 }, animate: { opacity: 1, y: 0 }, transition: { delay: 0.3, duration: 0.7, ease } })}>
-            Convert, edit, compress and enhance. All the tools your files need, in one thoughtful workspace.
-          </motion.p>
-          <motion.div className="hero-actions" {...(reducedMotion ? {} : { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, transition: { delay: 0.42, duration: 0.7, ease } })}>
-            <a className="primary-button" href="#workspace">Explore the workspace <ArrowRight size={17} /></a>
-            <a className="text-button" href="#tools">Browse all tools <ArrowDown size={15} /></a>
-          </motion.div>
-          <motion.div className="hero-proof" {...(reducedMotion ? {} : { initial: { opacity: 0 }, animate: { opacity: 1 }, transition: { delay: 0.65, duration: 0.7 } })}>
-            <div className="proof-avatars"><span>PDF</span><span>IMG</span><span>DOC</span><span>ZIP</span></div>
-            <p><strong>One home for every format.</strong><br />No accounts. No watermarks. No fuss.</p>
+          <motion.div className="hero-product" initial={reducedMotion ? false : { opacity: 0, y: 30, rotate: 1.5 }} animate={{ opacity: 1, y: 0, rotate: 0 }} transition={{ duration: 0.9, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}>
+            <div className="product-window">
+              <div className="window-topbar">
+                <div className="window-dots"><i /><i /><i /></div>
+                <span className="window-path">CONVOTOOLS <b>/</b> WORKSPACE</span>
+                <span className="window-avatar">R</span>
+              </div>
+              <div className="window-content">
+                <div className="window-heading">
+                  <div><span className="micro-label">YOUR FILE DESK</span><h3>What are we working on?</h3></div>
+                  <span className="window-live"><i /> READY</span>
+                </div>
+                <div className="window-dropzone">
+                  <div className="window-upload-icon"><UploadCloud size={23} /></div>
+                  <div><strong>Drop anything here</strong><small>PDF, image, document, spreadsheet & more</small></div>
+                  <span className="window-plus"><Plus size={17} /></span>
+                </div>
+                <div className="window-or">OR PICK A STARTING POINT</div>
+                <div className="window-quick-actions">
+                  <div><span className="quick-icon pdf"><FileText size={17} /></span><b>PDF tools</b><small>Merge, compress, edit</small></div>
+                  <div><span className="quick-icon image"><ImageIcon size={17} /></span><b>Image lab</b><small>Convert, sharpen, resize</small></div>
+                  <div><span className="quick-icon doc"><FilePenLine size={17} /></span><b>Documents</b><small>Export, extract, edit</small></div>
+                </div>
+                <div className="window-footer"><span><ShieldCheck size={12} /> FILES STAY YOURS</span><span>SESSION READY <i /></span></div>
+              </div>
+            </div>
+            <div className="floating-file floating-file-a"><span className="floating-file-icon f-pdf"><FileText size={18} /></span><span><b>brief-final.pdf</b><small>PDF · 2.4 MB</small></span><BadgeCheck size={15} /></div>
+            <div className="floating-file floating-file-b"><span className="floating-file-icon f-img"><ImageIcon size={18} /></span><span><b>campaign_hero.png</b><small>IMAGE · 4.8 MB</small></span></div>
+            <div className="hero-index">01 <span>—</span> THE NEW FILE DESK</div>
           </motion.div>
         </div>
-
-        <motion.div className="hero-art" initial={reducedMotion ? false : { opacity: 0, scale: 0.88, rotate: 3 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} transition={{ duration: 1.1, delay: 0.25, ease }}>
-          <div className="art-orbit orbit-one" />
-          <div className="art-orbit orbit-two" />
-          <motion.div className="float-chip chip-top" animate={reducedMotion ? {} : { y: [0, -9, 0], rotate: [0, 2, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}>
-            <span className="chip-icon purple"><FileText size={18} /></span><span><b>PDF</b><small>Ready to edit</small></span><BadgeCheck size={16} className="chip-check" />
-          </motion.div>
-          <motion.div className="float-chip chip-side" animate={reducedMotion ? {} : { y: [0, 10, 0], rotate: [0, -2, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}>
-            <span className="chip-icon blue"><ImageIcon size={18} /></span><span><b>Image</b><small>2.4 MB · PNG</small></span>
-          </motion.div>
-          <div className="glass-core">
-            <div className="core-glow" />
-            <div className="core-inner">
-              <div className="core-icon"><Command size={48} strokeWidth={1.5} /></div>
-              <div className="core-wordmark">convo<span>tools</span></div>
-              <div className="core-caption">EVERY FILE. ONE WORKSPACE.</div>
-            </div>
-            <div className="core-ring ring-a" /><div className="core-ring ring-b" />
-            <div className="core-spark spark-a">✳</div><div className="core-spark spark-b">✦</div>
-          </div>
-          <motion.div className="float-chip chip-bottom" animate={reducedMotion ? {} : { y: [0, -7, 0], rotate: [0, 1, 0] }} transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut", delay: 0.8 }}>
-            <span className="chip-icon green"><FileSpreadsheet size={18} /></span><span><b>XLSX</b><small>Converted in 1.2s</small></span><span className="tiny-check"><Check size={11} /></span>
-          </motion.div>
-          <div className="art-caption"><span className="caption-line" /> DESIGNED FOR THE WAY YOU WORK</div>
-        </motion.div>
-        <div className="hero-bottom-note"><span>SCROLL TO EXPLORE</span><motion.div animate={reducedMotion ? {} : { y: [0, 5, 0] }} transition={{ duration: 1.6, repeat: Infinity }}><ArrowDown size={14} /></motion.div></div>
+        <div className="hero-bottom">
+          <span>BUILT FOR EVERYDAY FILE WORK</span>
+          <div className="format-list"><b>PDF</b><i /><b>DOCX</b><i /><b>XLSX</b><i /><b>PPTX</b><i /><b>JPG</b><i /><b>MP4</b><i /><b>ZIP</b></div>
+          <span className="hero-bottom-right">SCROLL TO EXPLORE <ArrowDownRight size={13} /></span>
+        </div>
       </section>
 
-      <section className="trust-strip" aria-label="Product benefits">
-        <span><ShieldCheck size={15} /> Privacy-first by design</span>
-        <i />
-        <span><Zap size={15} /> Fast, simple workflows</span>
-        <i />
-        <span><Globe2 size={15} /> Works right in your browser</span>
-        <i />
-        <span><LockKeyhole size={15} /> Free to use</span>
+      <section className="intro-band">
+        <div className="intro-band-inner">
+          <p>THE SMALL STUFF ADDS UP.</p>
+          <h2>One file. Five detours. <em>Not anymore.</em></h2>
+          <span>ConvoTools brings the everyday file jobs together, so you can spend less time searching for a converter and more time getting on with your work.</span>
+        </div>
       </section>
 
-      <section className="workspace-section section-wrap" id="workspace">
-        <motion.div className="section-heading" {...motionProps}>
-          <div>
-            <div className="eyebrow"><span /> THE WORKSPACE</div>
-            <h2>Drop in. Get things <span>done.</span></h2>
-            <p>Your next file task starts here. Drop a file, or choose one from your device.</p>
+      <section className="workspace-section section-pad" id="workspace">
+        <div className="section-topline">
+          <div><span className="section-kicker">01 / YOUR WORKSPACE</span><h2>Start with what<br /><em>you have.</em></h2></div>
+          <p>No need to pick a tool first. Add a file and choose what you want to do next.</p>
+        </div>
+        <div className={"drop-workspace" + (dragging ? " drag-active" : "")}
+          onDragEnter={(event) => { event.preventDefault(); setDragging(true); }}
+          onDragOver={(event) => event.preventDefault()}
+          onDragLeave={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setDragging(false); }}
+          onDrop={onDrop}>
+          <input ref={fileInput} className="file-input" type="file" multiple onChange={onChoose} />
+          <div className="drop-left">
+            <div className="drop-icon"><UploadCloud size={25} /></div>
+            <div className="drop-copy"><span className="micro-label">DRAG, DROP, DONE</span><h3>{dragging ? "That's it. Let go." : "Bring your files here."}</h3><p>Drop one file or a whole batch. We'll help you find the next step.</p></div>
           </div>
-          <div className="workspace-shortcut"><Command size={13} /> <span>Simple by design</span></div>
-        </motion.div>
-        <motion.div className={`upload-panel ${dragging ? "is-dragging" : ""}`} {...motionProps} onDragEnter={(e) => { e.preventDefault(); setDragging(true); }} onDragOver={(e) => e.preventDefault()} onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setDragging(false); }} onDrop={onDrop}>
-          <input ref={inputRef} type="file" multiple className="hidden-input" onChange={onInputChange} />
-          <div className="upload-decoration decoration-left"><FileImage size={24} /><span>PNG</span></div>
-          <div className="upload-decoration decoration-right"><FileText size={24} /><span>PDF</span></div>
-          <div className="upload-main">
-            <motion.div className="upload-icon" animate={reducedMotion ? {} : { y: [0, -5, 0] }} transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}><UploadCloud size={30} strokeWidth={1.6} /></motion.div>
-            <h3>{dragging ? "Drop it like it's hot." : "What are we working on?"}</h3>
-            <p>Drag and drop your files here, or <button className="inline-link" onClick={() => inputRef.current?.click()}>browse files</button></p>
-            <button className="choose-button" onClick={() => inputRef.current?.click()}><Plus size={16} /> Choose files <ArrowUpRight size={14} /></button>
-            <div className="upload-meta"><span><Check size={12} /> Multiple files</span><span><Check size={12} /> Up to 30 files in preview</span><span><Check size={12} /> Any common format</span></div>
+          <div className="drop-right">
+            <button className="button-dark" onClick={() => fileInput.current?.click()}>Choose files <Plus size={15} /></button>
+            <span>Up to 30 files in this preview</span>
           </div>
-          <div className="upload-bottom"><span><LockKeyhole size={12} /> Files stay in this demo session</span><span>PDF · DOCX · XLSX · PNG · JPG · MP4 · ZIP</span></div>
-        </motion.div>
+          <div className="drop-bottom"><span><LockKeyhole size={12} /> Files are held in this browser session</span><span>PDF · IMAGE · OFFICE · VIDEO · AUDIO · ARCHIVE</span></div>
+        </div>
         <AnimatePresence>
           {files.length > 0 && (
-            <motion.div className="file-queue" initial={{ opacity: 0, y: 12, height: 0 }} animate={{ opacity: 1, y: 0, height: "auto" }} exit={{ opacity: 0, y: -8, height: 0 }}>
-              <div className="queue-heading"><div><span className="eyebrow">YOUR FILES</span><h3>{files.length} file{files.length === 1 ? "" : "s"} added</h3></div><button className="clear-button" onClick={() => setFiles([])}>Clear all <X size={13} /></button></div>
-              <div className="queue-list">
-                {files.map((file, index) => (
-                  <div className="queue-file" key={`${file.name}-${index}`}>
-                    <div className="queue-file-icon"><FileType2 size={18} /></div>
-                    <div className="queue-file-name"><strong>{file.name}</strong><small>{formatBytes(file.size)} · {file.type || "Unknown type"}</small></div>
-                    <span className="detected-tag"><Check size={12} /> Added</span>
-                    <button aria-label={`Remove ${file.name}`} className="remove-file" onClick={() => setFiles((current) => current.filter((_, i) => i !== index))}><X size={15} /></button>
-                  </div>
-                ))}
-              </div>
-              <div className="queue-foot"><span>Upload UI preview · processing engine is next</span><span className="queue-hint">Your files aren't sent to a server.</span></div>
+            <motion.div className="file-list-panel" initial={{ opacity: 0, height: 0, y: 10 }} animate={{ opacity: 1, height: "auto", y: 0 }} exit={{ opacity: 0, height: 0 }}>
+              <div className="file-list-head"><div><span className="micro-label">SESSION FILES</span><h3>{files.length} file{files.length === 1 ? "" : "s"} ready</h3></div><button className="subtle-button" onClick={() => setFiles([])}>Clear list <X size={13} /></button></div>
+              {files.map((file, index) => (
+                <div className="file-row" key={file.name + index}>
+                  <span className="file-row-icon"><FileText size={17} /></span><span className="file-row-name"><b>{file.name}</b><small>{formatBytes(file.size)} · {file.type || "Unknown file type"}</small></span><span className="file-row-state"><Check size={13} /> Added locally</span>
+                  <button className="remove-file" aria-label={"Remove " + file.name} onClick={() => setFiles((current) => current.filter((_, fileIndex) => fileIndex !== index))}><X size={15} /></button>
+                </div>
+              ))}
+              <div className="file-list-foot">This is the upload interaction preview. Conversion engines will connect in the next build phase.</div>
             </motion.div>
           )}
         </AnimatePresence>
       </section>
 
-      <section className="tools-section section-wrap" id="tools">
-        <motion.div className="section-heading tools-heading" {...motionProps}>
-          <div>
-            <div className="eyebrow"><span /> THE TOOLKIT</div>
-            <h2>Small tasks. <span>Big relief.</span></h2>
-            <p>Everything you need to keep your files moving. Find your tool and get on with it.</p>
-          </div>
-          <div className="tool-count"><strong>40+</strong><span>tools planned<br />and growing</span></div>
-        </motion.div>
+      <section className="toolkit-section section-pad" id="toolkit">
+        <div className="section-topline toolkit-heading">
+          <div><span className="section-kicker">02 / THE TOOLKIT</span><h2>Every format has<br /><em>a next move.</em></h2></div>
+          <p>From everyday conversions to the jobs that usually need three different websites. Explore by task or search for exactly what you need.</p>
+        </div>
         <div className="tool-browser">
-          <div className="tool-topline">
-            <div className="category-tabs">
-              {categories.map((category) => {
-                const Icon = category.icon;
-                return <button key={category.name} className={activeCategory === category.name ? "category-tab active" : "category-tab"} onClick={() => { setActiveCategory(category.name); setShowAll(false); }}><Icon size={14} /><span>{category.name}</span><small>{category.count}</small></button>;
-              })}
+          <div className="tool-browser-head">
+            <div className="tool-browser-label"><span className="browser-led" /> BROWSE THE TOOL LIBRARY <span className="tool-library-count">36 TOOLS IN THE PREVIEW</span></div>
+            <label className="tool-search"><Search size={16} /><input value={query} onChange={(event) => { setQuery(event.target.value); setShowAll(true); }} placeholder="Search a tool or format..." /><kbd>/</kbd></label>
+          </div>
+          <div className="tool-browser-body">
+            <aside className="category-rail">
+              <span className="micro-label">CATEGORIES</span>
+              {categories.map((item) => (
+                <button key={item.name} className={category === item.name ? "category-option selected" : "category-option"} onClick={() => { setCategory(item.name); setShowAll(false); }}>
+                  <span>{item.name}</span><ChevronRight size={14} />
+                </button>
+              ))}
+              <div className="category-rail-note"><Sparkles size={15} /><span>New tools are added as the workspace grows.</span></div>
+            </aside>
+            <div className="tool-results">
+              <div className="tool-results-head"><div><span className="micro-label">SHOWING</span><h3>{category === "All tools" ? "The full toolbox" : category}</h3></div><span>{filteredTools.length} RESULTS</span></div>
+              <div className="tool-result-grid">
+                <AnimatePresence mode="popLayout">
+                  {(showAll ? filteredTools : filteredTools.slice(0, 12)).map((tool, index) => {
+                    const Icon = tool.icon;
+                    return (
+                      <motion.button layout key={tool.name} className="tool-result" onClick={() => setSelectedTool(tool)} initial={reducedMotion ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: .97 }} transition={{ duration: .25, delay: index * .012 }}>
+                        <span className="tool-result-icon"><Icon size={18} strokeWidth={1.7} /></span>
+                        <span className="tool-result-copy"><b>{tool.name}</b><small>{tool.description}</small></span>
+                        {tool.tag && <span className={"tool-tag" + (tool.tag === "AI" ? " tag-ai" : "")}>{tool.tag}</span>}
+                        <ArrowUpRight className="tool-result-arrow" size={15} />
+                      </motion.button>
+                    );
+                  })}
+                </AnimatePresence>
+                {filteredTools.length === 0 && <div className="no-results"><Search size={20} /><b>No matching tools</b><span>Try another search or switch category.</span></div>}
+              </div>
+              {filteredTools.length > 12 && <button className="show-more" onClick={() => setShowAll((value) => !value)}>{showAll ? "Show fewer tools" : "Show all " + filteredTools.length + " tools"} <ArrowRight size={15} /></button>}
             </div>
-            <label className="tool-search"><Search size={16} /><input value={query} onChange={(e) => { setQuery(e.target.value); setShowAll(true); }} placeholder="Find a tool..." /><kbd>/</kbd></label>
           </div>
-          <div className="tool-grid">
-            <AnimatePresence mode="popLayout">
-              {visibleTools.map((tool, index) => {
-                const Icon = tool.icon;
-                return (
-                  <motion.button layout key={tool.name} className="tool-card" initial={reducedMotion ? false : { opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96 }} transition={{ duration: 0.35, delay: index * 0.025, ease }}>
-                    <div className={`tool-icon ${tool.tint}`}><Icon size={19} strokeWidth={1.8} /></div>
-                    <div className="tool-card-copy"><div className="tool-title-line"><h3>{tool.name}</h3>{tool.status && <span className="ai-tag">{tool.status}</span>}</div><p>{tool.description}</p></div>
-                    <span className="tool-arrow"><ArrowUpRight size={15} /></span>
-                  </motion.button>
-                );
-              })}
-            </AnimatePresence>
-            {visibleTools.length === 0 && <div className="empty-tools"><Search size={22} /><strong>No tools found</strong><span>Try another search or category.</span></div>}
-          </div>
-          {filteredTools.length > 8 && (
-            <button className="view-all-button" onClick={() => setShowAll((v) => !v)}>{showAll ? "Show less" : `Explore all ${filteredTools.length} tools`} <ArrowRight size={15} /></button>
-          )}
         </div>
       </section>
 
-      <section className="feature-section section-wrap" id="why">
-        <motion.div className="feature-intro" {...motionProps}>
-          <div className="eyebrow"><span /> A BETTER KIND OF TOOLBOX</div>
-          <h2>Less tab-hopping.<br /><span>More making.</span></h2>
-          <p>ConvoTools brings the little file jobs into one calm, capable place. No scavenger hunt for the right website.</p>
-          <a className="text-button" href="#workspace">Give it a spin <ArrowUpRight size={15} /></a>
-        </motion.div>
-        <div className="feature-cards">
-          <motion.article className="feature-card feature-card-large" {...motionProps}>
-            <div className="feature-card-top"><span className="feature-symbol violet"><MousePointer2 size={18} /></span><span className="feature-index">01 / SIMPLE</span></div>
-            <div className="mini-window">
-              <div className="mini-window-bar"><i /><i /><i /><span>convo.tools / workspace</span></div>
-              <div className="mini-window-body"><div className="mini-sidebar"><b /><i /><i /><i /><i /></div><div className="mini-content"><div className="mini-title" /><div className="mini-drop"><UploadCloud size={18} /><span>Drop your file here</span></div><div className="mini-actions"><i /><i /><i /></div></div></div>
+      <section className="category-feature section-pad" id="pdf">
+        <div className="category-heading">
+          <span className="section-kicker">03 / PDF WORKBENCH</span>
+          <div className="category-title-row"><h2>PDFs, without<br /><em>the paperwork.</em></h2><span className="category-number">01</span></div>
+          <p>Make a document smaller, bring a stack together, pull out the pages you need, or get a scanned file ready to search.</p>
+          <div className="category-tool-list">
+            {["Convert PDF to Word, Excel or images", "Merge, split and rearrange pages", "Compress, rotate and add page numbers", "Annotate, sign and protect documents", "OCR scanned PDFs and extract tables"].map((item) => <div key={item}><Check size={14} /> {item}</div>)}
+          </div>
+          <a className="underlined-link" href="#toolkit" onClick={() => setCategory("PDF")}>Explore PDF tools <ArrowUpRight size={14} /></a>
+        </div>
+        <div className="pdf-visual">
+          <div className="pdf-visual-header"><span>DOCUMENT / PREVIEW</span><span className="visual-status"><i /> READY TO ORGANIZE</span></div>
+          <div className="pdf-stage">
+            <div className="pdf-side-label"><span>PAGE 01 — 04</span><span>DRAG TO REORDER</span></div>
+            <div className="pdf-page-stack">
+              <div className="pdf-page page-back"><div /><div /><div /><div className="pdf-page-chart" /></div>
+              <div className="pdf-page page-front"><div className="pdf-page-top"><span>CT / 2026</span><span>01</span></div><div className="pdf-page-title">Project<br />overview<span>.</span></div><div className="pdf-page-rule" /><div className="pdf-page-lines"><i /><i /><i /><i /><i /></div><div className="pdf-page-chart"><span /><span /><span /><span /></div><div className="pdf-page-footer">CONVOTOOLS / DOCUMENT STUDIO</div></div>
+              <div className="pdf-page-badge"><FileText size={15} /> PDF / 4 PAGES</div>
             </div>
-            <h3>One home for file jobs.</h3><p>One upload experience, one clean workspace, and the right next step without the extra clicks.</p>
-          </motion.article>
-          <motion.article className="feature-card" {...motionProps}>
-            <div className="feature-card-top"><span className="feature-symbol blue"><Zap size={18} /></span><span className="feature-index">02 / QUICK</span></div>
-            <div className="speed-visual"><div className="speed-ring"><Zap size={30} /><span>FAST</span></div><div className="speed-orbit" /></div>
-            <h3>Out of your way.</h3><p>Thoughtful flows that help you get in, get it done, and get back to what matters.</p>
-          </motion.article>
-          <motion.article className="feature-card" {...motionProps}>
-            <div className="feature-card-top"><span className="feature-symbol green"><LockKeyhole size={18} /></span><span className="feature-index">03 / PRIVATE</span></div>
-            <div className="privacy-visual"><div className="privacy-shield"><ShieldCheck size={38} /></div><span className="privacy-pill"><Check size={11} /> Local-first direction</span></div>
-            <h3>Your files, your business.</h3><p>Browser-based processing wherever practical. Clear choices when a task needs a server.</p>
-          </motion.article>
+            <div className="pdf-thumbnails"><span className="thumbnail active"><i /><b>01</b></span><span className="thumbnail"><i /><b>02</b></span><span className="thumbnail"><i /><b>03</b></span><span className="thumbnail"><i /><b>04</b></span><button aria-label="Add page"><Plus size={15} /></button></div>
+          </div>
+          <div className="pdf-visual-footer"><span><Layers3 size={14} /> Page management</span><span><Minimize2 size={14} /> Compression options</span><span><ScanText size={14} /> Text recognition</span></div>
         </div>
       </section>
 
-      <section className="closing-section section-wrap">
-        <motion.div className="closing-card" {...motionProps}>
-          <div className="closing-glow" />
-          <div className="closing-copy"><div className="eyebrow"><span /> READY WHEN YOU ARE</div><h2>Make file work<br /><span>feel less like work.</span></h2><p>Your next conversion is a drag and drop away.</p><a href="#workspace" className="primary-button">Open the workspace <ArrowUpRight size={16} /></a></div>
-          <div className="closing-art"><div className="closing-orbit orbit-x" /><div className="closing-orbit orbit-y" /><div className="closing-doc doc-a"><FileText size={27} /></div><div className="closing-doc doc-b"><ImageIcon size={27} /></div><div className="closing-doc doc-c"><FileSpreadsheet size={27} /></div><div className="closing-center"><Command size={42} /></div><Sparkles className="closing-spark" size={22} /></div>
-        </motion.div>
+      <section className="category-feature image-feature section-pad" id="image-lab">
+        <div className="image-visual">
+          <div className="image-visual-top"><span>IMAGE LAB / ENHANCEMENT</span><span className="visual-status"><i /> EXAMPLE WORKSPACE</span></div>
+          <div className="image-canvas">
+            <div className="image-canvas-grid" />
+            <div className="image-mock-image">
+              <div className="image-mock-sun" /><div className="image-mock-mountain mountain-back" /><div className="image-mock-mountain mountain-front" /><div className="image-mock-ground" />
+            </div>
+            <div className="compare-divider"><span><ArrowLeftRightIcon /></span></div>
+            <div className="compare-label before">BEFORE</div><div className="compare-label after">AFTER / 2×</div>
+            <div className="image-canvas-caption"><span>landscape_01.jpg</span><span>2400 × 1600</span></div>
+          </div>
+          <div className="image-controls"><span><SlidersHorizontal size={14} /> Enhance details</span><div className="image-control-pills"><b>2×</b><b>4×</b><b>Denoise</b><b>Unblur</b></div></div>
+        </div>
+        <div className="category-heading">
+          <span className="section-kicker">04 / IMAGE LAB</span>
+          <div className="category-title-row"><h2>Give every image<br /><em>a second look.</em></h2><span className="category-number">02</span></div>
+          <p>Format changes when you need them. A little restoration when you don't. Bring images into shape without opening a heavyweight editor.</p>
+          <div className="category-tool-list">
+            {["Convert PNG, JPG, WEBP, AVIF and more", "Resize, crop, rotate and compress", "Upscale, unblur and reduce image noise", "Remove backgrounds and create transparent PNGs", "Improve scanned photos and old images"].map((item) => <div key={item}><Check size={14} /> {item}</div>)}
+          </div>
+          <a className="underlined-link" href="#toolkit" onClick={() => setCategory("Images")}>Explore image tools <ArrowUpRight size={14} /></a>
+        </div>
       </section>
 
-      <footer className="footer">
-        <a className="brand footer-brand" href="#"><span className="brand-mark"><Command size={17} /></span><span>convo<span className="brand-light">tools</span><i>.</i></span></a>
-        <span>Thoughtful tools for all your files.</span>
-        <div className="footer-links"><a href="#tools">Explore tools</a><a href="#workspace">Workspace</a><a href="https://github.com/RAJ-SUHANDANI/ConvoTools" target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={12} /></a></div>
-        <small>© 2026 ConvoTools. Made for the love of getting things done.</small>
+      <section className="document-section section-pad" id="documents">
+        <div className="section-topline">
+          <div><span className="section-kicker">05 / DOCUMENTS & DATA</span><h2>Keep the format.<br /><em>Keep the flow.</em></h2></div>
+          <p>Move between office formats and make quick changes without losing your place.</p>
+        </div>
+        <div className="format-workbench">
+          <div className="format-panel format-word">
+            <div className="format-top"><span className="format-file-icon word"><FileText size={17} /></span><span className="format-label">DOCUMENTS</span><span className="format-ext">.DOCX</span></div>
+            <h3>Words into<br />workable files.</h3>
+            <p>PDF to Word, Word to PDF, text extraction, quick edits and document cleanup.</p>
+            <div className="doc-mini">
+              <div className="doc-mini-toolbar"><i /><i /><i /><i /><i /></div>
+              <div className="doc-mini-sheet"><b>Notes & ideas</b><i /><i /><i /><i className="short" /><div /></div>
+            </div>
+            <a href="#toolkit" onClick={() => setCategory("Documents")}>Explore document tools <ArrowUpRight size={13} /></a>
+          </div>
+          <div className="format-panel format-sheet">
+            <div className="format-top"><span className="format-file-icon sheet"><FileSpreadsheet size={17} /></span><span className="format-label">SPREADSHEETS</span><span className="format-ext">.XLSX</span></div>
+            <h3>Make data<br />less messy.</h3>
+            <p>Convert workbooks, clean CSVs, combine sheets and remove duplicate rows.</p>
+            <div className="sheet-mini">
+              <div className="sheet-head"><span /><span>A</span><span>B</span><span>C</span><span>D</span></div>
+              {["01","02","03","04"].map((n) => <div className="sheet-row" key={n}><span>{n}</span><i /><i /><i /><i /></div>)}
+            </div>
+            <a href="#toolkit" onClick={() => setCategory("Spreadsheets")}>Explore spreadsheet tools <ArrowUpRight size={13} /></a>
+          </div>
+          <div className="format-panel format-slides">
+            <div className="format-top"><span className="format-file-icon slides"><PanelTop size={17} /></span><span className="format-label">PRESENTATIONS</span><span className="format-ext">.PPTX</span></div>
+            <h3>Slides that<br />travel well.</h3>
+            <p>Move decks to PDF, export individual slides or collect images from a presentation.</p>
+            <div className="slides-mini"><div className="slide-one"><small>FIELD NOTES / 2026</small><b>Ideas into<br />action<span>.</span></b><i /></div><div className="slide-two"><i /><i /><i /></div></div>
+            <a href="#toolkit" onClick={() => setCategory("Presentations")}>Explore presentation tools <ArrowUpRight size={13} /></a>
+          </div>
+        </div>
+      </section>
+
+      <section className="media-section section-pad" id="media">
+        <div className="media-copy">
+          <span className="section-kicker">06 / VIDEO & AUDIO</span>
+          <h2>Make media<br /><em>more manageable.</em></h2>
+          <p>Trim the extra, pull out a soundtrack, make a lightweight GIF or find a better format for the way you share.</p>
+          <a className="underlined-link" href="#toolkit" onClick={() => setCategory("Video & audio")}>Explore media tools <ArrowUpRight size={14} /></a>
+        </div>
+        <div className="media-console">
+          <div className="media-console-head"><span><Film size={14} /> MEDIA WORKBENCH</span><span>DEMO / TIMELINE</span></div>
+          <div className="media-screen"><div className="media-screen-art"><div className="media-sun" /><div className="media-hill hill-one" /><div className="media-hill hill-two" /></div><div className="media-screen-overlay"><span>00:12</span><span><Play size={15} fill="currentColor" /></span><span>00:48</span></div></div>
+          <div className="timeline-ruler"><span>00:00</span><span>00:15</span><span>00:30</span><span>00:45</span></div>
+          <div className="timeline-track"><span className="track-label"><Film size={13} /> VIDEO</span><div className="track-segments"><i /><i /><i /><i /></div></div>
+          <div className="timeline-track audio-track"><span className="track-label"><AudioLines size={13} /> AUDIO</span><div className="audio-wave">{Array.from({length:44}, (_, index) => <i key={index} style={{height: (8 + ((index * 17) % 23)) + "px"}} />)}</div></div>
+          <div className="media-export"><span><Check size={13} /> Trim & export</span><b>MP4 <ChevronRight size={12} /> GIF <ChevronRight size={12} /> MP3</b></div>
+        </div>
+      </section>
+
+      <section className="ai-section section-pad" id="ai">
+        <div className="ai-top">
+          <div><span className="section-kicker">07 / THE AI LAB</span><h2>When a file needs<br /><em>a little more.</em></h2></div>
+          <p>Optional AI-powered tools for the jobs that go beyond format conversion. Choose the improvement, compare the result and keep control of the original.</p>
+        </div>
+        <div className="ai-grid">
+          <article className="ai-card ai-card-main">
+            <div className="ai-card-meta"><span>01 / RESTORE</span><WandSparkles size={17} /></div>
+            <div className="ai-restore-art"><div className="restore-photo"><div className="restore-person-head" /><div className="restore-person-body" /><span className="restore-grain" /></div><div className="restore-arrow"><ArrowRight size={17} /></div><div className="restore-photo restore-sharp"><div className="restore-person-head" /><div className="restore-person-body" /></div><span className="restore-label restore-before">ORIGINAL</span><span className="restore-label restore-after">ENHANCED</span></div>
+            <h3>Restore the detail.</h3><p>Upscale, sharpen and reduce noise in photos that need a second chance.</p><div className="ai-chips"><span>Upscale</span><span>Unblur</span><span>Denoise</span><span>Face restore</span></div>
+          </article>
+          <article className="ai-card">
+            <div className="ai-card-meta"><span>02 / EXTRACT</span><ScanText size={17} /></div>
+            <div className="ai-icon-art ocr-art"><div className="ocr-paper"><i /><i /><i /><i /><span>Recognize text</span></div><div className="ocr-scanline" /></div>
+            <h3>Find the words inside.</h3><p>OCR for scans and screenshots. Turn image-based pages into useful text.</p>
+            <span className="ai-card-foot">OCR / TABLE EXTRACTION</span>
+          </article>
+          <article className="ai-card">
+            <div className="ai-card-meta"><span>03 / ISOLATE</span><Sparkles size={17} /></div>
+            <div className="ai-icon-art remove-art"><div className="remove-grid" /><div className="remove-subject"><div /><span /></div><span className="remove-sticker">PNG</span></div>
+            <h3>Keep what matters.</h3><p>Remove backgrounds and export clean transparent assets.</p>
+            <span className="ai-card-foot">BACKGROUND / OBJECT</span>
+          </article>
+        </div>
+        <div className="ai-disclosure"><ShieldCheck size={15} /><span>AI provider transparency: image enhancement may use an external API. The final product will show when a file leaves your device and which provider processes it.</span></div>
+      </section>
+
+      <section className="workflow-section section-pad" id="workflow">
+        <div className="section-topline">
+          <div><span className="section-kicker">08 / WORKFLOWS</span><h2>One task at a time.<br /><em>Or link them up.</em></h2></div>
+          <p>Turn repeat work into a small pipeline. Arrange a few steps once, then reuse the same flow whenever you need it.</p>
+        </div>
+        <div className="workflow-board">
+          <div className="workflow-board-head"><span><Workflow size={15} /> VISUAL WORKFLOW / UNTITLED</span><span className="workflow-draft">CONCEPT PREVIEW</span></div>
+          <div className="workflow-canvas">
+            <div className="workflow-node node-input"><div className="workflow-node-top"><span className="node-icon"><UploadCloud size={15} /></span><small>01 / INPUT</small></div><b>Drop images</b><span>12 PNG files</span><div className="node-port" /></div>
+            <div className="workflow-connector"><i /><i /><i /></div>
+            <div className="workflow-node node-edit"><div className="workflow-node-top"><span className="node-icon"><SlidersHorizontal size={15} /></span><small>02 / TRANSFORM</small></div><b>Resize & optimize</b><span>1200 px · quality 82</span><div className="node-port" /></div>
+            <div className="workflow-connector"><i /><i /><i /></div>
+            <div className="workflow-node node-output"><div className="workflow-node-top"><span className="node-icon"><FileText size={15} /></span><small>03 / EXPORT</small></div><b>Combine as PDF</b><span>One document</span><div className="node-port" /></div>
+            <div className="workflow-cursor"><span /><b>Raj</b></div>
+          </div>
+          <div className="workflow-board-foot"><span><span className="workflow-status-dot" /> THREE STEPS / ONE REPEATABLE FLOW</span><span>ADD STEP <Plus size={13} /></span></div>
+        </div>
+      </section>
+
+      <section className="developer-section section-pad" id="developer">
+        <div className="developer-copy"><span className="section-kicker">09 / DEVELOPER UTILITIES</span><h2>Little tools for<br /><em>the in-between.</em></h2><p>Not every file task needs a full editor. Keep handy utilities close by for when you need to inspect, encode or validate something quickly.</p><a className="underlined-link" href="#toolkit" onClick={() => setCategory("Developer")}>Explore developer tools <ArrowUpRight size={14} /></a></div>
+        <div className="developer-console">
+          <div className="developer-tabs"><span className="dev-tab-active"><Braces size={13} /> JSON</span><span><Code2 size={13} /> BASE64</span><span><LockKeyhole size={13} /> HASH</span></div>
+          <div className="code-area"><div className="code-gutter">01<br />02<br />03<br />04<br />05<br />06</div><pre><span className="code-punc">{"{"}</span>{"\n"}  <span className="code-key">"tool"</span>: <span className="code-string">"json formatter"</span>,{"\n"}  <span className="code-key">"status"</span>: <span className="code-string">"ready"</span>,{"\n"}  <span className="code-key">"clean"</span>: <span className="code-bool">true</span>,{"\n"}  <span className="code-key">"next_step"</span>: <span className="code-string">"your idea"</span>{"\n"}<span className="code-punc">{"}"}</span></pre></div>
+          <div className="developer-console-foot"><span><span className="dev-status" /> VALID JSON</span><button onClick={() => navigator.clipboard?.writeText('{"tool":"json formatter","status":"ready","clean":true,"next_step":"your idea"}')}><Copy size={13} /> Copy sample</button></div>
+        </div>
+      </section>
+
+      <section className="principles-section section-pad" id="principles">
+        <div className="principles-heading"><span className="section-kicker">10 / THE CONVOTOOLS APPROACH</span><h2>Useful first.<br /><em>Beautiful by design.</em></h2></div>
+        <div className="principles-grid">
+          <article><span className="principle-num">01</span><div className="principle-icon"><ShieldCheck size={20} /></div><h3>Privacy is a product feature.</h3><p>Prefer local processing for everyday tasks. When a server or AI provider is needed, make that choice clear.</p></article>
+          <article><span className="principle-num">02</span><div className="principle-icon"><Layers3 size={20} /></div><h3>Batch work is normal work.</h3><p>Handle collections of files in one go, with consistent settings and one final download.</p></article>
+          <article><span className="principle-num">03</span><div className="principle-icon"><Zap size={20} /></div><h3>Fast should feel effortless.</h3><p>Keep the interface calm, the controls obvious and motion purposeful rather than distracting.</p></article>
+        </div>
+      </section>
+
+      <section className="faq-section section-pad" id="faq">
+        <div><span className="section-kicker">11 / GOOD TO KNOW</span><h2>A few things,<br /><em>answered.</em></h2></div>
+        <div className="faq-list">
+          <details><summary>Will ConvoTools be free? <span>+</span></summary><p>The goal is a free-first product without subscriptions or watermarks. Some AI providers may have their own free usage limits, and heavy server processing has real infrastructure costs.</p></details>
+          <details><summary>Do my files get uploaded? <span>+</span></summary><p>The product is being designed to process files in the browser wherever practical. Some complex conversions or optional AI tools may need server-side processing or an external provider, which should be disclosed before use.</p></details>
+          <details><summary>Can I process multiple files at once? <span>+</span></summary><p>Batch operations are a core part of the product direction. The workspace preview already demonstrates multi-file selection; processing will be connected tool by tool.</p></details>
+          <details><summary>Are all the tools working already? <span>+</span></summary><p>This is the interface foundation. The upload interaction and tool discovery work in this preview, while conversion, editing and AI processing engines are being built in later phases.</p></details>
+        </div>
+      </section>
+
+      <section className="final-cta section-pad">
+        <div className="final-cta-card"><div className="final-cta-copy"><span className="section-kicker">A BETTER PLACE FOR FILE WORK</span><h2>Make the next file task<br /><em>the easy one.</em></h2><p>Bring a file. Pick a task. Keep moving.</p><a className="button-light" href="#workspace">Open your workspace <ArrowUpRight size={15} /></a></div><div className="final-cta-mark"><div className="cta-mark-grid" /><div className="cta-file cta-file-one"><FileImage size={25} /></div><div className="cta-file cta-file-two"><FileText size={25} /></div><div className="cta-file cta-file-three"><FileSpreadsheet size={25} /></div><div className="cta-center"><span /><span /><span /></div></div></div>
+      </section>
+
+      <footer className="site-footer">
+        <div className="footer-main">
+          <a className="wordmark footer-wordmark" href="#"><span className="wordmark-symbol"><span /><span /><span /></span><span>convo<span className="wordmark-light">tools</span></span></a>
+          <p>A more considered way to get<br />the everyday file jobs done.</p>
+          <div className="footer-nav"><div><b>EXPLORE</b><a href="#toolkit">All tools</a><a href="#pdf">PDF</a><a href="#image-lab">Image lab</a><a href="#ai">AI lab</a></div><div><b>WORKSPACE</b><a href="#workspace">Upload files</a><a href="#workflow">Workflows</a><a href="#developer">Developer tools</a><a href="#faq">FAQ</a></div><div><b>PROJECT</b><a href="https://github.com/RAJ-SUHANDANI/ConvoTools" target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={12} /></a><a href="#principles">Our approach</a></div></div>
+        </div>
+        <div className="footer-bottom"><span>© 2026 CONVOTOOLS. MADE FOR THE WORK BETWEEN THE WORK.</span><span>EARLY INTERFACE PREVIEW <i /> PROCESSING ENGINES IN PROGRESS</span></div>
       </footer>
+
+      <AnimatePresence>
+        {selectedTool && (
+          <motion.div className="tool-modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={(event) => { if (event.target === event.currentTarget) closeTool(); }}>
+            <motion.div className="tool-modal" initial={{ opacity: 0, y: 18, scale: .98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: .98 }} transition={{ duration: .22 }}>
+              <button className="modal-close" onClick={closeTool} aria-label="Close tool preview"><X size={17} /></button>
+              <span className="section-kicker">TOOL PREVIEW / {selectedTool.category.toUpperCase()}</span>
+              <div className="modal-tool-icon"><selectedTool.icon size={22} /></div>
+              <h2>{selectedTool.name}</h2>
+              <p>{selectedTool.description}</p>
+              <div className="modal-next-step"><span className="modal-step-icon"><UploadCloud size={17} /></span><span><b>Start with a file</b><small>Add a file in the workspace to prepare this tool.</small></span><button onClick={() => { closeTool(); document.getElementById("workspace")?.scrollIntoView({ behavior: "smooth" }); }}>Go to upload <ArrowUpRight size={13} /></button></div>
+              <div className="modal-note"><Clock3 size={14} /> This tool's processing engine is part of the next build phase. This preview demonstrates the product flow.</div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }
 
-function formatBytes(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+function ArrowLeftRightIcon() {
+  return <span className="arrow-left-right">↔</span>;
 }
