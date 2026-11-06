@@ -98,7 +98,7 @@ async function pptxText(file:File):Promise<string>{
 async function pdfAdvanced(files:File[],tool:string):Promise<ProcessResult[]>{
  if(tool==="PDF to Word"){const text=await pdfText(files[0]);if(!text.trim())throw new Error("This PDF contains no selectable text. Try OCR extractor for scanned pages.");return [await makeDocx(text,name(files[0],"docx"))];}
  if(tool==="PDF to Excel"){const text=await pdfText(files[0]);if(!text.trim())throw new Error("No selectable text was found in this PDF.");const rows=text.split(/\r?\n/).filter(Boolean).map(line=>line.split(/\s{2,}|\t/));const sheet=XLSX.utils.aoa_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,sheet,"Extracted data");return [result(bytesBlob(XLSX.write(wb,{type:"array",bookType:"xlsx"}) as Uint8Array,"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),name(files[0],"xlsx"),"Text rows exported to a spreadsheet. PDF table structure may require manual cleanup.")];}
- if(tool==="PDF to JPG"||tool==="PDF to PNG"||tool==="Slides to images"){const pages=await renderPdfPages(files[0],tool==="PDF to JPG"?"jpeg":"png");if(pages.length===1)return [result(pages[0],name(files[0],tool==="PDF to JPG"?"jpg":"png"),"PDF page rendered as an image.")];const zip=new JSZip();pages.forEach((p,i)=>zip.file("page-"+String(i+1).padStart(3,"0")+(tool==="PDF to JPG"?".jpg":".png"),p));return [result(await zip.generateAsync({type:"blob"}),name(files[0],"zip"),pages.length+" PDF pages rendered into image files.")];}
+ if(tool==="PDF to JPG"||tool==="PDF to PNG"){const pages=await renderPdfPages(files[0],tool==="PDF to JPG"?"jpeg":"png");if(pages.length===1)return [result(pages[0],name(files[0],tool==="PDF to JPG"?"jpg":"png"),"PDF page rendered as an image.")];const zip=new JSZip();pages.forEach((p,i)=>zip.file("page-"+String(i+1).padStart(3,"0")+(tool==="PDF to JPG"?".jpg":".png"),p));return [result(await zip.generateAsync({type:"blob"}),name(files[0],"zip"),pages.length+" PDF pages rendered into image files.")];}
  if(tool==="PDF to PowerPoint"){const pages=await renderPdfPages(files[0],"jpeg");return [result(await pdfPagesToPptx(pages),name(files[0],"pptx"),"PDF pages placed as full-slide images in a PowerPoint file. Text is not editable.")];}
  throw new Error("Unsupported PDF operation.");
 }
@@ -200,19 +200,119 @@ async function upscaleImage(file:File,tool:string):Promise<ProcessResult>{
  }finally{URL.revokeObjectURL(source);}
 }
 
+
+const PPT_NS="http://schemas.openxmlformats.org/presentationml/2006/main";
+const DRAW_NS="http://schemas.openxmlformats.org/drawingml/2006/main";
+const REL_NS="http://schemas.openxmlformats.org/officeDocument/2006/relationships";
+const PKG_REL_NS="http://schemas.openxmlformats.org/package/2006/relationships";
+function parsePptXml(source:string):Document{
+ const parsed=new DOMParser().parseFromString(source,"application/xml");
+ if(parsed.getElementsByTagName("parsererror").length)throw new Error("This PowerPoint file contains invalid slide XML.");
+ return parsed;
+}
+function pptFirst(root:Element|null,ns:string,tag:string):Element|null{return root?root.getElementsByTagNameNS(ns,tag)[0]||null:null;}
+function pptAll(root:Element,ns:string,tag:string):Element[]{return Array.from(root.getElementsByTagNameNS(ns,tag));}
+function resolvePptPath(baseFile:string,target:string):string{
+ if(target.startsWith("/"))return target.slice(1);
+ const parts=baseFile.split("/").slice(0,-1);
+ for(const part of target.split("/")){if(!part||part===".")continue;if(part==="..")parts.pop();else parts.push(part);}
+ return parts.join("/");
+}
+function pptColor(root:Element|null,fallback:string):string{
+ const fill=pptFirst(root,DRAW_NS,"solidFill");const rgb=pptFirst(fill,DRAW_NS,"srgbClr");
+ if(rgb?.getAttribute("val"))return "#"+rgb.getAttribute("val");
+ const sys=pptFirst(fill,DRAW_NS,"sysClr");if(sys?.getAttribute("lastClr"))return "#"+sys.getAttribute("lastClr");
+ return fallback;
+}
+function pptBounds(shape:Element,sx:number,sy:number){
+ const props=pptFirst(shape,PPT_NS,"spPr")||shape;const xfrm=pptFirst(props,DRAW_NS,"xfrm")||pptFirst(shape,PPT_NS,"xfrm");
+ const off=pptFirst(xfrm,DRAW_NS,"off"),ext=pptFirst(xfrm,DRAW_NS,"ext");if(!off||!ext)return null;
+ return {x:Number(off.getAttribute("x"))*sx,y:Number(off.getAttribute("y"))*sy,w:Number(ext.getAttribute("cx"))*sx,h:Number(ext.getAttribute("cy"))*sy};
+}
+function wrapSlideText(ctx:CanvasRenderingContext2D,text:string,width:number):string[]{
+ const output:string[]=[];
+ for(const paragraph of text.split(/\r?\n/)){let line="";for(const word of paragraph.split(/\s+/)){const next=line?line+" "+word:word;if(line&&ctx.measureText(next).width>width){output.push(line);line=word;}else line=next;}output.push(line);}
+ return output;
+}
+async function renderPresentationSlides(file:File):Promise<Blob[]>{
+ if(file.size>120*1024*1024)throw new Error("For browser-based presentation rendering, choose a PPTX smaller than 120 MB.");
+ const zip=await JSZip.loadAsync(file);const presFile=zip.file("ppt/presentation.xml");
+ if(!presFile)throw new Error("This file does not contain a PowerPoint presentation.");
+ const presentation=parsePptXml(await presFile.async("text"));const sldSize=pptFirst(presentation,PPT_NS,"sldSz");
+ const emuW=Number(sldSize?.getAttribute("cx"))||12192000,emuH=Number(sldSize?.getAttribute("cy"))||6858000;
+ const canvasW=1280,canvasH=Math.max(480,Math.round(canvasW*emuH/emuW));
+ const presentationRels=zip.file("ppt/_rels/presentation.xml.rels");const rels=new Map<string,string>();
+ if(presentationRels){const doc=parsePptXml(await presentationRels.async("text"));for(const rel of pptAll(doc,PKG_REL_NS,"Relationship"))rels.set(rel.getAttribute("Id")||"",resolvePptPath("ppt/presentation.xml",rel.getAttribute("Target")||""));}
+ let slides=pptAll(presentation,PPT_NS,"sldId").map(item=>rels.get(item.getAttributeNS(REL_NS,"id")||item.getAttribute("r:id")||"")).filter(Boolean);
+ if(!slides.length)slides=Object.keys(zip.files).filter(path=>/^ppt\/slides\/slide\d+\.xml$/.test(path)).sort((a,b)=>Number(a.match(/slide(\d+)/)?.[1])-Number(b.match(/slide(\d+)/)?.[1]));
+ if(!slides.length)throw new Error("No PowerPoint slides were found.");
+ const rendered:Blob[]=[];
+ for(const slidePath of slides){
+  const entry=zip.file(slidePath);if(!entry)continue;const slide=parsePptXml(await entry.async("text"));
+  const canvas=document.createElement("canvas");canvas.width=canvasW;canvas.height=canvasH;
+  const ctx=canvas.getContext("2d");if(!ctx)throw new Error("Canvas rendering is unavailable.");
+  const bg=pptColor(pptFirst(slide,PPT_NS,"bg"),"#ffffff");ctx.fillStyle=bg;ctx.fillRect(0,0,canvasW,canvasH);
+  const relationPath=slidePath.replace(/([^/]+)$/,"_rels/$1.rels");const imageRels=new Map<string,string>();const relationFile=zip.file(relationPath);
+  if(relationFile){const doc=parsePptXml(await relationFile.async("text"));for(const rel of pptAll(doc,PKG_REL_NS,"Relationship"))imageRels.set(rel.getAttribute("Id")||"",resolvePptPath(slidePath,rel.getAttribute("Target")||""));}
+  const tree=pptFirst(slide,PPT_NS,"spTree");
+  const shapes=tree?Array.from(tree.children).filter(el=>el.namespaceURI===PPT_NS&&(el.localName==="sp"||el.localName==="pic")):[];
+  for(const shape of shapes){
+   const bounds=pptBounds(shape,canvasW/emuW,canvasH/emuH);if(!bounds||bounds.w<=0||bounds.h<=0)continue;
+   if(shape.localName==="pic"){
+    const blip=pptFirst(shape,DRAW_NS,"blip");const id=blip?.getAttributeNS(REL_NS,"embed")||blip?.getAttribute("r:embed")||"";
+    const path=imageRels.get(id);const media=path?zip.file(path):null;
+    if(media&&path){const ext=path.split(".").pop()?.toLowerCase()||"png";const mime=ext==="jpg"||ext==="jpeg"?"image/jpeg":ext==="gif"?"image/gif":"image/png";const data=await media.async("base64");const image=new Image();image.src="data:"+mime+";base64,"+data;try{await image.decode();ctx.drawImage(image,bounds.x,bounds.y,bounds.w,bounds.h);}catch{/* Unsupported embedded image files are skipped. */}}
+    continue;
+   }
+   const props=pptFirst(shape,PPT_NS,"spPr");const fill=pptColor(props,"");
+   if(fill){ctx.fillStyle=fill;const preset=pptFirst(props,DRAW_NS,"prstGeom")?.getAttribute("prst");if(preset==="ellipse"){ctx.beginPath();ctx.ellipse(bounds.x+bounds.w/2,bounds.y+bounds.h/2,bounds.w/2,bounds.h/2,0,0,Math.PI*2);ctx.fill();}else ctx.fillRect(bounds.x,bounds.y,bounds.w,bounds.h);}
+   const body=pptFirst(shape,PPT_NS,"txBody");if(!body)continue;
+   const paragraphs=pptAll(body,DRAW_NS,"p");let y=bounds.y+Math.max(5,bounds.h*.05);
+   for(const paragraph of paragraphs){
+    const text=pptAll(paragraph,DRAW_NS,"t").map(node=>node.textContent||"").join("");if(!text){y+=10;continue;}
+    const style=pptFirst(paragraph,DRAW_NS,"rPr")||pptFirst(paragraph,DRAW_NS,"defRPr");
+    const pt=Math.max(7,Math.min(60,Number(style?.getAttribute("sz"))/100||18));
+    const px= Math.max(9,Math.min(78,pt*(canvasW/emuW*914400/72)));
+    ctx.font=(style?.getAttribute("i")==="1"?"italic ":"")+(style?.getAttribute("b")==="1"?"600 ":"400 ")+px+"px Arial, sans-serif";
+    ctx.fillStyle=pptColor(style,"#25262b");
+    const align=pptFirst(paragraph,DRAW_NS,"pPr")?.getAttribute("algn");ctx.textAlign=align==="ctr"?"center":align==="r"?"right":"left";
+    const pad=10,maxWidth=Math.max(20,bounds.w-pad*2),lines=wrapSlideText(ctx,text,maxWidth);
+    const x=ctx.textAlign==="center"?bounds.x+bounds.w/2:ctx.textAlign==="right"?bounds.x+bounds.w-pad:bounds.x+pad;
+    const lineH=px*1.26;for(const line of lines){if(y+lineH>bounds.y+bounds.h)break;ctx.fillText(line,x,y+px);y+=lineH;}y+=px*.15;
+   }
+  }
+  const blob=await new Promise<Blob>((resolve,reject)=>canvas.toBlob(value=>value?resolve(value):reject(new Error("A presentation slide could not be rendered.")),"image/png"));
+  rendered.push(blob);canvas.width=0;canvas.height=0;
+ }
+ if(!rendered.length)throw new Error("No slides could be rendered from this presentation.");
+ return rendered;
+}
+async function presentationToPdf(pages:Blob[],filename:string):Promise<ProcessResult>{
+ const {jsPDF}=await import("jspdf");const pageW=960,pageH=pageW*9/16;const pdf=new jsPDF({unit:"pt",format:[pageW,pageH],orientation:"landscape"});
+ for(let i=0;i<pages.length;i++){if(i>0)pdf.addPage([pageW,pageH],"landscape");const url=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=()=>reject(new Error("Could not prepare a slide image."));reader.readAsDataURL(pages[i]);});pdf.addImage(url,"PNG",0,0,pageW,pageH);}
+ return result(pdf.output("blob"),filename,"Rendered PowerPoint slides exported to PDF. Slide text is presented as page imagery.");
+}
+async function slidesToImageFiles(file:File):Promise<ProcessResult[]>{
+ const pages=await renderPresentationSlides(file);if(pages.length===1)return [result(pages[0],name(file,"png"),"Presentation slide rendered to PNG.")];
+ const zip=new JSZip();pages.forEach((page,index)=>zip.file("slide-"+String(index+1).padStart(3,"0")+".png",page));
+ return [result(await zip.generateAsync({type:"blob"}),name(file,"zip"),pages.length+" slides rendered into individual PNG images.")];
+}
+
 export async function processFiles(files:File[],tool:string,options:ProcessOptions={}):Promise<ProcessResult[]>{
  if(!files.length)throw new Error("Choose at least one file.");
  if(["PNG to JPG","JPG to PNG","PNG to WEBP","WEBP converter","Image compressor","Resize image","Crop & rotate"].includes(tool))return Promise.all(files.map(f=>image(f,tool,options)));
  if(["Image to PDF","Merge PDF","Split PDF","Compress PDF","Organize PDF"].includes(tool))return pdf(files,tool,options);
  if(tool==="Protect PDF"){const password=options.password?.trim();if(!password||password.length<6)throw new Error("Enter a password with at least 6 characters.");const {PDFDocument:SecurePDF}=await import("@cantoo/pdf-lib");const doc=await SecurePDF.load(await files[0].arrayBuffer());doc.encrypt({userPassword:password,ownerPassword:password+"-"+crypto.randomUUID()});return [result(bytesBlob(await doc.save(),"application/pdf"),name(files[0],"pdf"),"PDF encrypted with AES-256 password protection.")];}
  if(["PDF to Word","PDF to Excel","PDF to JPG","PDF to PNG","PDF to PowerPoint"].includes(tool))return pdfAdvanced(files,tool);
+ if(tool==="PPTX to PDF"||tool==="Slides to images"){if(tool==="PPTX to PDF"){const pages=await renderPresentationSlides(files[0]);return [await presentationToPdf(pages,name(files[0],"pdf"))];}return slidesToImageFiles(files[0]);}
  if(["CSV to XLSX","Remove duplicates"].includes(tool))return spreadsheet(files[0],tool);
  if(tool==="Excel to PDF"){const wb=XLSX.read(await files[0].arrayBuffer(),{type:"array"});const csv=wb.SheetNames.map(n=>n+"\\n"+XLSX.utils.sheet_to_csv(wb.Sheets[n])).join("\\n\\n");return [await makePdf(csv,name(files[0],"pdf"))];}
  if(["Create ZIP","Extract archive"].includes(tool))return [await archive(files,tool)];
  if(["JSON formatter","Base64 tools","DOCX to TXT"].includes(tool))return [await textTool(files[0],tool)];
  if(tool==="Word to PDF"){const mammoth=await import("mammoth");const extracted=await mammoth.extractRawText({arrayBuffer:await files[0].arrayBuffer()});return [await makePdf(extracted.value,name(files[0],"pdf"))];}
- if(tool==="PPTX to PDF"){const text=await pptxText(files[0]);return [await makePdf(text,name(files[0],"pdf"))];}
+ if(tool==="PPTX to PDF"){const pages=await renderPresentationSlides(files[0]);return [await presentationToPdf(pages,name(files[0],"pdf"))];}
  if(tool==="Image to Word (OCR)"||tool==="OCR extractor"){const extracted=files[0].type==="application/pdf"||files[0].name.toLowerCase().endsWith(".pdf")?await ocrPdf(files[0]):await ocrImage(files[0]);return [await makeDocx(extracted,name(files[0],"docx"))];}
+ if(tool==="Slides to images")return slidesToImageFiles(files[0]);
  if(tool==="Background remover")return [await removeImageBackground(files[0])];
  if(tool==="Image enhancer"||tool==="Photo restoration")return [await upscaleImage(files[0],tool)];
  if(["MP4 to GIF","Video compressor","Extract audio","Audio converter"].includes(tool))return [await ffmpegRun(files[0],tool,options)];
