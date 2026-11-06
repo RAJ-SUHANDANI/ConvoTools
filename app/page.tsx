@@ -13,6 +13,9 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChangeEvent, DragEvent, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import FileActionPanel from "@/components/FileActionPanel";
+import ImageComparison from "@/components/ImageComparison";
+import ScrollProgress from "@/components/ScrollProgress";
+import { recordActivity } from "@/lib/activity";
 import { TOOLS, TOOL_CATEGORIES, slugify } from "@/lib/tools";
 
 export default function Home() {
@@ -28,6 +31,13 @@ export default function Home() {
 
   const addFiles = (incoming: FileList | File[]) => {
     const next = Array.from(incoming).filter((file) => file.size > 0);
+    next.forEach((file) => recordActivity({
+      type: "upload",
+      title: file.name,
+      filename: file.name,
+      size: file.size,
+      description: "Added to the universal file workspace",
+    }));
     setFiles((current) => [...current, ...next].slice(0, 30));
   };
 
@@ -52,7 +62,7 @@ export default function Home() {
   }, [category, query]);
 
   return (
-    <main className="app-shell">
+    <main className="app-shell">\n      <ScrollProgress />
       <div className="announcement-bar">
         <span className="announcement-pulse" />
         <span>THE FILE WORKSPACE FOR PEOPLE WHO MAKE THINGS</span>
@@ -74,7 +84,7 @@ export default function Home() {
         </nav>
         <div className="header-actions">
           <a className="header-github" href="https://github.com/RAJ-SUHANDANI/ConvoTools" target="_blank" rel="noreferrer"><Github size={15} /> <span>GitHub</span></a>
-          <a className="header-button" href="/workspace">Open workspace <ArrowUpRight size={14} /></a>
+          <a className="header-button" href="/dashboard">Open workspace <ArrowUpRight size={14} /></a>
           <button className="mobile-toggle" onClick={() => setMenuOpen((value) => !value)} aria-label="Toggle navigation">{menuOpen ? <X size={19} /> : <Menu size={19} />}</button>
         </div>
       </header>
@@ -88,14 +98,14 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      <section className="hero-section">
+      <motion.section initial={reducedMotion ? false : { opacity: 0, y: 26 }} whileInView={reducedMotion ? {} : { opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.12 }} transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }} className="hero-section">
         <div className="hero-main">
           <motion.div className="hero-copy" initial={reducedMotion ? false : { opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}>
             <div className="eyebrow"><span className="eyebrow-rule" /> ONE WORKSPACE. A LOT LESS BUSYWORK.</div>
             <h1>Make files<br /><em>work for you.</em></h1>
             <p className="hero-lede">Convert, refine, organize and edit the files that keep your day moving. One considered toolkit, from quick fixes to bigger workflows.</p>
             <div className="hero-ctas">
-              <a className="button-primary" href="/workspace">Start with a file <ArrowUpRight size={16} /></a>
+              <a className="button-primary" href="/dashboard">Start with a file <ArrowUpRight size={16} /></a>
               <a className="button-text" href="#toolkit">See everything you can do <ArrowDownRight size={16} /></a>
             </div>
             <div className="hero-note"><span className="hero-note-mark"><LockKeyhole size={14} /></span><span><strong>Private by default.</strong> Local-first tools wherever practical.</span></div>
@@ -136,7 +146,7 @@ export default function Home() {
           <div className="format-list"><b>PDF</b><i /><b>DOCX</b><i /><b>XLSX</b><i /><b>PPTX</b><i /><b>JPG</b><i /><b>MP4</b><i /><b>ZIP</b></div>
           <span className="hero-bottom-right">SCROLL TO EXPLORE <ArrowDownRight size={13} /></span>
         </div>
-      </section>
+      </motion.section>
 
       <section className="intro-band">
         <div className="intro-band-inner">
@@ -248,15 +258,7 @@ export default function Home() {
       <section className="category-feature image-feature section-pad" id="image-lab">
         <div className="image-visual">
           <div className="image-visual-top"><span>IMAGE LAB / ENHANCEMENT</span><span className="visual-status"><i /> EXAMPLE WORKSPACE</span></div>
-          <div className="image-canvas">
-            <div className="image-canvas-grid" />
-            <div className="image-mock-image">
-              <div className="image-mock-sun" /><div className="image-mock-mountain mountain-back" /><div className="image-mock-mountain mountain-front" /><div className="image-mock-ground" />
-            </div>
-            <div className="compare-divider"><span><ArrowLeftRightIcon /></span></div>
-            <div className="compare-label before">BEFORE</div><div className="compare-label after">AFTER / 2×</div>
-            <div className="image-canvas-caption"><span>landscape_01.jpg</span><span>2400 × 1600</span></div>
-          </div>
+          <ImageComparison />
           <div className="image-controls"><span><SlidersHorizontal size={14} /> Enhance details</span><div className="image-control-pills"><b>2×</b><b>4×</b><b>Denoise</b><b>Unblur</b></div></div>
         </div>
         <div className="category-heading">
@@ -315,7 +317,16 @@ export default function Home() {
         </div>
         <div className="media-console">
           <div className="media-console-head"><span><Film size={14} /> MEDIA WORKBENCH</span><span>DEMO / TIMELINE</span></div>
-          <div className="media-screen"><div className="media-screen-art"><div className="media-sun" /><div className="media-hill hill-one" /><div className="media-hill hill-two" /></div><div className="media-screen-overlay"><span>00:12</span><span><Play size={15} fill="currentColor" /></span><span>00:48</span></div></div>
+          <div className="media-screen media-screen-real">
+            <video
+              className="media-demo-video"
+              src="https://videos.pexels.com/video-files/34528660/14629544_2160_3840_30fps.mp4"
+              poster="https://images.unsplash.com/photo-1747671688812-76d7bca21f34?auto=format&fit=crop&w=1100&q=82"
+              controls
+              playsInline
+              preload="none"
+            />
+          </div>
           <div className="timeline-ruler"><span>00:00</span><span>00:15</span><span>00:30</span><span>00:45</span></div>
           <div className="timeline-track"><span className="track-label"><Film size={13} /> VIDEO</span><div className="track-segments"><i /><i /><i /><i /></div></div>
           <div className="timeline-track audio-track"><span className="track-label"><AudioLines size={13} /> AUDIO</span><div className="audio-wave">{Array.from({length:44}, (_, index) => <i key={index} style={{height: (8 + ((index * 17) % 23)) + "px"}} />)}</div></div>
@@ -398,14 +409,14 @@ export default function Home() {
       </section>
 
       <section className="final-cta section-pad">
-        <div className="final-cta-card"><div className="final-cta-copy"><span className="section-kicker">A BETTER PLACE FOR FILE WORK</span><h2>Make the next file task<br /><em>the easy one.</em></h2><p>Bring a file. Pick a task. Keep moving.</p><a className="button-light" href="/workspace">Open your workspace <ArrowUpRight size={15} /></a></div><div className="final-cta-mark"><div className="cta-mark-grid" /><div className="cta-file cta-file-one"><FileImage size={25} /></div><div className="cta-file cta-file-two"><FileText size={25} /></div><div className="cta-file cta-file-three"><FileSpreadsheet size={25} /></div><div className="cta-center"><span /><span /><span /></div></div></div>
+        <div className="final-cta-card"><div className="final-cta-copy"><span className="section-kicker">A BETTER PLACE FOR FILE WORK</span><h2>Make the next file task<br /><em>the easy one.</em></h2><p>Bring a file. Pick a task. Keep moving.</p><a className="button-light" href="/dashboard">Open your workspace <ArrowUpRight size={15} /></a></div><div className="final-cta-mark"><div className="cta-mark-grid" /><div className="cta-file cta-file-one"><FileImage size={25} /></div><div className="cta-file cta-file-two"><FileText size={25} /></div><div className="cta-file cta-file-three"><FileSpreadsheet size={25} /></div><div className="cta-center"><span /><span /><span /></div></div></div>
       </section>
 
       <footer className="site-footer">
         <div className="footer-main">
           <a className="wordmark footer-wordmark" href="#"><span className="wordmark-symbol"><span /><span /><span /></span><span>convo<span className="wordmark-light">tools</span></span></a>
           <p>A more considered way to get<br />the everyday file jobs done.</p>
-          <div className="footer-nav"><div><b>EXPLORE</b><a href="#toolkit">All tools</a><a href="#pdf">PDF</a><a href="#image-lab">Image lab</a><a href="#ai">AI lab</a></div><div><b>WORKSPACE</b><a href="/workspace">Upload files</a><a href="#workflow">Workflows</a><a href="#developer">Developer tools</a><a href="#faq">FAQ</a></div><div><b>PROJECT</b><a href="https://github.com/RAJ-SUHANDANI/ConvoTools" target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={12} /></a><a href="#principles">Our approach</a></div></div>
+          <div className="footer-nav"><div><b>EXPLORE</b><a href="#toolkit">All tools</a><a href="#pdf">PDF</a><a href="#image-lab">Image lab</a><a href="#ai">AI lab</a></div><div><b>WORKSPACE</b><a href="/dashboard">Dashboard</a><a href="#workflow">Workflows</a><a href="#developer">Developer tools</a><a href="#faq">FAQ</a></div><div><b>PROJECT</b><a href="https://github.com/RAJ-SUHANDANI/ConvoTools" target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={12} /></a><a href="#principles">Our approach</a></div></div>
         </div>
         <div className="footer-bottom"><span>© 2026 CONVOTOOLS. MADE FOR THE WORK BETWEEN THE WORK.</span><span>EARLY INTERFACE PREVIEW <i /> PROCESSING ENGINES IN PROGRESS</span></div>
       </footer>
