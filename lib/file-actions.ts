@@ -120,7 +120,7 @@ export function acceptedInputForTool(inputLabel: string, category: string) {
   if (input === "webp") return ".webp,image/webp";
   if (input === "image") return "image/*";
   if (input === "image or pdf") return "image/*,.pdf,application/pdf";
-  if (input === "docx") return ".doc,.docx,.odt,.rtf";
+  if (input === "docx" || input === "document") return ".doc,.docx,.odt,.rtf,.txt,.md";
   if (input === "csv") return ".csv,.tsv,text/csv";
   if (input === "xlsx" || input === "csv / xlsx") return ".xls,.xlsx,.csv,.tsv,.ods";
   if (input === "pptx") return ".ppt,.pptx,.odp";
