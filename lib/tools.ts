@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
-  AudioLines, Braces, Check, Code2, FileArchive, FileAudio, FileImage,
+  AudioLines, Braces, Check, Code2, Download, FileArchive, FileAudio, FileImage,
   FilePenLine, FileSpreadsheet, FileText, FileVideo, Film, Image as ImageIcon,
   LockKeyhole, Merge, Minimize2, Music2, PanelTop, QrCode, ScanText,
   SlidersHorizontal, Sparkles, Split, WandSparkles
@@ -37,10 +37,10 @@ export const TOOLS: Tool[] = [
   { name: "Image compressor", description: "Reduce image file sizes while retaining detail.", category: "Images", icon: Minimize2, inputLabel: "Image", outputLabel: "Optimized image" },
   { name: "Resize image", description: "Set exact image dimensions or scale by percentage.", category: "Images", icon: SlidersHorizontal, inputLabel: "Image", outputLabel: "Image" },
   { name: "Crop & rotate", description: "Center-crop an image to a square and rotate it in 90° increments.", category: "Images", icon: ImageIcon, inputLabel: "Image", outputLabel: "Image" },
-  { name: "Image enhancer", description: "Use an AI super-resolution model to upscale images 2× and reconstruct finer detail.", category: "AI lab", icon: WandSparkles, tag: "AI", inputLabel: "Image", outputLabel: "Enhanced image" },
-  { name: "Background remover", description: "Remove the background from portrait photos and export a transparent PNG using local AI matting.", category: "AI lab", icon: Sparkles, tag: "AI", inputLabel: "Image", outputLabel: "PNG" },
-  { name: "Photo restoration", description: "Apply real-world AI super-resolution to low-resolution photos at 4× output. Not scratch repair.", category: "AI lab", icon: ImageIcon, tag: "AI", inputLabel: "Image", outputLabel: "Restored image" },
-  { name: "OCR extractor", description: "Turn scanned pages and screenshots into editable text.", category: "AI lab", icon: ScanText, tag: "AI", inputLabel: "Image or PDF", outputLabel: "DOCX / TXT" },
+  { name: "Image enhancer", description: "Coming soon — AI image upscaling is being prepared.", category: "AI lab", icon: WandSparkles, tag: "Coming soon", inputLabel: "Image", outputLabel: "Enhanced image" },
+  { name: "Background remover", description: "Coming soon — AI background removal is being prepared.", category: "AI lab", icon: Sparkles, tag: "Coming soon", inputLabel: "Image", outputLabel: "PNG" },
+  { name: "Photo restoration", description: "Coming soon — AI photo enhancement is being prepared.", category: "AI lab", icon: ImageIcon, tag: "Coming soon", inputLabel: "Image", outputLabel: "Restored image" },
+  { name: "OCR extractor", description: "Coming soon — standalone OCR tools are being prepared.", category: "AI lab", icon: ScanText, tag: "Coming soon", inputLabel: "Image or PDF", outputLabel: "DOCX / TXT" },
   { name: "Word editor", description: "Edit extracted Word document text and export a clean DOCX file.", category: "Documents", icon: FilePenLine, inputLabel: "DOCX", outputLabel: "DOCX" },
   { name: "DOCX to TXT", description: "Extract clean plain text from Word documents.", category: "Documents", icon: FileText, inputLabel: "DOCX", outputLabel: "TXT" },
   { name: "Excel to PDF", description: "Export spreadsheet cell content into a simple PDF report; styling may differ.", category: "Spreadsheets", icon: FileSpreadsheet, inputLabel: "XLSX", outputLabel: "PDF" },
@@ -50,6 +50,7 @@ export const TOOLS: Tool[] = [
   { name: "PDF to PPTX", description: "Convert PDF pages into editable slide layouts.", category: "Presentations", icon: FileText, inputLabel: "PDF", outputLabel: "PPTX" },
   { name: "Slides to images", description: "Render slide text boxes, basic shapes and embedded images to PNG files.", category: "Presentations", icon: ImageIcon, inputLabel: "PPTX", outputLabel: "PNG" },
   { name: "MP4 to GIF", description: "Turn a video clip into a lightweight looping GIF.", category: "Video & audio", icon: Film, inputLabel: "MP4", outputLabel: "GIF" },
+  { name: "Social media downloader", description: "Identify YouTube, Instagram and TikTok links, preview public posts and find official, creator-authorized save options.", category: "Video & audio", icon: Download, inputLabel: "Social media URL", outputLabel: "Preview / official save" },
   { name: "Video compressor", description: "Reduce video size for easier sharing.", category: "Video & audio", icon: FileVideo, inputLabel: "Video", outputLabel: "MP4" },
   { name: "Extract audio", description: "Save the audio track from a video file.", category: "Video & audio", icon: FileAudio, inputLabel: "Video", outputLabel: "MP3" },
   { name: "Audio converter", description: "Convert between MP3, WAV, AAC and FLAC.", category: "Video & audio", icon: Music2, inputLabel: "Audio", outputLabel: "MP3" },
@@ -69,7 +70,7 @@ export const TOOL_CATEGORIES = [
   { name: "Spreadsheets", detail: "Clean, reshape and share" },
   { name: "Presentations", detail: "Slides in every format" },
   { name: "Video & audio", detail: "Trim, convert and compress" },
-  { name: "AI lab", detail: "Enhance with intelligence" },
+  { name: "AI lab", detail: "Coming soon — access is temporarily locked" },
   { name: "Archives", detail: "Pack and unpack" },
   { name: "Developer", detail: "Utilities for file workflows" },
 ];

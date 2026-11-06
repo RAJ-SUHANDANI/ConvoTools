@@ -420,6 +420,7 @@ async function extractDocumentText(file:File):Promise<string>{
 async function mapFileResults(files:File[],operation:(file:File)=>Promise<ProcessResult[]>):Promise<ProcessResult[]>{const output:ProcessResult[]=[];for(const file of files)output.push(...await operation(file));return output;}
 
 export async function processFiles(files:File[],tool:string,options:ProcessOptions={}):Promise<ProcessResult[]>{
+ if(["Image enhancer","Background remover","Photo restoration","OCR extractor"].includes(tool))throw new Error("This AI tool is temporarily locked and marked Coming soon.");
  if(!files.length&&!(tool==="QR generator"&&options.qrText?.trim()))throw new Error("Choose at least one file or enter text to generate a QR code.");
  if(["PNG to JPG","JPG to PNG","PNG to WEBP","WEBP converter","Image compressor","Resize image","Crop & rotate"].includes(tool))return Promise.all(files.map(f=>image(f,tool,options)));
  if(["Image to PDF","Merge PDF"].includes(tool))return pdf(files,tool,options);

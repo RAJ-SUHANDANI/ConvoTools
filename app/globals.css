@@ -1117,3 +1117,68 @@ button,a,.tool-result,.format-panel,.ai-card,.dash-stat-card,.dash-quick-tool{ -
 @keyframes output-enter{from{opacity:0;transform:translateY(8px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
 button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid #6268dd;outline-offset:3px}
 @media(prefers-reduced-motion:reduce){.operation-upload-icon{animation:none!important}.operation-card,.operation-card:before,.operation-file-row,.operation-file-thumb,.operation-drop,.operation-submit,.operation-results>button{transition:none!important;animation:none!important}}
+
+/* Locked AI tools and social media link saver */
+.coming-soon-page{min-height:100vh;display:flex;flex-direction:column}
+.coming-soon-shell{width:min(760px,calc(100% - 48px));margin:clamp(56px,10vh,110px) auto 54px;text-align:center;position:relative}
+.coming-soon-orbit{width:132px;height:132px;border:1px solid rgba(82,89,216,.2);border-radius:50%;margin:0 auto 34px;display:grid;place-items:center;position:relative;box-shadow:0 0 0 13px rgba(82,89,216,.025),0 0 0 28px rgba(82,89,216,.018)}
+.coming-soon-orbit:before,.coming-soon-orbit:after{content:"";position:absolute;inset:12px;border:1px dashed rgba(82,89,216,.32);border-radius:50%;animation:coming-orbit 18s linear infinite}
+.coming-soon-orbit:after{inset:-18px;border-color:rgba(24,25,28,.12);animation-direction:reverse;animation-duration:26s}
+.coming-soon-orbit span{position:absolute;width:6px;height:6px;background:var(--blue);border-radius:50%;top:13px;left:25px;box-shadow:0 0 0 5px rgba(82,89,216,.1)}
+.coming-soon-orbit span:nth-child(2){top:auto;left:auto;right:5px;bottom:40px;background:var(--lime)}
+.coming-soon-orbit span:nth-child(3){top:58px;left:-5px;background:#8d91ee}
+.coming-soon-orbit>div{width:72px;height:72px;background:var(--night);color:var(--lime);border-radius:22px;display:grid;place-items:center;box-shadow:0 14px 32px rgba(20,21,25,.18)}
+@keyframes coming-orbit{to{transform:rotate(360deg)}}
+.coming-soon-shell .tool-detail-kicker{justify-content:center}
+.coming-soon-shell h1,.social-saver-hero h1{font:500 clamp(48px,7vw,76px)/.94 var(--display);letter-spacing:-.075em;margin:24px 0 20px}
+.coming-soon-shell h1 em,.social-saver-hero h1 em{font-family:var(--serif);font-weight:400;color:var(--blue);letter-spacing:-.025em}
+.coming-soon-shell>p{max-width:590px;margin:0 auto;color:#6f7076;font-size:14px;line-height:1.85}
+.coming-soon-status{display:flex;justify-content:center;gap:22px;margin:30px 0;color:#676971;font:9px var(--mono);letter-spacing:.09em}
+.coming-soon-status span{display:flex;align-items:center;gap:7px}
+.coming-soon-status span:first-child{color:var(--blue)}
+.coming-soon-actions{display:flex;justify-content:center;align-items:center;gap:22px;margin-top:30px}
+.coming-soon-actions .operation-submit{display:inline-flex;align-items:center;gap:14px;padding:0 17px;border-radius:4px;color:#fff;height:45px;font-size:11px}
+.coming-soon-back{display:inline-flex;align-items:center;gap:7px;font-size:11px;color:#686a71}
+.coming-soon-foot{text-align:center;margin:auto auto 22px;color:#888a8f;font:9px var(--mono);letter-spacing:.12em}
+.social-saver-page{padding-bottom:20px}
+.social-saver-hero{max-width:920px;margin:68px auto 35px;padding:0 28px;text-align:center}
+.social-saver-hero .tool-detail-kicker{justify-content:center}
+.social-saver-hero>p{max-width:650px;margin:0 auto;color:#71737a;line-height:1.8;font-size:14px}
+.social-url-form{max-width:760px;margin:30px auto 0}
+.social-url-input{min-height:66px;background:#fbfaf7;border:1px solid #d4d3cd;box-shadow:0 14px 45px rgba(23,25,29,.055);border-radius:7px;padding:8px 9px 8px 17px;display:flex;align-items:center;gap:12px;color:#757780;transition:border-color .2s,box-shadow .25s}
+.social-url-input:focus-within{border-color:var(--blue);box-shadow:0 14px 45px rgba(82,89,216,.11)}
+.social-url-input input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--ink);font-size:13px}
+.social-url-input input::placeholder{color:#a0a1a5}
+.social-url-input button{height:45px;padding:0 16px;background:var(--blue);border:1px solid var(--blue);border-radius:4px;color:white;display:flex;align-items:center;gap:11px;font-size:11px;font-weight:600;transition:transform .2s,background .2s}
+.social-url-input button:hover{transform:translateY(-2px);background:var(--blue-deep)}
+.social-url-error{display:block;text-align:left;color:#ad4545;margin:10px 4px 0}
+.social-platform-list{display:flex;justify-content:center;gap:24px;margin-top:25px;color:#74767c;font:10px var(--mono);letter-spacing:.04em}
+.social-platform-list span{display:flex;align-items:center;gap:7px}
+.social-result-grid{max-width:1050px;margin:38px auto 0;padding:0 28px;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:18px}
+.social-preview-card,.social-official-card{border:1px solid var(--line);background:var(--paper-light);border-radius:8px;overflow:hidden;box-shadow:0 15px 46px rgba(25,26,31,.04)}
+.social-preview-card{padding:15px}
+.social-card-topline{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;color:#50525a;font:9px var(--mono);letter-spacing:.09em}
+.social-card-topline span{display:flex;align-items:center;gap:7px}
+.social-card-topline small{color:#82848b}
+.social-embed{width:100%;min-height:360px;max-height:620px;border:0;background:#ecebe6;border-radius:5px}
+.social-embed-unavailable{min-height:300px;background:#eeede7;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:#777981;font-size:12px;text-align:center;padding:20px}
+.social-preview-actions{display:flex;justify-content:space-between;gap:12px;padding-top:13px}
+.social-preview-actions a,.social-preview-actions button{border:0;background:transparent;color:#50525a;display:flex;align-items:center;gap:7px;font-size:10px}
+.social-preview-actions a:hover,.social-preview-actions button:hover{color:var(--blue)}
+.social-official-card{padding:25px 27px}
+.social-official-kicker{display:flex;align-items:center;gap:7px;color:var(--green);font:9px var(--mono);letter-spacing:.1em}
+.social-official-card h2{font:500 28px/1.1 var(--display);letter-spacing:-.05em;margin:20px 0 12px}
+.social-official-card>p{color:#74767b;font-size:12px;line-height:1.8;margin:0}
+.social-official-card ol{list-style:none;margin:22px 0;padding:0;display:grid;gap:15px}
+.social-official-card li{display:grid;grid-template-columns:26px 1fr;gap:10px;color:#565860;font-size:11px;line-height:1.6}
+.social-official-card li span{font:10px var(--mono);color:var(--blue);padding-top:1px}
+.social-help-link{display:inline-flex;align-items:center;gap:8px;border-bottom:1px solid rgba(82,89,216,.35);padding-bottom:5px;color:var(--blue);font-size:11px}
+.social-saver-notice{max-width:1050px;margin:22px auto 0;padding:18px 22px;display:flex;align-items:flex-start;gap:13px;background:#e9e8e1;border:1px solid #deddd5;border-radius:6px;color:#53555d}
+.social-saver-notice>svg{flex-shrink:0;margin-top:2px;color:var(--blue)}
+.social-saver-notice b{font-size:11px}
+.social-saver-notice p{margin:5px 0 0;color:#777981;font-size:11px;line-height:1.7}
+.social-saver-bottom{max-width:1050px;margin:38px auto 0;padding:0 28px;display:flex;justify-content:space-between;color:#898b90;font:9px var(--mono);letter-spacing:.08em}
+.social-saver-bottom a{display:flex;align-items:center;gap:6px;color:#666970;font:11px var(--sans);letter-spacing:0}
+@media(max-width:760px){.social-result-grid{grid-template-columns:1fr}.social-saver-hero{margin-top:48px}.social-embed{min-height:320px}.social-saver-notice,.social-saver-bottom{margin-left:18px;margin-right:18px}.social-saver-bottom{padding:0}.coming-soon-status{flex-direction:column;align-items:center;gap:10px}}
+@media(max-width:520px){.social-url-input{flex-wrap:wrap;padding:12px}.social-url-input input{flex:1 1 calc(100% - 35px);font-size:12px;min-height:34px}.social-url-input button{width:100%;justify-content:center}.social-platform-list{gap:13px;font-size:8px}.coming-soon-actions{flex-direction:column}.coming-soon-shell h1,.social-saver-hero h1{font-size:49px}.social-official-card{padding:22px}}
+@media(prefers-reduced-motion:reduce){.coming-soon-orbit:before,.coming-soon-orbit:after{animation:none}}
