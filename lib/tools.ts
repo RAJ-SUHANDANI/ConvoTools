@@ -50,7 +50,6 @@ export const TOOLS: Tool[] = [
   { name: "PDF to PPTX", description: "Convert PDF pages into editable slide layouts.", category: "Presentations", icon: FileText, inputLabel: "PDF", outputLabel: "PPTX" },
   { name: "Slides to images", description: "Render slide text boxes, basic shapes and embedded images to PNG files.", category: "Presentations", icon: ImageIcon, inputLabel: "PPTX", outputLabel: "PNG" },
   { name: "MP4 to GIF", description: "Turn a video clip into a lightweight looping GIF.", category: "Video & audio", icon: Film, inputLabel: "MP4", outputLabel: "GIF" },
-  { name: "Social media downloader", description: "Identify YouTube, Instagram and TikTok links, preview public posts and find official, creator-authorized save options.", category: "Video & audio", icon: Download, inputLabel: "Social media URL", outputLabel: "Preview / official save" },
   { name: "Video compressor", description: "Reduce video size for easier sharing.", category: "Video & audio", icon: FileVideo, inputLabel: "Video", outputLabel: "MP4" },
   { name: "Extract audio", description: "Save the audio track from a video file.", category: "Video & audio", icon: FileAudio, inputLabel: "Video", outputLabel: "MP3" },
   { name: "Audio converter", description: "Convert between MP3, WAV, AAC and FLAC.", category: "Video & audio", icon: Music2, inputLabel: "Audio", outputLabel: "MP3" },
