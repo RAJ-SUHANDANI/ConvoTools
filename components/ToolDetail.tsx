@@ -62,7 +62,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
   const [files, setFiles] = useState<File[]>([]);
   const [output, setOutput] = useState(defaultOutput(tool));
   const [quality, setQuality] = useState<"Smaller file" | "Balanced" | "Best quality">("Balanced");
-  const [keepMetadata, setKeepMetadata] = useState(true);
+  const [keepMetadata, setKeepMetadata] = useState(true);\n  const [password, setPassword] = useState("");\n  const [pdfPageOrder, setPdfPageOrder] = useState("");
   const [notice, setNotice] = useState("");
   const [processing, setProcessing] = useState(false);
   const [results, setResults] = useState<ProcessResult[]>([]);
@@ -120,7 +120,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
     if (invalidFiles.length) { setNotice("One or more files do not match this tool's expected input format."); return; }
     setProcessing(true); setResults([]); setNotice("Processing locally in your browser…");
     try {
-      const completed = await processFiles(files, tool.name, { output, quality });
+      const completed = await processFiles(files, tool.name, { output, quality, password, pdfPageOrder });
       setResults(completed);
       completed.forEach((result) => {
         saveProcessedFile(result);
@@ -191,7 +191,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
               <div className="select-wrap"><select id="quality-select" value={quality} onChange={(event) => setQuality(event.target.value)}><option>Smaller file</option><option>Balanced</option><option>Best quality</option></select><ChevronDown size={15} /></div>
             </>
           )}
-          <label className="metadata-toggle"><input type="checkbox" checked={keepMetadata} onChange={(event) => setKeepMetadata(event.target.checked)} /><span className="fake-check"><Check size={11} /></span><span><b>Keep original metadata when possible</b><small>Preserve dates, orientation and other available file information.</small></span></label>
+          {tool.name === "Protect PDF" && <><label className="field-label" htmlFor="pdf-password">PDF password</label><input id="pdf-password" className="operation-password" type="password" autoComplete="new-password" minLength={6} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="At least 6 characters" /><small className="operation-hint">The password is applied locally. Keep it safe; it cannot be recovered.</small></>}\n          {tool.name === "Organize PDF" && <><label className="field-label" htmlFor="pdf-page-order">Page order / pages to keep</label><input id="pdf-page-order" className="operation-password" type="text" value={pdfPageOrder} onChange={(event) => setPdfPageOrder(event.target.value)} placeholder="Example: 3, 1, 2" /><small className="operation-hint">Enter page numbers in the desired order. Omit a page to remove it. Leave blank to keep the original order.</small></>}\n          <label className="metadata-toggle"><input type="checkbox" checked={keepMetadata} onChange={(event) => setKeepMetadata(event.target.checked)} /><span className="fake-check"><Check size={11} /></span><span><b>Keep original metadata when possible</b><small>Preserve dates, orientation and other available file information.</small></span></label>
 
           <motion.button className="operation-submit" onClick={startOperation} disabled={processing || (files.length > 0 && invalidFiles.length > 0)} whileHover={{ y: -2, boxShadow: "0 10px 24px rgba(82,89,216,.18)" }} whileTap={{ scale: 0.99 }}><span>{processing ? "Processing…" : isAI ? "Run tool" : "Process & download"}</span><ArrowRight size={16} /></motion.button>
           {processing && <div className="operation-progress"><motion.i initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut" }} /></div>}

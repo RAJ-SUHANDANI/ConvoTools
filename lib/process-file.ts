@@ -4,7 +4,7 @@ import { PDFDocument } from "pdf-lib";
 import * as XLSX from "xlsx";
 import { Document, Packer, Paragraph, TextRun } from "docx";
 
-export type ProcessOptions = { quality?: "Smaller file" | "Balanced" | "Best quality"; output?: string };
+export type ProcessOptions = { quality?: "Smaller file" | "Balanced" | "Best quality"; output?: string; password?: string; pdfPageOrder?: string };
 export type ProcessResult = { blob: Blob; filename: string; mime: string; message: string };
 const result=(blob:Blob,filename:string,message:string):ProcessResult=>({blob,filename,mime:blob.type||"application/octet-stream",message});
 const name=(file:File,ext:string)=>((file.name.replace(/\.[^.]+$/,"")||"output")+"."+ext);
@@ -25,7 +25,8 @@ async function pdf(files:File[],tool:string):Promise<ProcessResult[]>{
  if(tool==="Image to PDF"){const doc=await PDFDocument.create();for(const f of files){const bytes=await f.arrayBuffer();const img=f.type.includes("png")?await doc.embedPng(bytes):await doc.embedJpg(bytes);const p=doc.addPage([img.width,img.height]);p.drawImage(img,{x:0,y:0,width:img.width,height:img.height});}return [result(new Blob([await doc.save()],{type:"application/pdf"}),"images-combined.pdf","Images combined into one PDF.")];}
  if(tool==="Merge PDF"){const doc=await PDFDocument.create();for(const f of files){const src=await PDFDocument.load(await f.arrayBuffer());(await doc.copyPages(src,src.getPageIndices())).forEach(p=>doc.addPage(p));}return [result(new Blob([await doc.save()],{type:"application/pdf"}),"merged.pdf","PDFs merged in selection order.")];}
  if(tool==="Split PDF"){const src=await PDFDocument.load(await files[0].arrayBuffer());const zip=new JSZip();for(let i=0;i<src.getPageCount();i++){const part=await PDFDocument.create();const [p]=await part.copyPages(src,[i]);part.addPage(p);zip.file("page-"+String(i+1).padStart(3,"0")+".pdf",await part.save());}return [result(await zip.generateAsync({type:"blob"}),name(files[0],"zip"),"PDF pages exported separately in a ZIP.")];}
- if(tool==="Compress PDF"||tool==="Organize PDF"){const src=await PDFDocument.load(await files[0].arrayBuffer());return [result(new Blob([await src.save({useObjectStreams:true})],{type:"application/pdf"}),name(files[0],"pdf"),"PDF rewritten with compact object streams; embedded images are not recompressed.")];}
+ if(tool==="Compress PDF"){const src=await PDFDocument.load(await files[0].arrayBuffer());return [result(new Blob([await src.save({useObjectStreams:true})],{type:"application/pdf"}),name(files[0],"pdf"),"PDF rewritten with compact object streams; embedded images are not recompressed.")];}
+ if(tool==="Organize PDF"){const src=await PDFDocument.load(await files[0].arrayBuffer());const count=src.getPageCount();let indices=Array.from({length:count},(_,i)=>i);const requested=options.pdfPageOrder?.trim();if(requested){const nums=requested.split(/[,\\s]+/).filter(Boolean).map(Number);if(!nums.length||nums.some(n=>!Number.isInteger(n)||n<1||n>count)||new Set(nums).size!==nums.length)throw new Error("Enter valid page numbers once each, separated by commas. Example: 3, 1, 2.");indices=nums.map(n=>n-1);}const out=await PDFDocument.create();const pages=await out.copyPages(src,indices);pages.forEach(p=>out.addPage(p));return [result(new Blob([await out.save({useObjectStreams:true})],{type:"application/pdf"}),name(files[0],"pdf"),"PDF pages reordered or removed as requested.")];}
  throw new Error(tool+" needs a specialized PDF engine not available in this build.");
 }
 async function spreadsheet(file:File,tool:string):Promise<ProcessResult[]>{
@@ -133,6 +134,7 @@ export async function processFiles(files:File[],tool:string,options:ProcessOptio
  if(!files.length)throw new Error("Choose at least one file.");
  if(["PNG to JPG","JPG to PNG","PNG to WEBP","WEBP converter","Image compressor","Resize image","Crop & rotate"].includes(tool))return Promise.all(files.map(f=>image(f,tool,options)));
  if(["Image to PDF","Merge PDF","Split PDF","Compress PDF","Organize PDF"].includes(tool))return pdf(files,tool);
+ if(tool==="Protect PDF"){const password=options.password?.trim();if(!password||password.length<6)throw new Error("Enter a password with at least 6 characters.");const {PDFDocument:SecurePDF}=await import("@cantoo/pdf-lib");const doc=await SecurePDF.load(await files[0].arrayBuffer());doc.encrypt({userPassword:password,ownerPassword:password+"-"+crypto.randomUUID()});return [result(new Blob([await doc.save()],{type:"application/pdf"}),name(files[0],"pdf"),"PDF encrypted with AES-256 password protection.")];}
  if(["PDF to Word","PDF to Excel","PDF to JPG","PDF to PNG","PDF to PowerPoint"].includes(tool))return pdfAdvanced(files,tool);
  if(["CSV to XLSX","Remove duplicates"].includes(tool))return spreadsheet(files[0],tool);
  if(tool==="Excel to PDF"){const wb=XLSX.read(await files[0].arrayBuffer(),{type:"array"});const csv=wb.SheetNames.map(n=>n+"\\n"+XLSX.utils.sheet_to_csv(wb.Sheets[n])).join("\\n\\n");return [await makePdf(csv,name(files[0],"pdf"))];}
