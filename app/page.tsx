@@ -122,6 +122,7 @@ export default function Home() {
   const reveal = reducedMotion ? {} : { variants: fadeUp, initial: "hidden", whileInView: "visible", viewport: { once: true, amount: 0.12 } };
 
   const closeTool = () => setSelectedTool(null);
+  const SelectedToolIcon = selectedTool?.icon;
 
   return (
     <main className="app-shell">
@@ -142,7 +143,7 @@ export default function Home() {
           <a href="#pdf">PDF</a>
           <a href="#image-lab">Image lab</a>
           <a href="#workflow">Workflows</a>
-          <a href="#principles">About</a>
+          <a href="#why">About</a>
         </nav>
         <div className="header-actions">
           <a className="header-github" href="https://github.com/RAJ-SUHANDANI/ConvoTools" target="_blank" rel="noreferrer"><Github size={15} /> <span>GitHub</span></a>
@@ -457,7 +458,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="principles-section section-pad" id="principles">
+      <section className="principles-section section-pad" id="why">
         <div className="principles-heading"><span className="section-kicker">10 / THE CONVOTOOLS APPROACH</span><h2>Useful first.<br /><em>Beautiful by design.</em></h2></div>
         <div className="principles-grid">
           <article><span className="principle-num">01</span><div className="principle-icon"><ShieldCheck size={20} /></div><h3>Privacy is a product feature.</h3><p>Prefer local processing for everyday tasks. When a server or AI provider is needed, make that choice clear.</p></article>
@@ -495,7 +496,7 @@ export default function Home() {
             <motion.div className="tool-modal" initial={{ opacity: 0, y: 18, scale: .98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: .98 }} transition={{ duration: .22 }}>
               <button className="modal-close" onClick={closeTool} aria-label="Close tool preview"><X size={17} /></button>
               <span className="section-kicker">TOOL PREVIEW / {selectedTool.category.toUpperCase()}</span>
-              <div className="modal-tool-icon"><selectedTool.icon size={22} /></div>
+              <div className="modal-tool-icon">{SelectedToolIcon && <SelectedToolIcon size={22} />}</div>
               <h2>{selectedTool.name}</h2>
               <p>{selectedTool.description}</p>
               <div className="modal-next-step"><span className="modal-step-icon"><UploadCloud size={17} /></span><span><b>Start with a file</b><small>Add a file in the workspace to prepare this tool.</small></span><button onClick={() => { closeTool(); document.getElementById("workspace")?.scrollIntoView({ behavior: "smooth" }); }}>Go to upload <ArrowUpRight size={13} /></button></div>
