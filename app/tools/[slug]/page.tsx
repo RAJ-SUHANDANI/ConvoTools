@@ -1,0 +1,33 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import ToolDetail from "@/components/ToolDetail";
+import { getToolBySlug, TOOLS, slugify } from "@/lib/tools";
+
+type Props = { params: Promise<{ slug: string }> };
+
+export function generateStaticParams() {
+  return TOOLS.map((tool) => ({ slug: slugify(tool.name) }));
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const tool = getToolBySlug(slug);
+  if (!tool) return { title: "Tool not found · ConvoTools" };
+  return {
+    title: tool.name + " · ConvoTools",
+    description: tool.description,
+  };
+}
+
+export default async function ToolPage({ params }: Props) {
+  const { slug } = await params;
+  const tool = getToolBySlug(slug);
+  if (!tool) notFound();
+  return <ToolDetail tool={{
+    name: tool.name,
+    description: tool.description,
+    category: tool.category,
+    inputLabel: tool.inputLabel,
+    outputLabel: tool.outputLabel,
+  }} />;
+}
