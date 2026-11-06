@@ -151,28 +151,32 @@ async function ffmpegRun(file:File,tool:string,options:ProcessOptions):Promise<P
  const {fetchFile,toBlobURL}=await import("@ffmpeg/util");
  const ffmpeg=new FFmpeg();
  ffmpeg.on("progress",({progress})=>options.onProgress?.(Math.max(0,Math.min(.995,progress))));
- const core="https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/umd";
- await ffmpeg.load({coreURL:await toBlobURL(core+"/ffmpeg-core.js","text/javascript"),wasmURL:await toBlobURL(core+"/ffmpeg-core.wasm","application/wasm")});
- const input="input-"+(file.name.split(".").pop()||"bin").replace(/[^a-z0-9]/gi,"");
- const ext=(options.output||"MP3").toLowerCase().replace(/[^a-z0-9]/g,"");
- const outputExt=tool==="MP4 to GIF"?"gif":tool==="Video compressor"?"mp4":tool==="Extract audio"?"mp3":(["mp3","wav","aac","flac","ogg"].includes(ext)?ext:"mp3");
- const output="convotools-output."+outputExt;
  try{
+  const core="https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/umd";
+  await ffmpeg.load({coreURL:await toBlobURL(core+"/ffmpeg-core.js","text/javascript"),wasmURL:await toBlobURL(core+"/ffmpeg-core.wasm","application/wasm")});
+  const input="input-"+(file.name.split(".").pop()||"bin").replace(/[^a-z0-9]/gi,"");
+  const ext=(options.output||"MP3").toLowerCase().replace(/[^a-z0-9]/g,"");
+  const outputExt=tool==="MP4 to GIF"?"gif":tool==="Video compressor"?"mp4":tool==="Extract audio"?"mp3":(["mp3","wav","aac","flac","ogg"].includes(ext)?ext:"mp3");
+  const output="convotools-output."+outputExt;
   await ffmpeg.writeFile(input,await fetchFile(file));
   let args:string[]=[];
-  if(tool==="MP4 to GIF")args=["-i",input,"-vf","fps=12,scale=720:-1:flags=lanczos","-loop","0",output];
+  if(tool==="MP4 to GIF")args=["-i",input,"-t","30","-vf","fps=12,scale=720:-1:flags=lanczos","-loop","0",output];
   else if(tool==="Video compressor"){const crf=options.quality==="Smaller file"?"30":options.quality==="Best quality"?"20":"25";args=["-i",input,"-c:v","libx264","-preset","veryfast","-crf",crf,"-c:a","aac","-b:a","128k","-movflags","+faststart",output];}
   else if(tool==="Extract audio")args=["-i",input,"-vn","-codec:a","libmp3lame","-q:a","2",output];
   else if(tool==="Audio converter"){
    const codec:Record<string,string[]>={mp3:["-c:a","libmp3lame","-q:a","2"],wav:["-c:a","pcm_s16le"],aac:["-c:a","aac","-b:a","192k"],flac:["-c:a","flac"],ogg:["-c:a","libvorbis","-q:a","5"]};
    args=["-i",input,...(codec[outputExt]||codec.mp3),output];
   }else throw new Error("Unsupported media operation.");
-  const exit=await ffmpeg.exec(args);if(exit!==0)throw new Error("The media encoder could not process this file. Check that the input codec is supported.");
-  const data=await ffmpeg.readFile(output);if(typeof data==="string")throw new Error("The encoder returned an invalid output.");
+  const exit=await ffmpeg.exec(args);
+  if(exit!==0)throw new Error("The media encoder could not process this file. Check that the input codec is supported.");
+  const data=await ffmpeg.readFile(output);
+  if(typeof data==="string")throw new Error("The encoder returned an invalid output.");
   const mime:Record<string,string>={gif:"image/gif",mp4:"video/mp4",mp3:"audio/mpeg",wav:"audio/wav",aac:"audio/aac",flac:"audio/flac",ogg:"audio/ogg"};
   const blob=bytesBlob(data as Uint8Array,mime[outputExt]||"application/octet-stream");
-  return result(blob,name(file,outputExt),"Media encoded locally in your browser with FFmpeg.");
- }finally{await ffmpeg.terminate();}
+  return result(blob,name(file,outputExt),tool==="MP4 to GIF"?"First 30 seconds encoded locally as an animated GIF.": "Media encoded locally in your browser with FFmpeg.");
+ }finally{
+  try{ffmpeg.terminate();}catch{/* The worker may already be closed. */}
+ }
 }
 
 

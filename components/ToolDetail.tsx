@@ -37,6 +37,8 @@ const outputOptions: Record<string, string[]> = {
 };
 
 function defaultOutput(tool: ToolData) {
+  if (tool.name === "QR generator") return "PNG";
+  if (tool.name === "OCR extractor") return "DOCX";
   return tool.outputLabel || outputOptions[tool.category]?.[0] || "PDF";
 }
 
@@ -164,6 +166,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
 
   const options = tool.name === "Audio converter" ? ["MP3", "WAV", "AAC", "FLAC", "OGG"] : tool.name === "OCR extractor" ? ["DOCX", "TXT"] : tool.name === "WEBP converter" ? ["JPG", "PNG", "WEBP"] : tool.name === "Image compressor" ? ["Optimized image", "JPG", "PNG", "WEBP"] : ["Resize image", "Crop & rotate"].includes(tool.name) ? [defaultOutput(tool), "JPG", "PNG", "WEBP"] : [defaultOutput(tool)];
   const isAI = tool.category === "AI lab" || tool.name.toLowerCase().includes("enhancer") || tool.name.toLowerCase().includes("restoration");
+  const showOutputFormat = !["QR generator", "OCR extractor", "Base64 tools", "Hash generator"].includes(tool.name);
 
   return (
     <main className="tool-page">
@@ -214,8 +217,10 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
 
           <div className="operation-divider" />
           <div className="operation-card-head settings-head"><div><span className="operation-step">STEP 02 / OUTPUT</span><h2>Choose your settings</h2><p>Adjust the output before preparing your file.</p></div><span className="settings-icon"><Settings2 size={19} /></span></div>
+          {showOutputFormat && <>
           <label className="field-label" htmlFor="output-format">Output format</label>
-          <div className="select-wrap"><select id="output-format" value={output} onChange={(event) => setOutput(event.target.value)}>{(options.includes(defaultOutput(tool)) ? options : [defaultOutput(tool), ...options]).map((option) => <option key={option} value={option}>{option}</option>)}</select><ChevronDown size={15} /></div>
+                    <div className="select-wrap"><select id="output-format" value={output} onChange={(event) => setOutput(event.target.value)}>{(options.includes(defaultOutput(tool)) ? options : [defaultOutput(tool), ...options]).map((option) => <option key={option} value={option}>{option}</option>)}</select><ChevronDown size={15} /></div>
+          </>}
           {(tool.name.toLowerCase().includes("compress") || tool.category === "Images" || tool.category === "Video & audio") && (
             <>
               <label className="field-label" htmlFor="quality-select">Quality preset</label>
@@ -235,7 +240,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
 
           <motion.button className="operation-submit" onClick={startOperation} disabled={processing || documentLoading || (files.length > 0 && invalidFiles.length > 0)} whileHover={{ y: -2, boxShadow: "0 10px 24px rgba(82,89,216,.18)" }} whileTap={{ scale: 0.99 }}><span>{processing ? "Processing…" : isAI ? "Run tool" : "Process & download"}</span><ArrowRight size={16} /></motion.button>
           {processing && <div className="operation-progress"><motion.i initial={{ scaleX: 0 }} animate={mediaProgress ? { scaleX: progress } : { scaleX: 1 }} transition={mediaProgress ? { duration: .18, ease: "linear" } : { duration: 1.1, repeat: Infinity, ease: "easeInOut" }} /></div>}
-          {processing && mediaProgress && <small className="operation-hint" aria-live="polite">{Math.round(progress*100)}% encoded</small>}
+          {processing && mediaProgress && <small className="operation-hint" aria-live="polite">Approx. {Math.round(progress*100)}%</small>}
           {notice && <div className="operation-notice"><Sparkles size={14} /> {notice}</div>}
           {results.length > 0 && <motion.div className="operation-results" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .32 }}><b><Check size={14} /> {results.length} output {results.length===1?"file":"files"} ready</b>{results.map((result,index) => <motion.button key={result.filename+index} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: Math.min(index*.035,.35) }} onClick={() => saveProcessedFile(result)}><FileText size={14} /><span>{result.filename}<small>{result.message}</small></span><ArrowUpRight size={13} /></motion.button>)}</motion.div>}
           <div className="operation-secure"><LockKeyhole size={12} /> Supported tools process locally in this browser. Files are not uploaded to a server.</div>
