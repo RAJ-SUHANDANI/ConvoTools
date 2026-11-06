@@ -51,7 +51,7 @@ async function textTool(file:File,tool:string):Promise<ProcessResult>{
 
 async function pdfJsDocument(file:File) {
  const pdfjs=await import("pdfjs-dist/legacy/build/pdf.mjs");
- return pdfjs.getDocument({data:await file.arrayBuffer(),disableWorker:true}).promise;
+ return pdfjs.getDocument({data:await file.arrayBuffer()}).promise;
 }
 async function renderPdfPages(file:File,format:"png"|"jpeg"="png"):Promise<Blob[]> {
  const doc=await pdfJsDocument(file);const pages:Blob[]=[];
