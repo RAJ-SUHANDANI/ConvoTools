@@ -64,7 +64,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
   const [quality, setQuality] = useState<"Smaller file" | "Balanced" | "Best quality">("Balanced");
   const [keepMetadata, setKeepMetadata] = useState(true);
   const [password, setPassword] = useState("");
-  const [pdfPageOrder, setPdfPageOrder] = useState("");
+  const [pdfPageOrder, setPdfPageOrder] = useState("");\n  const [imageWidth, setImageWidth] = useState("");\n  const [imageHeight, setImageHeight] = useState("");\n  const [rotation, setRotation] = useState(0);\n  const [cropMode, setCropMode] = useState<"Original" | "Square center crop">("Original");
   const [notice, setNotice] = useState("");
   const [processing, setProcessing] = useState(false);
   const [results, setResults] = useState<ProcessResult[]>([]);
@@ -122,7 +122,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
     if (invalidFiles.length) { setNotice("One or more files do not match this tool's expected input format."); return; }
     setProcessing(true); setResults([]); setNotice("Processing locally in your browser…");
     try {
-      const completed = await processFiles(files, tool.name, { output, quality, password, pdfPageOrder });
+      const completed = await processFiles(files, tool.name, { output, quality, password, pdfPageOrder, width: imageWidth, height: imageHeight, rotation, cropMode });
       setResults(completed);
       completed.forEach((result) => {
         saveProcessedFile(result);
@@ -133,7 +133,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
     finally { setProcessing(false); }
   };
 
-  const options = tool.name === "Audio converter" ? ["MP3", "WAV", "AAC", "FLAC", "OGG"] : [defaultOutput(tool)];
+  const options = tool.name === "Audio converter" ? ["MP3", "WAV", "AAC", "FLAC", "OGG"] : tool.name === "WEBP converter" ? ["JPG", "PNG", "WEBP"] : tool.name === "Image compressor" ? ["Optimized image", "JPG", "PNG", "WEBP"] : ["Resize image", "Crop & rotate"].includes(tool.name) ? [defaultOutput(tool), "JPG", "PNG", "WEBP"] : [defaultOutput(tool)];
   const isAI = tool.category === "AI lab" || tool.name.toLowerCase().includes("enhancer") || tool.name.toLowerCase().includes("restoration");
 
   return (
@@ -193,6 +193,8 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
               <div className="select-wrap"><select id="quality-select" value={quality} onChange={(event) => setQuality(event.target.value)}><option>Smaller file</option><option>Balanced</option><option>Best quality</option></select><ChevronDown size={15} /></div>
             </>
           )}
+          {tool.name === "Resize image" && <div className="operation-dimensions"><div><label className="field-label" htmlFor="image-width">Width (px)</label><input id="image-width" className="operation-password" type="number" min="1" max="8192" value={imageWidth} onChange={(event) => setImageWidth(event.target.value)} placeholder="Auto" /></div><div><label className="field-label" htmlFor="image-height">Height (px)</label><input id="image-height" className="operation-password" type="number" min="1" max="8192" value={imageHeight} onChange={(event) => setImageHeight(event.target.value)} placeholder="Auto" /></div></div>}
+          {tool.name === "Crop & rotate" && <><label className="field-label" htmlFor="crop-mode">Crop</label><div className="select-wrap"><select id="crop-mode" value={cropMode} onChange={(event) => setCropMode(event.target.value as "Original" | "Square center crop")}><option>Original</option><option>Square center crop</option></select><ChevronDown size={15} /></div><label className="field-label" htmlFor="image-rotation">Rotation</label><div className="select-wrap"><select id="image-rotation" value={rotation} onChange={(event) => setRotation(Number(event.target.value))}><option value={0}>No rotation</option><option value={90}>90° clockwise</option><option value={180}>180°</option><option value={270}>90° counter-clockwise</option></select><ChevronDown size={15} /></div></>}
           {tool.name === "Protect PDF" && <><label className="field-label" htmlFor="pdf-password">PDF password</label><input id="pdf-password" className="operation-password" type="password" autoComplete="new-password" minLength={6} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="At least 6 characters" /><small className="operation-hint">The password is applied locally. Keep it safe; it cannot be recovered.</small></>}
           {tool.name === "Organize PDF" && <><label className="field-label" htmlFor="pdf-page-order">Page order / pages to keep</label><input id="pdf-page-order" className="operation-password" type="text" value={pdfPageOrder} onChange={(event) => setPdfPageOrder(event.target.value)} placeholder="Example: 3, 1, 2" /><small className="operation-hint">Enter page numbers in the desired order. Omit a page to remove it. Leave blank to keep the original order.</small></>}
           <label className="metadata-toggle"><input type="checkbox" checked={keepMetadata} onChange={(event) => setKeepMetadata(event.target.checked)} /><span className="fake-check"><Check size={11} /></span><span><b>Keep original metadata when possible</b><small>Preserve dates, orientation and other available file information.</small></span></label>

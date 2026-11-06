@@ -4,18 +4,20 @@ import { PDFDocument } from "pdf-lib";
 import * as XLSX from "xlsx";
 import { Document, Packer, Paragraph, TextRun } from "docx";
 
-export type ProcessOptions = { quality?: "Smaller file" | "Balanced" | "Best quality"; output?: string; password?: string; pdfPageOrder?: string };
+export type ProcessOptions = { quality?: "Smaller file" | "Balanced" | "Best quality"; output?: string; password?: string; pdfPageOrder?: string; width?: string; height?: string; rotation?: number; cropMode?: "Original" | "Square center crop" };
 export type ProcessResult = { blob: Blob; filename: string; mime: string; message: string };
 const result=(blob:Blob,filename:string,message:string):ProcessResult=>({blob,filename,mime:blob.type||"application/octet-stream",message});
 const name=(file:File,ext:string)=>((file.name.replace(/\.[^.]+$/,"")||"output")+"."+ext);
 const textFile=(text:string,filename:string,mime="text/plain;charset=utf-8")=>result(new Blob([text],{type:mime}),filename,"Your file is ready.");
 async function image(file:File,tool:string,options:ProcessOptions):Promise<ProcessResult>{
  const bitmap=await createImageBitmap(file);let w=bitmap.width,h=bitmap.height;
- if(tool==="Resize image"){const scale=Math.min(1,2048/Math.max(w,h));w=Math.max(1,Math.round(w*scale));h=Math.max(1,Math.round(h*scale));}
- const canvas=document.createElement("canvas");canvas.width=w;canvas.height=h;const ctx=canvas.getContext("2d");if(!ctx)throw new Error("Image canvas is unavailable.");
- const fmt=(options.output|| (tool==="PNG to WEBP"?"WEBP":tool==="PNG to JPG"?"JPG":"PNG")).toUpperCase();
- if(fmt==="JPG"||fmt==="JPEG"){ctx.fillStyle="#fff";ctx.fillRect(0,0,w,h);}
- ctx.drawImage(bitmap,0,0,w,h);bitmap.close();
+ if(tool==="Resize image"){const requestedW=Number(options.width)||0,requestedH=Number(options.height)||0;if(requestedW>0&&requestedH>0){w=Math.min(8192,Math.round(requestedW));h=Math.min(8192,Math.round(requestedH));}else if(requestedW>0){h=Math.round(bitmap.height*requestedW/bitmap.width);w=Math.min(8192,Math.round(requestedW));}else if(requestedH>0){w=Math.round(bitmap.width*requestedH/bitmap.height);h=Math.min(8192,Math.round(requestedH));}else{const scale=Math.min(1,2048/Math.max(w,h));w=Math.max(1,Math.round(w*scale));h=Math.max(1,Math.round(h*scale));}}
+ const rotation=((Number(options.rotation)||0)%360+360)%360;const crop=tool==="Crop & rotate"&&options.cropMode==="Square center crop";const side=Math.min(w,h);const sw=crop?side:w,sh=crop?side:h,sx=crop?(w-side)/2:0,sy=crop?(h-side)/2:0;
+ const rotated=rotation===90||rotation===270;const canvas=document.createElement("canvas");canvas.width=rotated?sh:sw;canvas.height=rotated?sw:sh;const ctx=canvas.getContext("2d");if(!ctx)throw new Error("Image canvas is unavailable.");
+ const originalFmt=file.type==="image/jpeg"?"JPG":file.type==="image/webp"?"WEBP":"PNG";
+ const requested=(options.output||"").toUpperCase();const fmt=!requested||requested==="IMAGE"||requested==="OPTIMIZED IMAGE"?originalFmt:requested;
+ if(fmt==="JPG"||fmt==="JPEG"){ctx.fillStyle="#fff";ctx.fillRect(0,0,canvas.width,canvas.height);}
+ ctx.translate(canvas.width/2,canvas.height/2);ctx.rotate(rotation*Math.PI/180);ctx.drawImage(bitmap,sx,sy,sw,sh,-sw/2,-sh/2,sw,sh);bitmap.close();
  const mime=fmt==="JPG"||fmt==="JPEG"?"image/jpeg":fmt==="WEBP"?"image/webp":"image/png";
  const quality=options.quality==="Smaller file"?.62:options.quality==="Best quality"?.96:.84;
  const blob=await new Promise<Blob>((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error("Image export failed.")),mime,quality));
