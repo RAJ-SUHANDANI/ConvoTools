@@ -6,7 +6,7 @@ import { Document, Packer, Paragraph, TextRun } from "docx";
 
 export type ProcessOptions = { quality?: "Smaller file" | "Balanced" | "Best quality"; output?: string; password?: string; pdfPageOrder?: string; width?: string; height?: string; rotation?: number; cropMode?: "Original" | "Square center crop" };
 export type ProcessResult = { blob: Blob; filename: string; mime: string; message: string };
-const result=(blob:Blob,filename:string,message:string):ProcessResult=>({blob,filename,mime:blob.type||"application/octet-stream",message});
+const result=(blob:Blob,filename:string,message:string):ProcessResult=>({blob,filename,mime:blob.type||"application/octet-stream",message});\nconst bytesBlob=(bytes:Uint8Array,mime:string)=>{const safe=new Uint8Array(bytes.byteLength);safe.set(bytes);return new Blob([safe.buffer],{type:mime});};
 const name=(file:File,ext:string)=>((file.name.replace(/\.[^.]+$/,"")||"output")+"."+ext);
 const textFile=(text:string,filename:string,mime="text/plain;charset=utf-8")=>result(new Blob([text],{type:mime}),filename,"Your file is ready.");
 async function image(file:File,tool:string,options:ProcessOptions):Promise<ProcessResult>{
@@ -24,18 +24,18 @@ async function image(file:File,tool:string,options:ProcessOptions):Promise<Proce
  return result(blob,name(file,mime==="image/jpeg"?"jpg":mime==="image/webp"?"webp":"png"),"Image converted locally in your browser.");
 }
 async function pdf(files:File[],tool:string):Promise<ProcessResult[]>{
- if(tool==="Image to PDF"){const doc=await PDFDocument.create();for(const f of files){const bytes=await f.arrayBuffer();const img=f.type.includes("png")?await doc.embedPng(bytes):await doc.embedJpg(bytes);const p=doc.addPage([img.width,img.height]);p.drawImage(img,{x:0,y:0,width:img.width,height:img.height});}return [result(new Blob([await doc.save()],{type:"application/pdf"}),"images-combined.pdf","Images combined into one PDF.")];}
+ if(tool==="Image to PDF"){const doc=await PDFDocument.create();for(const f of files){const bytes=await f.arrayBuffer();const img=f.type.includes("png")?await doc.embedPng(bytes):await doc.embedJpg(bytes);const p=doc.addPage([img.width,img.height]);p.drawImage(img,{x:0,y:0,width:img.width,height:img.height});}return [result(bytesBlob(await doc.save(),"application/pdf"),"images-combined.pdf","Images combined into one PDF.")];}
  if(tool==="Merge PDF"){const doc=await PDFDocument.create();for(const f of files){const src=await PDFDocument.load(await f.arrayBuffer());(await doc.copyPages(src,src.getPageIndices())).forEach(p=>doc.addPage(p));}return [result(new Blob([await doc.save()],{type:"application/pdf"}),"merged.pdf","PDFs merged in selection order.")];}
  if(tool==="Split PDF"){const src=await PDFDocument.load(await files[0].arrayBuffer());const zip=new JSZip();for(let i=0;i<src.getPageCount();i++){const part=await PDFDocument.create();const [p]=await part.copyPages(src,[i]);part.addPage(p);zip.file("page-"+String(i+1).padStart(3,"0")+".pdf",await part.save());}return [result(await zip.generateAsync({type:"blob"}),name(files[0],"zip"),"PDF pages exported separately in a ZIP.")];}
- if(tool==="Compress PDF"){const src=await PDFDocument.load(await files[0].arrayBuffer());return [result(new Blob([await src.save({useObjectStreams:true})],{type:"application/pdf"}),name(files[0],"pdf"),"PDF rewritten with compact object streams; embedded images are not recompressed.")];}
- if(tool==="Organize PDF"){const src=await PDFDocument.load(await files[0].arrayBuffer());const count=src.getPageCount();let indices=Array.from({length:count},(_,i)=>i);const requested=options.pdfPageOrder?.trim();if(requested){const nums=requested.split(/[,\s]+/).filter(Boolean).map(Number);if(!nums.length||nums.some(n=>!Number.isInteger(n)||n<1||n>count)||new Set(nums).size!==nums.length)throw new Error("Enter valid page numbers once each, separated by commas. Example: 3, 1, 2.");indices=nums.map(n=>n-1);}const out=await PDFDocument.create();const pages=await out.copyPages(src,indices);pages.forEach(p=>out.addPage(p));return [result(new Blob([await out.save({useObjectStreams:true})],{type:"application/pdf"}),name(files[0],"pdf"),"PDF pages reordered or removed as requested.")];}
+ if(tool==="Compress PDF"){const src=await PDFDocument.load(await files[0].arrayBuffer());return [result(bytesBlob(await src.save({useObjectStreams:true}),"application/pdf"),name(files[0],"pdf"),"PDF rewritten with compact object streams; embedded images are not recompressed.")];}
+ if(tool==="Organize PDF"){const src=await PDFDocument.load(await files[0].arrayBuffer());const count=src.getPageCount();let indices=Array.from({length:count},(_,i)=>i);const requested=options.pdfPageOrder?.trim();if(requested){const nums=requested.split(/[,\s]+/).filter(Boolean).map(Number);if(!nums.length||nums.some(n=>!Number.isInteger(n)||n<1||n>count)||new Set(nums).size!==nums.length)throw new Error("Enter valid page numbers once each, separated by commas. Example: 3, 1, 2.");indices=nums.map(n=>n-1);}const out=await PDFDocument.create();const pages=await out.copyPages(src,indices);pages.forEach(p=>out.addPage(p));return [result(bytesBlob(await out.save({useObjectStreams:true}),"application/pdf"),name(files[0],"pdf"),"PDF pages reordered or removed as requested.")];}
  throw new Error(tool+" needs a specialized PDF engine not available in this build.");
 }
 async function spreadsheet(file:File,tool:string):Promise<ProcessResult[]>{
  const wb=XLSX.read(await file.arrayBuffer(),{type:"array"});
  if(tool==="Remove duplicates")wb.SheetNames.forEach(n=>{const rows=XLSX.utils.sheet_to_json<unknown[]>(wb.Sheets[n],{header:1});const seen=new Set<string>();wb.Sheets[n]=XLSX.utils.aoa_to_sheet(rows.filter(r=>{const k=JSON.stringify(r);if(seen.has(k))return false;seen.add(k);return true;}));});
  if(tool==="Excel to PDF"){const csv=XLSX.utils.sheet_to_csv(wb.Sheets[wb.SheetNames[0]]);return [textFile(csv,name(file,"csv"),"text/csv;charset=utf-8")];}
- const bytes=XLSX.write(wb,{type:"array",bookType:"xlsx"});return [result(new Blob([bytes],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),name(file,"xlsx"),"Spreadsheet prepared locally.")];
+ const bytes=XLSX.write(wb,{type:"array",bookType:"xlsx"});return [result(bytesBlob(bytes as Uint8Array,"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),name(file,"xlsx"),"Spreadsheet prepared locally.")];
 }
 async function archive(files:File[],tool:string):Promise<ProcessResult>{
  const zip=new JSZip();if(tool==="Create ZIP"){files.forEach(f=>zip.file(f.name,f));return result(await zip.generateAsync({type:"blob"}),"convotools-archive.zip","Files packed into a ZIP archive.");}
@@ -96,7 +96,7 @@ async function pptxText(file:File):Promise<string>{
 }
 async function pdfAdvanced(files:File[],tool:string):Promise<ProcessResult[]>{
  if(tool==="PDF to Word"){const text=await pdfText(files[0]);if(!text.trim())throw new Error("This PDF contains no selectable text. Try OCR extractor for scanned pages.");return [await makeDocx(text,name(files[0],"docx"))];}
- if(tool==="PDF to Excel"){const text=await pdfText(files[0]);if(!text.trim())throw new Error("No selectable text was found in this PDF.");const rows=text.split(/\r?\n/).filter(Boolean).map(line=>line.split(/\s{2,}|\t/));const sheet=XLSX.utils.aoa_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,sheet,"Extracted data");return [result(new Blob([XLSX.write(wb,{type:"array",bookType:"xlsx"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),name(files[0],"xlsx"),"Text rows exported to a spreadsheet. PDF table structure may require manual cleanup.")];}
+ if(tool==="PDF to Excel"){const text=await pdfText(files[0]);if(!text.trim())throw new Error("No selectable text was found in this PDF.");const rows=text.split(/\r?\n/).filter(Boolean).map(line=>line.split(/\s{2,}|\t/));const sheet=XLSX.utils.aoa_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,sheet,"Extracted data");return [result(bytesBlob(XLSX.write(wb,{type:"array",bookType:"xlsx"}) as Uint8Array,"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),name(files[0],"xlsx"),"Text rows exported to a spreadsheet. PDF table structure may require manual cleanup.")];}
  if(tool==="PDF to JPG"||tool==="PDF to PNG"||tool==="Slides to images"){const pages=await renderPdfPages(files[0],tool==="PDF to JPG"?"jpeg":"png");if(pages.length===1)return [result(pages[0],name(files[0],tool==="PDF to JPG"?"jpg":"png"),"PDF page rendered as an image.")];const zip=new JSZip();pages.forEach((p,i)=>zip.file("page-"+String(i+1).padStart(3,"0")+(tool==="PDF to JPG"?".jpg":".png"),p));return [result(await zip.generateAsync({type:"blob"}),name(files[0],"zip"),pages.length+" PDF pages rendered into image files.")];}
  if(tool==="PDF to PowerPoint"){const pages=await renderPdfPages(files[0],"jpeg");return [result(await pdfPagesToPptx(pages),name(files[0],"pptx"),"PDF pages placed as full-slide images in a PowerPoint file. Text is not editable.")];}
  throw new Error("Unsupported PDF operation.");
@@ -127,7 +127,7 @@ async function ffmpegRun(file:File,tool:string,options:ProcessOptions):Promise<P
   const exit=await ffmpeg.exec(args);if(exit!==0)throw new Error("The media encoder could not process this file. Check that the input codec is supported.");
   const data=await ffmpeg.readFile(output);if(typeof data==="string")throw new Error("The encoder returned an invalid output.");
   const mime:Record<string,string>={gif:"image/gif",mp4:"video/mp4",mp3:"audio/mpeg",wav:"audio/wav",aac:"audio/aac",flac:"audio/flac",ogg:"audio/ogg"};
-  const blob=new Blob([data],{type:mime[outputExt]||"application/octet-stream"});
+  const blob=bytesBlob(data as Uint8Array,mime[outputExt]||"application/octet-stream");
   return result(blob,name(file,outputExt),"Media encoded locally in your browser with FFmpeg.");
  }finally{await ffmpeg.terminate();}
 }
