@@ -212,7 +212,7 @@ export default function DashboardPage() {
                   </div>
 
                   <div className="dash-stat-grid">
-                    <motion.div className="dash-stat-card" whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 320, damping: 24 }}><span className="dash-stat-icon violet"><Command size={17} /></span><small>AVAILABLE TOOLS</small><strong>{TOOLS.length}</strong><span>Across 10 categories</span></motion.div>
+                    <motion.div className="dash-stat-card" whileHover={settings.motion && !reducedMotion ? { y: -4 } : undefined} transition={{ type: "spring", stiffness: 320, damping: 24 }}><span className="dash-stat-icon violet"><Command size={17} /></span><small>AVAILABLE TOOLS</small><strong>{TOOLS.length}</strong><span>Across 10 categories</span></motion.div>
                     <motion.div className="dash-stat-card" whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 320, damping: 24 }}><span className="dash-stat-icon green"><FileImage size={17} /></span><small>FILES ADDED</small><strong>{uploads.length}</strong><span>Tracked in this browser</span></motion.div>
                     <motion.div className="dash-stat-card" whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 320, damping: 24 }}><span className="dash-stat-icon blue"><Activity size={17} /></span><small>TOOLS OPENED</small><strong>{openedTools.length}</strong><span>Tool pages visited</span></motion.div>
                     <motion.div className="dash-stat-card" whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 320, damping: 24 }}><span className="dash-stat-icon amber"><Heart size={17} /></span><small>FAVORITES</small><strong>{favorites.length}</strong><span>Your saved shortcuts</span></motion.div>
