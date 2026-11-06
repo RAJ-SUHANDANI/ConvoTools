@@ -43,7 +43,7 @@ function compatible(tool: ToolData, file: File) {
   if (expected.includes("image") && category === "Images") return true;
   if (expected.includes("image or pdf") && (category === "Images" || category === "PDF")) return true;
   if (expected.includes("pdf")) return category === "PDF";
-  if (expected.includes("docx") || expected.includes("word")) return category === "Documents";
+  if (expected.includes("docx") || expected.includes("word") || expected === "document") return category === "Documents";
   if (expected.includes("xlsx") || expected.includes("csv")) return category === "Spreadsheets";
   if (expected.includes("pptx")) return category === "Presentations";
   if (expected.includes("video") || expected.includes("audio") || expected.includes("mp4")) return category === "Video & audio";
@@ -95,7 +95,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
     setNotice("Your settings are ready. The " + tool.name + " processing engine will be connected in the next implementation phase.");
   };
 
-  const options = outputOptions[tool.category] || ["PDF", "JPG", "PNG"];
+  const options = [defaultOutput(tool)];
   const isAI = tool.category === "AI lab" || tool.name.toLowerCase().includes("enhancer") || tool.name.toLowerCase().includes("restoration");
 
   return (
