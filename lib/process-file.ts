@@ -229,7 +229,7 @@ const PPT_NS="http://schemas.openxmlformats.org/presentationml/2006/main";
 const DRAW_NS="http://schemas.openxmlformats.org/drawingml/2006/main";
 const REL_NS="http://schemas.openxmlformats.org/officeDocument/2006/relationships";
 const PKG_REL_NS="http://schemas.openxmlformats.org/package/2006/relationships";
-function parsePptXml(source:string):Document{
+function parsePptXml(source:string){
  const parsed=new DOMParser().parseFromString(source,"application/xml");
  if(parsed.getElementsByTagName("parsererror").length)throw new Error("This PowerPoint file contains invalid slide XML.");
  return parsed;
