@@ -211,7 +211,7 @@ export default function Home() {
                   {(showAll ? filteredTools : filteredTools.slice(0, 12)).map((tool, index) => {
                     const Icon = tool.icon;
                     return (
-                      <motion.button layout key={tool.name} className="tool-result" onClick={() => router.push("/tools/" + slugify(tool.name))} initial={reducedMotion ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: .97 }} transition={{ duration: .25, delay: index * .012 }}>
+                      <motion.button layout key={tool.name} className="tool-result" onClick={() => router.push("/tools/" + slugify(tool.name))} initial={reducedMotion ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: .97 }} transition={{ duration: .25, delay: index * .012 }} whileHover={{ y: -3, scale: 1.005 }} whileTap={{ scale: 0.99 }}>
                         <span className="tool-result-icon"><Icon size={18} strokeWidth={1.7} /></span>
                         <span className="tool-result-copy"><b>{tool.name}</b><small>{tool.description}</small></span>
                         {tool.tag && <span className={"tool-tag" + (tool.tag === "AI" ? " tag-ai" : "")}>{tool.tag}</span>}
@@ -325,6 +325,7 @@ export default function Home() {
               preload="none"
             />
           </div>
+          <div className="media-demo-credit"><a href="https://www.pexels.com/video/close-up-portrait-of-a-woman-outdoors-34528660/" target="_blank" rel="noreferrer">Video by Zulfugar Karimov / Pexels <ArrowUpRight size={11} /></a><span>Free stock footage</span></div>
           <div className="timeline-ruler"><span>00:00</span><span>00:15</span><span>00:30</span><span>00:45</span></div>
           <div className="timeline-track"><span className="track-label"><Film size={13} /> VIDEO</span><div className="track-segments"><i /><i /><i /><i /></div></div>
           <div className="timeline-track audio-track"><span className="track-label"><AudioLines size={13} /> AUDIO</span><div className="audio-wave">{Array.from({length:44}, (_, index) => <i key={index} style={{height: (8 + ((index * 17) % 23)) + "px"}} />)}</div></div>
