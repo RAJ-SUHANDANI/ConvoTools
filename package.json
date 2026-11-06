@@ -19,7 +19,11 @@
     "mammoth": "^1.10.0",
     "pdf-lib": "^1.17.1",
     "qrcode": "^1.5.4",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "pdfjs-dist": "^5.4.394",
+    "jspdf": "^3.0.3",
+    "tesseract.js": "^6.0.1",
+    "pptxgenjs": "^4.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.16",
@@ -30,6 +34,7 @@
     "eslint-config-next": "^15.5.6",
     "tailwindcss": "^4.1.16",
     "typescript": "^5.9.3",
-    "@types/qrcode": "^1.5.5"
+    "@types/qrcode": "^1.5.5",
+    "@types/pptxgenjs": "^3.3.8"
   }
-}
+}\n
