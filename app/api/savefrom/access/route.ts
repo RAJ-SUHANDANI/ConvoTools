@@ -7,12 +7,30 @@ import {
   verifySavefromCredentials,
 } from "@/lib/savefrom-auth";
 
+function hasValidRequestOrigin(request: NextRequest) {
+  const origin = request.headers.get("origin");
+  if (!origin) return true;
+
+  // Codespaces and other reverse proxies expose a public host while Next.js may see an internal URL.
+  const forwardedHost = request.headers.get("x-forwarded-host")?.split(",")[0]?.trim();
+  const host = forwardedHost || request.headers.get("host") || new URL(request.url).host;
+  const forwardedProto = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim();
+  const protocol = forwardedProto || new URL(request.url).protocol.replace(":", "");
+
+  try {
+    const originUrl = new URL(origin);
+    return originUrl.host === host && originUrl.protocol === `${protocol}:`;
+  } catch {
+    return false;
+  }
+}
+
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
-  const origin = request.headers.get("origin");
-  if (origin && origin !== new URL(request.url).origin) {
+  if (!hasValidRequestOrigin(request)) {
     return NextResponse.json({ error: "Request origin rejected." }, { status: 403 });
   }
   if (!savefromCredentialsConfigured()) {
@@ -37,8 +55,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const origin = request.headers.get("origin");
-  if (origin && origin !== new URL(request.url).origin) {
+  if (!hasValidRequestOrigin(request)) {
     return NextResponse.json({ error: "Request origin rejected." }, { status: 403 });
   }
   const response = NextResponse.json({ ok: true });
