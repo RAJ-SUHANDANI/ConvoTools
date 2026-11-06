@@ -1050,3 +1050,6 @@ button,a,.tool-result,.format-panel,.ai-card,.dash-stat-card,.dash-quick-tool{ -
 .comparison-credit{gap:8px}
 .comparison-demo-note{color:#96989c}
 @media(max-width:560px){.media-demo-credit{padding:0 9px;font-size:6px}.tool-favorite-button{margin-top:16px}}
+
+.comparison-range:focus-visible{outline:2px solid var(--blue);outline-offset:-3px;opacity:.18}
+@media(prefers-reduced-motion:reduce){.comparison-divider{transition:none}}
