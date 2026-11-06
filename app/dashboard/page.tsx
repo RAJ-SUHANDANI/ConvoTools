@@ -96,7 +96,6 @@ export default function DashboardPage() {
       description: "Added from the dashboard workspace",
     }));
     setFiles((current) => [...current, ...next].slice(0, 30));
-    setActiveTab("Overview");
   };
 
   const onChoose = (event: ChangeEvent<HTMLInputElement>) => {
