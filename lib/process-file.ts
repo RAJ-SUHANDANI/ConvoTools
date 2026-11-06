@@ -1,10 +1,10 @@
 "use client";
 import JSZip from "jszip";
-import { PDFDocument } from "pdf-lib";
+import { PDFDocument, degrees } from "pdf-lib";
 import * as XLSX from "xlsx";
 import { Document, Packer, Paragraph, TextRun } from "docx";
 
-export type ProcessOptions = { quality?: "Smaller file" | "Balanced" | "Best quality"; output?: string; password?: string; pdfPageOrder?: string; width?: string; height?: string; rotation?: number; cropMode?: "Original" | "Square center crop"; textContent?: string };
+export type ProcessOptions = { quality?: "Smaller file" | "Balanced" | "Best quality"; output?: string; password?: string; pdfPageOrder?: string; width?: string; height?: string; rotation?: number; cropMode?: "Original" | "Square center crop"; textContent?: string; base64Mode?: "Encode" | "Decode"; decodedFormat?: string; ocrFormat?: "DOCX" | "TXT"; ocrLanguage?: string; pdfRotation?: number };
 export type ProcessResult = { blob: Blob; filename: string; mime: string; message: string };
 const result=(blob:Blob,filename:string,message:string):ProcessResult=>({blob,filename,mime:blob.type||"application/octet-stream",message});
 const bytesBlob=(bytes:Uint8Array,mime:string)=>{const safe=new Uint8Array(bytes.byteLength);safe.set(bytes);return new Blob([safe.buffer],{type:mime});};
@@ -27,9 +27,9 @@ async function image(file:File,tool:string,options:ProcessOptions):Promise<Proce
 async function pdf(files:File[],tool:string,options:ProcessOptions):Promise<ProcessResult[]>{
  if(tool==="Image to PDF"){const doc=await PDFDocument.create();for(const f of files){const bytes=await f.arrayBuffer();const img=f.type.includes("png")?await doc.embedPng(bytes):await doc.embedJpg(bytes);const p=doc.addPage([img.width,img.height]);p.drawImage(img,{x:0,y:0,width:img.width,height:img.height});}return [result(bytesBlob(await doc.save(),"application/pdf"),"images-combined.pdf","Images combined into one PDF.")];}
  if(tool==="Merge PDF"){const doc=await PDFDocument.create();for(const f of files){const src=await PDFDocument.load(await f.arrayBuffer());(await doc.copyPages(src,src.getPageIndices())).forEach(p=>doc.addPage(p));}return [result(bytesBlob(await doc.save(),"application/pdf"),"merged.pdf","PDFs merged in selection order.")];}
- if(tool==="Split PDF"){const src=await PDFDocument.load(await files[0].arrayBuffer());const zip=new JSZip();for(let i=0;i<src.getPageCount();i++){const part=await PDFDocument.create();const [p]=await part.copyPages(src,[i]);part.addPage(p);zip.file("page-"+String(i+1).padStart(3,"0")+".pdf",await part.save());}return [result(await zip.generateAsync({type:"blob"}),name(files[0],"zip"),"PDF pages exported separately in a ZIP.")];}
+ if(tool==="Split PDF"){const src=await PDFDocument.load(await files[0].arrayBuffer());const zip=new JSZip();const count=src.getPageCount();const input=options.pdfPageOrder?.trim();const indices=input?input.split(/[,\s]+/).filter(Boolean).map(Number).map(n=>n-1):Array.from({length:count},(_,i)=>i);if(!indices.length||indices.some(n=>!Number.isInteger(n)||n<0||n>=count)||new Set(indices).size!==indices.length)throw new Error("Enter valid page numbers once each. Example: 1, 3, 5.");for(const i of indices){const part=await PDFDocument.create();const [page]=await part.copyPages(src,[i]);part.addPage(page);zip.file("page-"+String(i+1).padStart(3,"0")+".pdf",await part.save());}return [result(await zip.generateAsync({type:"blob"}),name(files[0],"zip"),indices.length+" selected pages exported to a ZIP.")];}
  if(tool==="Compress PDF"){const src=await PDFDocument.load(await files[0].arrayBuffer());return [result(bytesBlob(await src.save({useObjectStreams:true}),"application/pdf"),name(files[0],"pdf"),"PDF rewritten with compact object streams; embedded images are not recompressed.")];}
- if(tool==="Organize PDF"){const src=await PDFDocument.load(await files[0].arrayBuffer());const count=src.getPageCount();let indices=Array.from({length:count},(_,i)=>i);const requested=options.pdfPageOrder?.trim();if(requested){const nums=requested.split(/[,\s]+/).filter(Boolean).map(Number);if(!nums.length||nums.some(n=>!Number.isInteger(n)||n<1||n>count)||new Set(nums).size!==nums.length)throw new Error("Enter valid page numbers once each, separated by commas. Example: 3, 1, 2.");indices=nums.map(n=>n-1);}const out=await PDFDocument.create();const pages=await out.copyPages(src,indices);pages.forEach(p=>out.addPage(p));return [result(bytesBlob(await out.save({useObjectStreams:true}),"application/pdf"),name(files[0],"pdf"),"PDF pages reordered or removed as requested.")];}
+ if(tool==="Organize PDF"){const src=await PDFDocument.load(await files[0].arrayBuffer());const count=src.getPageCount();let indices=Array.from({length:count},(_,i)=>i);const requested=options.pdfPageOrder?.trim();if(requested){const nums=requested.split(/[,\s]+/).filter(Boolean).map(Number);if(!nums.length||nums.some(n=>!Number.isInteger(n)||n<1||n>count)||new Set(nums).size!==nums.length)throw new Error("Enter valid page numbers once each, separated by commas. Example: 3, 1, 2.");indices=nums.map(n=>n-1);}const out=await PDFDocument.create();const pages=await out.copyPages(src,indices);pages.forEach(p=>{p.setRotation(degrees(((p.getRotation().angle+(options.pdfRotation||0))%360+360)%360));out.addPage(p);});return [result(bytesBlob(await out.save({useObjectStreams:true}),"application/pdf"),name(files[0],"pdf"),"PDF pages reordered, removed or rotated as requested.")];}
  throw new Error(tool+" needs a specialized PDF engine not available in this build.");
 }
 async function spreadsheet(file:File,tool:string):Promise<ProcessResult[]>{
@@ -38,13 +38,37 @@ async function spreadsheet(file:File,tool:string):Promise<ProcessResult[]>{
  if(tool==="Excel to PDF"){const csv=XLSX.utils.sheet_to_csv(wb.Sheets[wb.SheetNames[0]]);return [textFile(csv,name(file,"csv"),"text/csv;charset=utf-8")];}
  const bytes=XLSX.write(wb,{type:"array",bookType:"xlsx"});return [result(bytesBlob(bytes as Uint8Array,"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),name(file,"xlsx"),"Spreadsheet prepared locally.")];
 }
-async function archive(files:File[],tool:string):Promise<ProcessResult>{
- const zip=new JSZip();if(tool==="Create ZIP"){files.forEach(f=>zip.file(f.name,f));return result(await zip.generateAsync({type:"blob"}),"convotools-archive.zip","Files packed into a ZIP archive.");}
- const src=await JSZip.loadAsync(files[0]);const out=new JSZip();await Promise.all(Object.values(src.files).filter(f=>!f.dir).map(async f=>out.file(f.name,await f.async("uint8array"))));return result(await out.generateAsync({type:"blob"}),name(files[0],"zip"),"Archive entries extracted and repacked into a standard ZIP.");
+async function archive(files:File[],tool:string):Promise<ProcessResult[]>{
+ if(tool==="Create ZIP"){const zip=new JSZip();files.forEach(f=>zip.file(f.name,f));return [result(await zip.generateAsync({type:"blob"}),"convotools-archive.zip","Files packed into a ZIP archive.")];}
+ const sourceFile=files[0];if(!sourceFile.name.toLowerCase().endsWith(".zip"))throw new Error("The local extractor supports ZIP files. 7Z, RAR and TAR need a separate archive engine.");
+ const zip=await JSZip.loadAsync(sourceFile);const entries=Object.values(zip.files).filter(f=>!f.dir&&!f.name.split("/").some(part=>part===".."||part===""));
+ if(!entries.length)throw new Error("This ZIP archive contains no files.");
+ if(entries.length>250)throw new Error("This ZIP contains over 250 files. Extract a smaller archive to protect browser memory.");
+ return Promise.all(entries.map(async(entry,index)=>{const safe=entry.name.replace(/[^a-zA-Z0-9._/-]/g,"_").split("/").filter(Boolean).join("__")||"file-"+index;return result(await entry.async("blob"),safe,"Extracted from "+sourceFile.name+" · "+entry.name);}));
 }
+
+
+function encodeBase64Bytes(bytes:Uint8Array):string{
+ let output="";const step=0x8000;
+ for(let i=0;i<bytes.length;i+=step)output+=String.fromCharCode(...bytes.subarray(i,Math.min(i+step,bytes.length)));
+ return btoa(output);
+}
+async function processBase64(file:File,options:ProcessOptions):Promise<ProcessResult[]>{
+ if(file.size>45*1024*1024)throw new Error("Base64 processing is limited to 45 MB per file to protect browser memory.");
+ if(options.base64Mode==="Decode"){
+  const encoded=(await file.text()).trim().replace(/^data:[^,]*;base64,/i,"").replace(/\s/g,"");
+  if(!encoded)throw new Error("The selected file contains no Base64 text.");
+  let binary:string;try{binary=atob(encoded);}catch{throw new Error("The selected file does not contain valid Base64 text.");}
+  const bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+  const ext=(options.decodedFormat||"BIN").toLowerCase(),mimes:Record<string,string>={txt:"text/plain",json:"application/json",png:"image/png",jpg:"image/jpeg",pdf:"application/pdf",bin:"application/octet-stream"};
+  return [result(new Blob([bytes.buffer],{type:mimes[ext]||"application/octet-stream"}),name(file,ext),"Decoded "+bytes.length.toLocaleString()+" bytes from Base64.")];
+ }
+ return [textFile(encodeBase64Bytes(new Uint8Array(await file.arrayBuffer())),name(file,"base64.txt"),"File encoded as Base64 text locally in your browser.")];
+}
+
 async function textTool(file:File,tool:string):Promise<ProcessResult>{
  const value=await file.text();if(tool==="JSON formatter")return textFile(JSON.stringify(JSON.parse(value),null,2)+"\n",name(file,"json"),"application/json");
- if(tool==="Base64 tools")return textFile(btoa(unescape(encodeURIComponent(value))),name(file,"b64"),"text/plain");
+ 
  if(tool==="DOCX to TXT"){const mammoth=await import("mammoth");const extracted=await mammoth.extractRawText({arrayBuffer:await file.arrayBuffer()});return textFile(extracted.value,name(file,"txt"));}
  throw new Error("Unsupported text operation.");
 }
@@ -70,12 +94,12 @@ async function pdfText(file:File):Promise<string>{
  for(let n=1;n<=doc.numPages;n++){const page=await doc.getPage(n);const content=await page.getTextContent();output.push(content.items.map((item)=>"str" in item?item.str+("hasEOL" in item&&item.hasEOL?"\n":" "):"").join(""));}
  return output.join("\n\n");
 }
-async function ocrImage(file:File):Promise<string>{
- const Tesseract=await import("tesseract.js");const worker=await Tesseract.createWorker("eng");
+async function ocrImage(file:File,language="eng"):Promise<string>{
+ const Tesseract=await import("tesseract.js");const worker=await Tesseract.createWorker(language);
  try{const {data}=await worker.recognize(file);return data.text;}finally{await worker.terminate();}
 }
-async function ocrPdf(file:File):Promise<string>{
- const pages=await renderPdfPages(file,"png");const Tesseract=await import("tesseract.js");const worker=await Tesseract.createWorker("eng");const text:string[]=[];
+async function ocrPdf(file:File,language="eng"):Promise<string>{
+ const pages=await renderPdfPages(file,"png");const Tesseract=await import("tesseract.js");const worker=await Tesseract.createWorker(language);const text:string[]=[];
  try{for(const page of pages){const {data}=await worker.recognize(page);text.push(data.text);}}finally{await worker.terminate();}
  return text.join("\n\n");
 }
@@ -298,6 +322,34 @@ async function slidesToImageFiles(file:File):Promise<ProcessResult[]>{
  return [result(await zip.generateAsync({type:"blob"}),name(file,"zip"),pages.length+" slides rendered into individual PNG images.")];
 }
 
+async function workbookToPdf(file:File):Promise<ProcessResult>{
+ const workbook=XLSX.read(await file.arrayBuffer(),{type:"array"});
+ const {jsPDF}=await import("jspdf");const pdf=new jsPDF({orientation:"landscape",unit:"pt",format:"a4"});
+ const pageW=pdf.internal.pageSize.getWidth(),pageH=pdf.internal.pageSize.getHeight(),margin=32;let started=false;
+ for(const sheetName of workbook.SheetNames){
+  const rows=XLSX.utils.sheet_to_json<unknown[]>(workbook.Sheets[sheetName],{header:1,raw:false,defval:""});if(!rows.length)continue;
+  const cols=Math.max(1,...rows.map(row=>row.length)),bands=Math.ceil(cols/8);
+  for(let band=0;band<bands;band++){
+   if(started)pdf.addPage();started=true;
+   const start=band*8,count=Math.min(8,cols-start),cellW=(pageW-margin*2)/count;
+   pdf.setFont("helvetica","bold");pdf.setFontSize(14);pdf.text(sheetName+(bands>1?" · columns "+(start+1)+"–"+(start+count):""),margin,margin+8);
+   let y=margin+28;
+   const header=()=>{pdf.setFont("helvetica","bold");pdf.setFontSize(7);for(let col=0;col<count;col++){const value=String(rows[0][start+col]??"");pdf.setFillColor(239,240,247);pdf.setDrawColor(214,216,225);pdf.rect(margin+col*cellW,y,cellW,22,"FD");pdf.text(pdf.splitTextToSize(value,cellW-8).slice(0,2),margin+col*cellW+4,y+9);}y+=22;};
+   header();
+   for(let rowIndex=1;rowIndex<rows.length;rowIndex++){
+    const row=rows[rowIndex];pdf.setFont("helvetica","normal");pdf.setFontSize(7);
+    const lines=Array.from({length:count},(_,col)=>pdf.splitTextToSize(String(row[start+col]??""),cellW-8).slice(0,4));
+    const height=Math.max(18,...lines.map(line=>line.length*8+6));
+    if(y+height>pageH-margin){pdf.addPage();y=margin;header();}
+    for(let col=0;col<count;col++){pdf.setDrawColor(225,226,231);pdf.setFillColor(rowIndex%2?255:249,rowIndex%2?255:250,rowIndex%2?255:252);pdf.rect(margin+col*cellW,y,cellW,height,"FD");pdf.setFont("helvetica","normal");pdf.setFontSize(7);pdf.setTextColor(45,47,55);pdf.text(lines[col],margin+col*cellW+4,y+10);}
+    y+=height;
+   }
+  }
+ }
+ if(!started)pdf.text("The workbook contains no printable rows.",margin,margin);
+ return result(pdf.output("blob"),name(file,"pdf"),"Workbook sheets exported as paginated PDF tables. Wide sheets are separated into column groups.");
+}
+
 export async function processFiles(files:File[],tool:string,options:ProcessOptions={}):Promise<ProcessResult[]>{
  if(!files.length)throw new Error("Choose at least one file.");
  if(["PNG to JPG","JPG to PNG","PNG to WEBP","WEBP converter","Image compressor","Resize image","Crop & rotate"].includes(tool))return Promise.all(files.map(f=>image(f,tool,options)));
@@ -306,12 +358,13 @@ export async function processFiles(files:File[],tool:string,options:ProcessOptio
  if(["PDF to Word","PDF to Excel","PDF to JPG","PDF to PNG","PDF to PowerPoint"].includes(tool))return pdfAdvanced(files,tool);
  if(tool==="PPTX to PDF"||tool==="Slides to images"){if(tool==="PPTX to PDF"){const pages=await renderPresentationSlides(files[0]);return [await presentationToPdf(pages,name(files[0],"pdf"))];}return slidesToImageFiles(files[0]);}
  if(["CSV to XLSX","Remove duplicates"].includes(tool))return spreadsheet(files[0],tool);
- if(tool==="Excel to PDF"){const wb=XLSX.read(await files[0].arrayBuffer(),{type:"array"});const csv=wb.SheetNames.map(n=>n+"\\n"+XLSX.utils.sheet_to_csv(wb.Sheets[n])).join("\\n\\n");return [await makePdf(csv,name(files[0],"pdf"))];}
- if(["Create ZIP","Extract archive"].includes(tool))return [await archive(files,tool)];
- if(["JSON formatter","Base64 tools","DOCX to TXT"].includes(tool))return [await textTool(files[0],tool)];
+ if(tool==="Excel to PDF")return [await workbookToPdf(files[0])];
+ if(["Create ZIP","Extract archive"].includes(tool))return archive(files,tool);
+ if(tool==="Base64 tools")return processBase64(files[0],options);
+ if(["JSON formatter","DOCX to TXT"].includes(tool))return [await textTool(files[0],tool)];
  if(tool==="Word to PDF"){const mammoth=await import("mammoth");const extracted=await mammoth.extractRawText({arrayBuffer:await files[0].arrayBuffer()});return [await makePdf(extracted.value,name(files[0],"pdf"))];}
  if(tool==="PPTX to PDF"){const pages=await renderPresentationSlides(files[0]);return [await presentationToPdf(pages,name(files[0],"pdf"))];}
- if(tool==="Image to Word (OCR)"||tool==="OCR extractor"){const extracted=files[0].type==="application/pdf"||files[0].name.toLowerCase().endsWith(".pdf")?await ocrPdf(files[0]):await ocrImage(files[0]);return [await makeDocx(extracted,name(files[0],"docx"))];}
+ if(tool==="Image to Word (OCR)"||tool==="OCR extractor"){const language=options.ocrLanguage||"eng";const extracted=files[0].type==="application/pdf"||files[0].name.toLowerCase().endsWith(".pdf")?await ocrPdf(files[0],language):await ocrImage(files[0],language);return options.ocrFormat==="TXT"?[textFile(extracted,name(files[0],"txt"))]:[await makeDocx(extracted,name(files[0],"docx"))];}
  if(tool==="Slides to images")return slidesToImageFiles(files[0]);
  if(tool==="Background remover")return [await removeImageBackground(files[0])];
  if(tool==="Image enhancer"||tool==="Photo restoration")return [await upscaleImage(files[0],tool)];

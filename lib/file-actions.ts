@@ -114,6 +114,7 @@ export function isVideoFile(file: File) {
 
 export function getActionsForFile(file: File) {
   const category = detectFileCategory(file);
+  if (category === "Archives" && !file.name.toLowerCase().endsWith(".zip")) return [];
   if (category !== "Video & audio") return actions[category];
   const lowerName = file.name.toLowerCase();
   const isAudio = file.type.toLowerCase().startsWith("audio/") ||
@@ -144,7 +145,7 @@ export function acceptedInputForTool(inputLabel: string, category: string) {
   if (input === "pptx") return ".ppt,.pptx,.odp";
   if (input === "video" || input === "mp4") return "video/*,.mp4";
   if (input === "audio") return "audio/*";
-  if (input === "zip") return ".zip,.7z,.rar,.tar,.gz";
+  if (input === "zip") return ".zip,application/zip";
   if (input === "json") return ".json,application/json";
   if (input === "text / url" || input === "text / file" || input === "any file" || input === "files") return "*/*";
   if (category === "Images") return "image/*";
