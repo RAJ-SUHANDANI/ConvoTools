@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createHash } from "node:crypto";
+import { createHash, timingSafeEqual } from "node:crypto";
 import { COOKIE_NAME, TOKEN_LIFETIME_SECONDS, createSavefromToken, savefromSecretConfigured } from "@/lib/savefrom-auth";
 
 export const runtime = "nodejs";
@@ -12,9 +12,8 @@ function safeEqual(left: string, right: string) {
 }
 function requireTimingSafeEqual(a: Buffer, b: Buffer) {
   // Fixed-length SHA-256 digests make the constant-time comparison safe.
-  return timingSafeEqualDigest(a, b);
+  return timingSafeEqual(a, b);
 }
-import { timingSafeEqual as timingSafeEqualDigest } from "node:crypto";
 
 export async function POST(request: NextRequest) {
   const origin = request.headers.get("origin");
