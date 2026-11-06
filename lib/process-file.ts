@@ -285,7 +285,7 @@ async function renderPresentationSlides(file:File):Promise<Blob[]>{
  const canvasW=1280,canvasH=Math.max(480,Math.round(canvasW*emuH/emuW));
  const presentationRels=zip.file("ppt/_rels/presentation.xml.rels");const rels=new Map<string,string>();
  if(presentationRels){const doc=parsePptXml(await presentationRels.async("text"));for(const rel of pptAll(doc,PKG_REL_NS,"Relationship"))rels.set(rel.getAttribute("Id")||"",resolvePptPath("ppt/presentation.xml",rel.getAttribute("Target")||""));}
- let slides=pptAll(presentation,PPT_NS,"sldId").map(item=>rels.get(item.getAttributeNS(REL_NS,"id")||item.getAttribute("r:id")||"")).filter(Boolean);
+ let slides:string[]=pptAll(presentation,PPT_NS,"sldId").map(item=>rels.get(item.getAttributeNS(REL_NS,"id")||item.getAttribute("r:id")||"")).filter((path):path is string=>Boolean(path));
  if(!slides.length)slides=Object.keys(zip.files).filter(path=>/^ppt\/slides\/slide\d+\.xml$/.test(path)).sort((a,b)=>Number(a.match(/slide(\d+)/)?.[1])-Number(b.match(/slide(\d+)/)?.[1]));
  if(!slides.length)throw new Error("No PowerPoint slides were found.");
  const rendered:Blob[]=[];
