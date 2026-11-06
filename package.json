@@ -23,7 +23,9 @@
     "pdfjs-dist": "^5.4.394",
     "jspdf": "^3.0.3",
     "tesseract.js": "^6.0.1",
-    "pptxgenjs": "^4.0.1"
+    "pptxgenjs": "^4.0.1",
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.16",

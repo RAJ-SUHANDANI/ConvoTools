@@ -99,6 +99,36 @@ async function pdfAdvanced(files:File[],tool:string):Promise<ProcessResult[]>{
  throw new Error("Unsupported PDF operation.");
 }
 
+
+async function ffmpegRun(file:File,tool:string,options:ProcessOptions):Promise<ProcessResult>{
+ if(file.size>180*1024*1024)throw new Error("For browser stability, video and audio files must be smaller than 180 MB.");
+ const {FFmpeg}=await import("@ffmpeg/ffmpeg");
+ const {fetchFile,toBlobURL}=await import("@ffmpeg/util");
+ const ffmpeg=new FFmpeg();
+ const core="https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/umd";
+ await ffmpeg.load({coreURL:await toBlobURL(core+"/ffmpeg-core.js","text/javascript"),wasmURL:await toBlobURL(core+"/ffmpeg-core.wasm","application/wasm")});
+ const input="input-"+(file.name.split(".").pop()||"bin").replace(/[^a-z0-9]/gi,"");
+ const ext=(options.output||"MP3").toLowerCase().replace(/[^a-z0-9]/g,"");
+ const outputExt=tool==="MP4 to GIF"?"gif":tool==="Video compressor"?"mp4":tool==="Extract audio"?"mp3":(["mp3","wav","aac","flac","ogg"].includes(ext)?ext:"mp3");
+ const output="convotools-output."+outputExt;
+ try{
+  await ffmpeg.writeFile(input,await fetchFile(file));
+  let args:string[]=[];
+  if(tool==="MP4 to GIF")args=["-i",input,"-vf","fps=12,scale=720:-1:flags=lanczos","-loop","0",output];
+  else if(tool==="Video compressor"){const crf=options.quality==="Smaller file"?"30":options.quality==="Best quality"?"20":"25";args=["-i",input,"-c:v","libx264","-preset","veryfast","-crf",crf,"-c:a","aac","-b:a","128k","-movflags","+faststart",output];}
+  else if(tool==="Extract audio")args=["-i",input,"-vn","-codec:a","libmp3lame","-q:a","2",output];
+  else if(tool==="Audio converter"){
+   const codec:Record<string,string[]>={mp3:["-c:a","libmp3lame","-q:a","2"],wav:["-c:a","pcm_s16le"],aac:["-c:a","aac","-b:a","192k"],flac:["-c:a","flac"],ogg:["-c:a","libvorbis","-q:a","5"]};
+   args=["-i",input,...(codec[outputExt]||codec.mp3),output];
+  }else throw new Error("Unsupported media operation.");
+  const exit=await ffmpeg.exec(args);if(exit!==0)throw new Error("The media encoder could not process this file. Check that the input codec is supported.");
+  const data=await ffmpeg.readFile(output);if(typeof data==="string")throw new Error("The encoder returned an invalid output.");
+  const mime:Record<string,string>={gif:"image/gif",mp4:"video/mp4",mp3:"audio/mpeg",wav:"audio/wav",aac:"audio/aac",flac:"audio/flac",ogg:"audio/ogg"};
+  const blob=new Blob([data],{type:mime[outputExt]||"application/octet-stream"});
+  return result(blob,name(file,outputExt),"Media encoded locally in your browser with FFmpeg.");
+ }finally{await ffmpeg.terminate();}
+}
+
 export async function processFiles(files:File[],tool:string,options:ProcessOptions={}):Promise<ProcessResult[]>{
  if(!files.length)throw new Error("Choose at least one file.");
  if(["PNG to JPG","JPG to PNG","PNG to WEBP","WEBP converter","Image compressor","Resize image","Crop & rotate"].includes(tool))return Promise.all(files.map(f=>image(f,tool,options)));
@@ -108,7 +138,10 @@ export async function processFiles(files:File[],tool:string,options:ProcessOptio
  if(tool==="Excel to PDF"){const wb=XLSX.read(await files[0].arrayBuffer(),{type:"array"});const csv=wb.SheetNames.map(n=>n+"\\n"+XLSX.utils.sheet_to_csv(wb.Sheets[n])).join("\\n\\n");return [await makePdf(csv,name(files[0],"pdf"))];}
  if(["Create ZIP","Extract archive"].includes(tool))return [await archive(files,tool)];
  if(["JSON formatter","Base64 tools","DOCX to TXT"].includes(tool))return [await textTool(files[0],tool)];
- if(tool==="Word to PDF"){const mammoth=await import("mammoth/mammoth.browser");const extracted=await mammoth.extractRawText({arrayBuffer:await files[0].arrayBuffer()});return [await makePdf(extracted.value,name(files[0],"pdf"))];}\n if(tool==="PPTX to PDF"){const text=await pptxText(files[0]);return [await makePdf(text,name(files[0],"pdf"))];}\n if(tool==="Image to Word (OCR)"||tool==="OCR extractor"){const extracted=files[0].type==="application/pdf"||files[0].name.toLowerCase().endsWith(".pdf")?await ocrPdf(files[0]):await ocrImage(files[0]);return [await makeDocx(extracted,name(files[0],"docx"))];}
+ if(tool==="Word to PDF"){const mammoth=await import("mammoth/mammoth.browser");const extracted=await mammoth.extractRawText({arrayBuffer:await files[0].arrayBuffer()});return [await makePdf(extracted.value,name(files[0],"pdf"))];}
+ if(tool==="PPTX to PDF"){const text=await pptxText(files[0]);return [await makePdf(text,name(files[0],"pdf"))];}
+ if(tool==="Image to Word (OCR)"||tool==="OCR extractor"){const extracted=files[0].type==="application/pdf"||files[0].name.toLowerCase().endsWith(".pdf")?await ocrPdf(files[0]):await ocrImage(files[0]);return [await makeDocx(extracted,name(files[0],"docx"))];}
+ if(["MP4 to GIF","Video compressor","Extract audio","Audio converter"].includes(tool))return [await ffmpegRun(files[0],tool,options)];
  if(tool==="Hash generator"){const digest=await crypto.subtle.digest("SHA-256",await files[0].arrayBuffer());const hash=Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,"0")).join("");return [textFile(hash+"  "+files[0].name+"\n",name(files[0],"sha256"))];}
  if(tool==="QR generator"){const QR=await import("qrcode");const url=await QR.toDataURL(await files[0].text(),{errorCorrectionLevel:"H",width:1024});const blob=await (await fetch(url)).blob();return [result(blob,"convotools-qr.png","QR generated locally.")];}
  if(tool==="Word editor"){const doc=new Document({sections:[{children:(await files[0].text()).split(/\r?\n/).map(line=>new Paragraph({children:[new TextRun(line)]}))}]});return [result(await Packer.toBlob(doc),"convotools-document.docx","Word document generated from the text content.")];}

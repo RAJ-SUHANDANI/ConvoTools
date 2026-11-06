@@ -131,7 +131,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
     finally { setProcessing(false); }
   };
 
-  const options = [defaultOutput(tool)];
+  const options = tool.name === "Audio converter" ? ["MP3", "WAV", "AAC", "FLAC", "OGG"] : [defaultOutput(tool)];
   const isAI = tool.category === "AI lab" || tool.name.toLowerCase().includes("enhancer") || tool.name.toLowerCase().includes("restoration");
 
   return (
