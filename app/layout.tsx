@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import ScrollProgress from "@/components/ScrollProgress";
 
 export const metadata: Metadata = {
   title: "ConvoTools — Make files work for you",
@@ -30,7 +31,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body><ScrollProgress />{children}</body>
     </html>
   );
 }
