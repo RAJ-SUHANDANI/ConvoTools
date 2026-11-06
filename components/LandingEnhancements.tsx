@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import {
   AnimatePresence, motion, useReducedMotion, useScroll, useTransform,
-  type MotionValue
 } from "motion/react";
 
 const navigation = [
@@ -85,11 +84,12 @@ export function LandingNav() {
   );
 }
 
+const typewriterPhrases = ["work for you.", "move with you.", "fit your flow."];
+
 export function TypewriterHeading() {
   const reducedMotion = useReducedMotion();
-  const phrases = ["work for you.", "move with you.", "fit your flow."];
   const [phraseIndex, setPhraseIndex] = useState(0);
-  const [visible, setVisible] = useState(phrases[0]);
+  const [visible, setVisible] = useState(typewriterPhrases[0]);
 
   useEffect(() => {
     if (reducedMotion) return;
@@ -97,7 +97,7 @@ export function TypewriterHeading() {
     let deleting = false;
     let timer: ReturnType<typeof setTimeout>;
     const tick = () => {
-      const phrase = phrases[phraseIndex];
+      const phrase = typewriterPhrases[phraseIndex];
       if (!deleting) {
         index += 1;
         setVisible(phrase.slice(0, index));
@@ -112,7 +112,7 @@ export function TypewriterHeading() {
         setVisible(phrase.slice(0, Math.max(0, index)));
         if (index <= 0) {
           deleting = false;
-          setPhraseIndex((current) => (current + 1) % phrases.length);
+          setPhraseIndex((current) => (current + 1) % typewriterPhrases.length);
           return;
         }
         timer = setTimeout(tick, 38);
@@ -122,13 +122,7 @@ export function TypewriterHeading() {
     return () => clearTimeout(timer);
   }, [phraseIndex, reducedMotion]);
 
-  return <h1>Make files<br /><em className="hero-typewriter" aria-label={visible}>{reducedMotion ? phrases[0] : visible}<i aria-hidden="true" /></em></h1>;
-}
-
-function ScrollLine({ progress, text, direction, index }: { progress: MotionValue<number>; text: string; direction: number; index: number }) {
-  const x = useTransform(progress, [0, 1], [direction * (50 + index * 15), direction * -25]);
-  const opacity = useTransform(progress, [0, .25, .8, 1], [.28, .75, 1, .85]);
-  return <motion.div className={index % 2 ? "scroll-text-line scroll-text-line-alt" : "scroll-text-line"} style={{ x, opacity }}><span>{text}</span><i /> <b>{index % 2 ? "CT / 02" : "CT / 01"}</b></motion.div>;
+  return <h1>Make files<br /><em className="hero-typewriter" aria-label={visible}>{reducedMotion ? typewriterPhrases[0] : visible}<i aria-hidden="true" /></em></h1>;
 }
 
 export function ScrollTextLines() {

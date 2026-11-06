@@ -2,7 +2,7 @@
 
 import {
   ArrowDownRight, ArrowRight, ArrowUpRight, AudioLines, Braces,
-  Check, ChevronRight, FileImage, FileSpreadsheet, FileText, Film, Image as ImageIcon, Layers3, LockKeyhole, Merge,
+  Check, ChevronRight, FileImage, FileSpreadsheet, FileText, Film, Image as ImageIcon, Layers3, LockKeyhole,
   Minimize2, PanelTop, Plus, ScanText, Search, ShieldCheck,
   SlidersHorizontal, Sparkles, UploadCloud
 } from "lucide-react";
@@ -11,7 +11,6 @@ import { ChangeEvent, DragEvent, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import FileActionPanel from "@/components/FileActionPanel";
 import ImageComparison from "@/components/ImageComparison";
-import BrandLogo from "@/components/BrandLogo";
 import { recordActivity } from "@/lib/activity";
 import { TOOLS, TOOL_CATEGORIES, slugify } from "@/lib/tools";
 import { AIGallery, ApproachWaypoints, FooterReveal, LandingNav, LiveCodeTerminal, ScrollTextLines, TypewriterHeading, WorkflowWaypoints } from "@/components/LandingEnhancements";
