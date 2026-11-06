@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { ArrowLeftRight, Sparkles } from "lucide-react";
 
 const portrait =
@@ -9,14 +9,15 @@ const portrait =
 
 export default function ImageComparison() {
   const [split, setSplit] = useState(48);
+  const reducedMotion = useReducedMotion();
 
   return (
     <motion.div
       className="image-comparison"
-      initial={{ opacity: 0, y: 22 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={reducedMotion ? false : { opacity: 0, y: 22 }}
+      whileInView={reducedMotion ? {} : { opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.25 }}
-      transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: reducedMotion ? 0 : 0.75, ease: [0.22, 1, 0.36, 1] }}
     >
       <img className="comparison-after" src={portrait} alt="Clear natural-light outdoor portrait used as the comparison reference" />
       <img
@@ -41,7 +42,7 @@ export default function ImageComparison() {
         aria-label="Move the before and after image comparison divider"
       />
       <div className="comparison-hint"><Sparkles size={12} /> VISUAL DEMO · DRAG TO COMPARE</div>
-      <div className="comparison-credit"><span className="comparison-demo-note">Not an actual AI result</span>
+      <div className="comparison-credit">
         <span>Portrait photo by Arturo Añez</span>
         <a href="https://unsplash.com/photos/a-smiling-woman-poses-outdoors-in-nature-nGnQpHSZaQ4" target="_blank" rel="noreferrer">Unsplash photo ↗</a>
       </div>
