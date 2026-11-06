@@ -269,7 +269,7 @@ export default function DashboardPage() {
               {activeTab === "Favorites" && (
                 <section className="dash-page-panel">
                   <div className="dash-page-title"><div><span className="section-kicker">YOUR SHORTCUTS</span><h1>Favorites<em>.</em></h1><p>Keep the tools you reach for most close at hand.</p></div><Link className="dash-primary-action" href="/#toolkit">Find tools <ArrowUpRight size={14} /></Link></div>
-                  {favoriteTools.length === 0 ? <EmptyPanel icon={<Heart size={22} />} title="Save your go-to tools" copy="Browse the tool library and add favorites here when that action is available." /> :
+                  {favoriteTools.length === 0 ? <EmptyPanel icon={<Heart size={22} />} title="Save your go-to tools" copy="Open any tool page and choose “Save this tool” to pin it here." /> :
                     <div className="dash-favorite-grid">{favoriteTools.map((tool) => { const Icon = tool.icon; const slug = slugify(tool.name); return <div className="dash-favorite-card" key={slug}><Link href={"/tools/" + slug}><span><Icon size={18} /></span><b>{tool.name}</b><small>{tool.description}</small></Link><button aria-label={"Remove " + tool.name + " from favorites"} onClick={() => toggleFavorite(slug)}><Heart size={15} fill="currentColor" /></button></div>; })}</div>}
                 </section>
               )}
