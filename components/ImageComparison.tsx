@@ -26,8 +26,8 @@ export default function ImageComparison() {
         aria-hidden="true"
         style={{ clipPath: `inset(0 ${100 - split}% 0 0)` }}
       />
-      <span className="comparison-label comparison-label-before">SOFTER INPUT</span>
-      <span className="comparison-label comparison-label-after">DETAIL REFERENCE</span>
+      <span className="comparison-label comparison-label-before">BEFORE / SOFTENED</span>
+      <span className="comparison-label comparison-label-after">AFTER / SHARP REFERENCE</span>
       <motion.div className="comparison-divider" style={{ left: `${split}%` }} animate={{ left: `${split}%` }} transition={{ type: "spring", stiffness: 180, damping: 26 }}>
         <span><ArrowLeftRight size={15} /></span>
       </motion.div>
@@ -40,8 +40,8 @@ export default function ImageComparison() {
         onChange={(event) => setSplit(Number(event.target.value))}
         aria-label="Move the before and after image comparison divider"
       />
-      <div className="comparison-hint"><Sparkles size={12} /> DRAG THE DIVIDER TO COMPARE</div>
-      <div className="comparison-credit">
+      <div className="comparison-hint"><Sparkles size={12} /> VISUAL DEMO · DRAG TO COMPARE</div>
+      <div className="comparison-credit"><span className="comparison-demo-note">Not an actual AI result</span>
         <span>Portrait photo by Arturo Añez</span>
         <a href="https://unsplash.com/photos/a-smiling-woman-poses-outdoors-in-nature-nGnQpHSZaQ4" target="_blank" rel="noreferrer">Unsplash photo ↗</a>
       </div>
