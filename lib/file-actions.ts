@@ -81,9 +81,7 @@ const actions: Record<FileCategory, FileAction[]> = {
     { id: "dev-base64", label: "Encode / decode", detail: "Convert between text and Base64.", output: "Base64", toolSlug: "base64-tools", kind: "convert" },
     { id: "dev-hash", label: "Generate checksum", detail: "Create a digest for this file.", output: "SHA hash", toolSlug: "hash-generator", kind: "extract" },
   ],
-  Other: [
-    { id: "other-pdf", label: "Try PDF conversion", detail: "Check whether this file can be exported as PDF.", output: "PDF", toolSlug: "word-to-pdf", kind: "convert" },
-  ],
+  Other: [],
 };
 
 export function detectFileCategory(file: File): FileCategory {
@@ -103,7 +101,15 @@ export function detectFileCategory(file: File): FileCategory {
 }
 
 export function getActionsForFile(file: File) {
-  return actions[detectFileCategory(file)];
+  const category = detectFileCategory(file);
+  if (category !== "Video & audio") return actions[category];
+  const lowerName = file.name.toLowerCase();
+  const isAudio = file.type.toLowerCase().startsWith("audio/") ||
+    [".mp3", ".wav", ".aac", ".flac", ".ogg", ".m4a"].some((extension) => lowerName.endsWith(extension));
+  if (isAudio) {
+    return actions[category].filter((action) => action.id === "media-audio-convert");
+  }
+  return actions[category].filter((action) => action.id !== "media-audio-convert");
 }
 
 export function formatFileSize(bytes: number) {
