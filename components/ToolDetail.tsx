@@ -46,7 +46,8 @@ function compatible(tool: ToolData, file: File) {
   if (expected.includes("docx") || expected.includes("word") || expected === "document") return category === "Documents";
   if (expected.includes("xlsx") || expected.includes("csv")) return category === "Spreadsheets";
   if (expected.includes("pptx")) return category === "Presentations";
-  if (expected.includes("video") || expected.includes("mp4")) return category === "Video & audio" && isVideoFile(file);\n  if (expected.includes("audio")) return category === "Video & audio" && isAudioFile(file);
+  if (expected.includes("video") || expected.includes("mp4")) return category === "Video & audio" && isVideoFile(file);
+  if (expected.includes("audio")) return category === "Video & audio" && isAudioFile(file);
   if (expected.includes("zip")) return category === "Archives";
   if (expected.includes("json")) return file.name.toLowerCase().endsWith(".json");
   return true;
