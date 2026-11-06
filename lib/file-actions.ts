@@ -112,16 +112,29 @@ export function formatFileSize(bytes: number) {
   return (bytes / (1024 * 1024)).toFixed(2) + " MB";
 }
 
-export function acceptedInputForTool(toolName: string, category: string) {
-  const name = toolName.toLowerCase();
-  if (name.includes("pdf") && !name.startsWith("image to")) return ".pdf,application/pdf";
-  if (name.includes("image") || name.includes("png") || name.includes("jpg") || name.includes("webp") || name.includes("photo") || name.includes("background")) return "image/*,.heic";
-  if (name.includes("word") || name.includes("docx")) return ".doc,.docx,.odt,.rtf";
-  if (name.includes("excel") || name.includes("csv") || name.includes("duplicate")) return ".xls,.xlsx,.csv,.tsv,.ods";
-  if (name.includes("ppt") || name.includes("slide")) return ".ppt,.pptx,.odp";
-  if (name.includes("video") || name.includes("mp4") || name.includes("audio") || name.includes("gif")) return "video/*,audio/*";
-  if (name.includes("archive") || name.includes("zip")) return ".zip,.7z,.rar,.tar,.gz";
-  if (name.includes("json") || name.includes("base64") || name.includes("hash")) return "*/*";
+export function acceptedInputForTool(inputLabel: string, category: string) {
+  const input = inputLabel.toLowerCase();
+  if (input === "pdf") return ".pdf,application/pdf";
+  if (input === "png") return ".png,image/png";
+  if (input === "jpg") return ".jpg,.jpeg,image/jpeg";
+  if (input === "webp") return ".webp,image/webp";
+  if (input === "image") return "image/*";
+  if (input === "image or pdf") return "image/*,.pdf,application/pdf";
+  if (input === "docx") return ".doc,.docx,.odt,.rtf";
+  if (input === "csv") return ".csv,.tsv,text/csv";
+  if (input === "xlsx" || input === "csv / xlsx") return ".xls,.xlsx,.csv,.tsv,.ods";
+  if (input === "pptx") return ".ppt,.pptx,.odp";
+  if (input === "video") return "video/*";
+  if (input === "audio") return "audio/*";
+  if (input === "zip") return ".zip,.7z,.rar,.tar,.gz";
+  if (input === "json") return ".json,application/json";
+  if (input === "text / url" || input === "text / file" || input === "any file" || input === "files") return "*/*";
   if (category === "Images") return "image/*";
+  if (category === "PDF") return ".pdf,application/pdf";
+  if (category === "Documents") return ".doc,.docx,.odt,.rtf,.txt,.md";
+  if (category === "Spreadsheets") return ".xls,.xlsx,.csv,.tsv,.ods";
+  if (category === "Presentations") return ".ppt,.pptx,.odp";
+  if (category === "Video & audio") return "video/*,audio/*";
+  if (category === "Archives") return ".zip,.7z,.rar,.tar,.gz";
   return "*/*";
 }
