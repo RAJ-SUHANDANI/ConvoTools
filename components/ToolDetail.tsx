@@ -151,7 +151,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
     if (invalidFiles.length) { setNotice("One or more files do not match this tool's expected input format."); return; }
     setProcessing(true); setProgress(0); setMediaProgress(["MP4 to GIF","Video compressor","Extract audio","Audio converter"].includes(tool.name)); setResults([]); setNotice("Processing locally in your browser…");
     try {
-      const completed = await processFiles(files, tool.name, { output, quality, password, pdfPageOrder, width: imageWidth, height: imageHeight, rotation, cropMode, textContent: documentText, base64Mode, decodedFormat, ocrFormat, ocrLanguage, pdfRotation, qrFormat, hashAlgorithm, qrText });
+      const completed = await processFiles(files, tool.name, { output, quality, password, pdfPageOrder, width: imageWidth, height: imageHeight, rotation, cropMode, textContent: documentText, base64Mode, decodedFormat, ocrFormat, ocrLanguage, pdfRotation, qrFormat, hashAlgorithm, qrText, onProgress: (value) => setProgress(value) });
       setResults(completed);
       completed.forEach((result) => {
         saveProcessedFile(result);
