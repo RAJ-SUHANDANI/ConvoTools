@@ -24,7 +24,7 @@ async function image(file:File,tool:string,options:ProcessOptions):Promise<Proce
  const blob=await new Promise<Blob>((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error("Image export failed.")),mime,quality));
  return result(blob,name(file,mime==="image/jpeg"?"jpg":mime==="image/webp"?"webp":"png"),"Image converted locally in your browser.");
 }
-async function pdf(files:File[],tool:string):Promise<ProcessResult[]>{
+async function pdf(files:File[],tool:string,options:ProcessOptions):Promise<ProcessResult[]>{
  if(tool==="Image to PDF"){const doc=await PDFDocument.create();for(const f of files){const bytes=await f.arrayBuffer();const img=f.type.includes("png")?await doc.embedPng(bytes):await doc.embedJpg(bytes);const p=doc.addPage([img.width,img.height]);p.drawImage(img,{x:0,y:0,width:img.width,height:img.height});}return [result(bytesBlob(await doc.save(),"application/pdf"),"images-combined.pdf","Images combined into one PDF.")];}
  if(tool==="Merge PDF"){const doc=await PDFDocument.create();for(const f of files){const src=await PDFDocument.load(await f.arrayBuffer());(await doc.copyPages(src,src.getPageIndices())).forEach(p=>doc.addPage(p));}return [result(bytesBlob(await doc.save(),"application/pdf"),"merged.pdf","PDFs merged in selection order.")];}
  if(tool==="Split PDF"){const src=await PDFDocument.load(await files[0].arrayBuffer());const zip=new JSZip();for(let i=0;i<src.getPageCount();i++){const part=await PDFDocument.create();const [p]=await part.copyPages(src,[i]);part.addPage(p);zip.file("page-"+String(i+1).padStart(3,"0")+".pdf",await part.save());}return [result(await zip.generateAsync({type:"blob"}),name(files[0],"zip"),"PDF pages exported separately in a ZIP.")];}
@@ -203,7 +203,7 @@ async function upscaleImage(file:File,tool:string):Promise<ProcessResult>{
 export async function processFiles(files:File[],tool:string,options:ProcessOptions={}):Promise<ProcessResult[]>{
  if(!files.length)throw new Error("Choose at least one file.");
  if(["PNG to JPG","JPG to PNG","PNG to WEBP","WEBP converter","Image compressor","Resize image","Crop & rotate"].includes(tool))return Promise.all(files.map(f=>image(f,tool,options)));
- if(["Image to PDF","Merge PDF","Split PDF","Compress PDF","Organize PDF"].includes(tool))return pdf(files,tool);
+ if(["Image to PDF","Merge PDF","Split PDF","Compress PDF","Organize PDF"].includes(tool))return pdf(files,tool,options);
  if(tool==="Protect PDF"){const password=options.password?.trim();if(!password||password.length<6)throw new Error("Enter a password with at least 6 characters.");const {PDFDocument:SecurePDF}=await import("@cantoo/pdf-lib");const doc=await SecurePDF.load(await files[0].arrayBuffer());doc.encrypt({userPassword:password,ownerPassword:password+"-"+crypto.randomUUID()});return [result(bytesBlob(await doc.save(),"application/pdf"),name(files[0],"pdf"),"PDF encrypted with AES-256 password protection.")];}
  if(["PDF to Word","PDF to Excel","PDF to JPG","PDF to PNG","PDF to PowerPoint"].includes(tool))return pdfAdvanced(files,tool);
  if(["CSV to XLSX","Remove duplicates"].includes(tool))return spreadsheet(files[0],tool);
