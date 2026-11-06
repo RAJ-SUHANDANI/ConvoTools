@@ -130,6 +130,19 @@ async function ffmpegRun(file:File,tool:string,options:ProcessOptions):Promise<P
  }finally{await ffmpeg.terminate();}
 }
 
+
+async function removeImageBackground(file:File):Promise<ProcessResult>{
+ const {pipeline}=await import("@huggingface/transformers");
+ const segmenter=await pipeline("background-removal","Xenova/modnet",{device:"wasm",dtype:"uint8"});
+ const source=URL.createObjectURL(file);
+ try{
+  const output=await segmenter(source);
+  const first=Array.isArray(output)?output[0]:output;
+  const blob=await first.toBlob("image/png");
+  return result(blob,name(file,"png"),"Portrait background removed locally in your browser using MODNet. The model is downloaded on first use.");
+ }finally{URL.revokeObjectURL(source);}
+}
+
 export async function processFiles(files:File[],tool:string,options:ProcessOptions={}):Promise<ProcessResult[]>{
  if(!files.length)throw new Error("Choose at least one file.");
  if(["PNG to JPG","JPG to PNG","PNG to WEBP","WEBP converter","Image compressor","Resize image","Crop & rotate"].includes(tool))return Promise.all(files.map(f=>image(f,tool,options)));
@@ -143,6 +156,7 @@ export async function processFiles(files:File[],tool:string,options:ProcessOptio
  if(tool==="Word to PDF"){const mammoth=await import("mammoth/mammoth.browser");const extracted=await mammoth.extractRawText({arrayBuffer:await files[0].arrayBuffer()});return [await makePdf(extracted.value,name(files[0],"pdf"))];}
  if(tool==="PPTX to PDF"){const text=await pptxText(files[0]);return [await makePdf(text,name(files[0],"pdf"))];}
  if(tool==="Image to Word (OCR)"||tool==="OCR extractor"){const extracted=files[0].type==="application/pdf"||files[0].name.toLowerCase().endsWith(".pdf")?await ocrPdf(files[0]):await ocrImage(files[0]);return [await makeDocx(extracted,name(files[0],"docx"))];}
+ if(tool==="Background remover")return [await removeImageBackground(files[0])];
  if(["MP4 to GIF","Video compressor","Extract audio","Audio converter"].includes(tool))return [await ffmpegRun(files[0],tool,options)];
  if(tool==="Hash generator"){const digest=await crypto.subtle.digest("SHA-256",await files[0].arrayBuffer());const hash=Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,"0")).join("");return [textFile(hash+"  "+files[0].name+"\n",name(files[0],"sha256"))];}
  if(tool==="QR generator"){const QR=await import("qrcode");const url=await QR.toDataURL(await files[0].text(),{errorCorrectionLevel:"H",width:1024});const blob=await (await fetch(url)).blob();return [result(blob,"convotools-qr.png","QR generated locally.")];}
