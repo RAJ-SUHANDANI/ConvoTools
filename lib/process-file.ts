@@ -234,15 +234,16 @@ function parsePptXml(source:string){
  if(parsed.getElementsByTagName("parsererror").length)throw new Error("This PowerPoint file contains invalid slide XML.");
  return parsed;
 }
-function pptFirst(root:Element|null,ns:string,tag:string):Element|null{return root?root.getElementsByTagNameNS(ns,tag)[0]||null:null;}
-function pptAll(root:Element,ns:string,tag:string):Element[]{return Array.from(root.getElementsByTagNameNS(ns,tag));}
+type PptXmlScope=Pick<Element,"getElementsByTagNameNS">;
+function pptFirst(root:PptXmlScope|null,ns:string,tag:string):Element|null{return root?root.getElementsByTagNameNS(ns,tag)[0]||null:null;}
+function pptAll(root:PptXmlScope,ns:string,tag:string):Element[]{return Array.from(root.getElementsByTagNameNS(ns,tag));}
 function resolvePptPath(baseFile:string,target:string):string{
  if(target.startsWith("/"))return target.slice(1);
  const parts=baseFile.split("/").slice(0,-1);
  for(const part of target.split("/")){if(!part||part===".")continue;if(part==="..")parts.pop();else parts.push(part);}
  return parts.join("/");
 }
-function pptColor(root:Element|null,fallback:string):string{
+function pptColor(root:PptXmlScope|null,fallback:string):string{
  const fill=pptFirst(root,DRAW_NS,"solidFill");const rgb=pptFirst(fill,DRAW_NS,"srgbClr");
  if(rgb?.getAttribute("val"))return "#"+rgb.getAttribute("val");
  const sys=pptFirst(fill,DRAW_NS,"sysClr");if(sys?.getAttribute("lastClr"))return "#"+sys.getAttribute("lastClr");
