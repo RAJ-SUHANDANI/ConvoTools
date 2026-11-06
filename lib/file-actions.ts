@@ -115,6 +115,8 @@ export function isVideoFile(file: File) {
 export function getActionsForFile(file: File) {
   const category = detectFileCategory(file);
   if (category === "Archives" && !file.name.toLowerCase().endsWith(".zip")) return [];
+  if (category === "Documents" && file.name.toLowerCase().endsWith(".doc")) return [];
+  if (category === "Presentations" && !file.name.toLowerCase().endsWith(".pptx")) return [];
   if (category !== "Video & audio") return actions[category];
   const lowerName = file.name.toLowerCase();
   const isAudio = file.type.toLowerCase().startsWith("audio/") ||
@@ -139,10 +141,11 @@ export function acceptedInputForTool(inputLabel: string, category: string) {
   if (input === "webp") return ".webp,image/webp";
   if (input === "image") return "image/*";
   if (input === "image or pdf") return "image/*,.pdf,application/pdf";
-  if (input === "docx" || input === "document") return ".doc,.docx,.odt,.rtf,.txt,.md";
+  if (input === "docx") return ".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+  if (input === "document") return ".docx,.odt,.rtf,.txt,.md";
   if (input === "csv") return ".csv,.tsv,text/csv";
   if (input === "xlsx" || input === "csv / xlsx") return ".xls,.xlsx,.csv,.tsv,.ods";
-  if (input === "pptx") return ".ppt,.pptx,.odp";
+  if (input === "pptx") return ".pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation";
   if (input === "video" || input === "mp4") return "video/*,.mp4";
   if (input === "audio") return "audio/*";
   if (input === "zip") return ".zip,application/zip";

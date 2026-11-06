@@ -368,6 +368,31 @@ async function workbookToPdf(file:File):Promise<ProcessResult>{
  return result(pdf.output("blob"),name(file,"pdf"),"Workbook sheets exported as paginated PDF tables. Wide sheets are separated into column groups.");
 }
 
+
+async function extractDocumentText(file:File):Promise<string>{
+ const ext=file.name.split(".").pop()?.toLowerCase()||"";
+ if(ext==="docx"){const mammoth=await import("mammoth");const value=await mammoth.extractRawText({arrayBuffer:await file.arrayBuffer()});return value.value;}
+ if(ext==="txt"||ext==="md")return file.text();
+ if(ext==="rtf"){
+  let value=await file.text();
+  value=value.replace(/\\'([0-9a-f]{2})/gi,(_,hex:string)=>String.fromCharCode(parseInt(hex,16)));
+  value=value.replace(/\\u(-?\\d+)\\??/g,(_,code:string)=>String.fromCharCode((Number(code)+65536)%65536));
+  value=value.replace(/\\par[d]?\\b/g,"\\n").replace(/\\line\\b/g,"\\n").replace(/\\tab\\b/g,"\\t");
+  value=value.replace(/\\[a-zA-Z]+-?\\d* ?/g,"").replace(/\\([{}\\\\])/g,"$1").replace(/[{}]/g,"");
+  return value.trim();
+ }
+ if(ext==="odt"){
+  const zip=await JSZip.loadAsync(file);const content=zip.file("content.xml");if(!content)throw new Error("This OpenDocument file has no readable content.xml.");
+  const xml=new DOMParser().parseFromString(await content.async("text"),"application/xml");
+  const ns="urn:oasis:names:tc:opendocument:xmlns:text:1.0";
+  const paragraphs=[...Array.from(xml.getElementsByTagNameNS(ns,"h")),...Array.from(xml.getElementsByTagNameNS(ns,"p"))];
+  if(!paragraphs.length)return xml.documentElement.textContent||"";
+  return paragraphs.map(node=>node.textContent||"").join("\\n");
+ }
+ if(ext==="doc")throw new Error("Legacy .doc files are not supported by the browser converter. Save the file as .docx, .odt, .rtf or .txt first.");
+ throw new Error("This document format is not supported by the local converter.");
+}
+
 export async function processFiles(files:File[],tool:string,options:ProcessOptions={}):Promise<ProcessResult[]>{
  if(!files.length)throw new Error("Choose at least one file.");
  if(["PNG to JPG","JPG to PNG","PNG to WEBP","WEBP converter","Image compressor","Resize image","Crop & rotate"].includes(tool))return Promise.all(files.map(f=>image(f,tool,options)));
@@ -380,7 +405,7 @@ export async function processFiles(files:File[],tool:string,options:ProcessOptio
  if(["Create ZIP","Extract archive"].includes(tool))return archive(files,tool);
  if(tool==="Base64 tools")return processBase64(files[0],options);
  if(["JSON formatter","DOCX to TXT"].includes(tool))return [await textTool(files[0],tool)];
- if(tool==="Word to PDF"){const mammoth=await import("mammoth");const extracted=await mammoth.extractRawText({arrayBuffer:await files[0].arrayBuffer()});return [await makePdf(extracted.value,name(files[0],"pdf"))];}
+ if(tool==="Word to PDF"){const extracted=await extractDocumentText(files[0]);return [await makePdf(extracted,name(files[0],"pdf"))];}
  if(tool==="PPTX to PDF"){const pages=await renderPresentationSlides(files[0]);return [await presentationToPdf(pages,name(files[0],"pdf"))];}
  if(tool==="Image to Word (OCR)"||tool==="OCR extractor"){const language=options.ocrLanguage||"eng";const extracted=files[0].type==="application/pdf"||files[0].name.toLowerCase().endsWith(".pdf")?await ocrPdf(files[0],language):await ocrImage(files[0],language);return options.ocrFormat==="TXT"?[textFile(extracted,name(files[0],"txt"))]:[await makeDocx(extracted,name(files[0],"docx"))];}
  if(tool==="Slides to images")return slidesToImageFiles(files[0]);
