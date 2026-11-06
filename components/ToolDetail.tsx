@@ -61,7 +61,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [output, setOutput] = useState(defaultOutput(tool));
-  const [quality, setQuality] = useState("Balanced");
+  const [quality, setQuality] = useState<"Smaller file" | "Balanced" | "Best quality">("Balanced");
   const [keepMetadata, setKeepMetadata] = useState(true);
   const [notice, setNotice] = useState("");
   const [processing, setProcessing] = useState(false);
