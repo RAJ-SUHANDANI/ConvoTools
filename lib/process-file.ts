@@ -134,14 +134,28 @@ async function ffmpegRun(file:File,tool:string,options:ProcessOptions):Promise<P
 }
 
 
+
+async function rawImageToBlob(raw:{data:Uint8Array|Uint8ClampedArray;width:number;height:number;channels:number},mime="image/png"):Promise<Blob>{
+ const rgba=new Uint8ClampedArray(raw.width*raw.height*4);
+ for(let i=0;i<raw.width*raw.height;i++){
+  const source=i*raw.channels,target=i*4;
+  if(raw.channels===1){rgba[target]=raw.data[source];rgba[target+1]=raw.data[source];rgba[target+2]=raw.data[source];rgba[target+3]=255;}
+  else{rgba[target]=raw.data[source]||0;rgba[target+1]=raw.data[source+1]||0;rgba[target+2]=raw.data[source+2]||0;rgba[target+3]=raw.channels>=4?raw.data[source+3]:255;}
+ }
+ const canvas=document.createElement("canvas");canvas.width=raw.width;canvas.height=raw.height;
+ const ctx=canvas.getContext("2d");if(!ctx)throw new Error("Image canvas is unavailable.");
+ ctx.putImageData(new ImageData(rgba,raw.width,raw.height),0,0);
+ return new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error("Could not export AI image output.")),mime));
+}
+
 async function removeImageBackground(file:File):Promise<ProcessResult>{
  const {pipeline}=await import("@huggingface/transformers");
  const segmenter=await pipeline("background-removal","Xenova/modnet",{device:"wasm",dtype:"uint8"});
  const source=URL.createObjectURL(file);
  try{
   const output=await segmenter(source);
-  const first=Array.isArray(output)?output[0]:output;
-  const blob=await first.toBlob("image/png");
+  const first=(Array.isArray(output)?output[0]:output) as {data:Uint8Array|Uint8ClampedArray;width:number;height:number;channels:number};
+  const blob=await rawImageToBlob(first);
   return result(blob,name(file,"png"),"Portrait background removed locally in your browser using MODNet. The model is downloaded on first use.");
  }finally{URL.revokeObjectURL(source);}
 }
@@ -180,8 +194,8 @@ async function upscaleImage(file:File,tool:string):Promise<ProcessResult>{
  const source=URL.createObjectURL(file);
  try{
   const output=await upscaler(source);
-  const raw=output as unknown as {toBlob:(type:string)=>Promise<Blob>};
-  const blob=await raw.toBlob("image/png");
+  const raw=output as unknown as {data:Uint8Array|Uint8ClampedArray;width:number;height:number;channels:number};
+  const blob=await rawImageToBlob(raw);
   return result(blob,name(file,"png"),tool==="Photo restoration"?"AI real-world 4× super-resolution completed locally. This improves low-resolution detail; it does not repair physical scratches or tears.":"AI 2× super-resolution completed locally in your browser.");
  }finally{URL.revokeObjectURL(source);}
 }
