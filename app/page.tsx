@@ -334,28 +334,28 @@ export default function Home() {
       <motion.section initial={reducedMotion ? false : { opacity: 0, y: 26 }} whileInView={reducedMotion ? {} : { opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.12 }} transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }} className="ai-section section-pad" id="ai">
         <div className="ai-top">
           <div><span className="section-kicker">07 / THE AI LAB</span><h2>When a file needs<br /><em>a little more.</em></h2></div>
-          <p>Optional AI-powered tools for the jobs that go beyond format conversion. Choose the improvement, compare the result and keep control of the original.</p>
+          <p>The AI Lab is temporarily locked while these experiences are being prepared. AI tool pages and processing access are disabled until release.</p>
         </div>
         <div className="ai-grid">
           <article className="ai-card ai-card-main">
-            <div className="ai-card-meta"><span>01 / RESTORE</span><WandSparkles size={17} /></div>
+            <div className="ai-card-meta"><span>01 / RESTORE · COMING SOON</span><WandSparkles size={17} /></div>
             <div className="ai-restore-art"><div className="restore-photo"><div className="restore-person-head" /><div className="restore-person-body" /><span className="restore-grain" /></div><div className="restore-arrow"><ArrowRight size={17} /></div><div className="restore-photo restore-sharp"><div className="restore-person-head" /><div className="restore-person-body" /></div><span className="restore-label restore-before">ORIGINAL</span><span className="restore-label restore-after">ENHANCED</span></div>
             <h3>Restore the detail.</h3><p>Upscale, sharpen and reduce noise in photos that need a second chance.</p><div className="ai-chips"><span>Upscale</span><span>Unblur</span><span>Denoise</span><span>Face restore</span></div>
           </article>
           <article className="ai-card">
-            <div className="ai-card-meta"><span>02 / EXTRACT</span><ScanText size={17} /></div>
+            <div className="ai-card-meta"><span>02 / EXTRACT · COMING SOON</span><ScanText size={17} /></div>
             <div className="ai-icon-art ocr-art"><div className="ocr-paper"><i /><i /><i /><i /><span>Recognize text</span></div><div className="ocr-scanline" /></div>
             <h3>Find the words inside.</h3><p>OCR for scans and screenshots. Turn image-based pages into useful text.</p>
             <span className="ai-card-foot">OCR / TABLE EXTRACTION</span>
           </article>
           <article className="ai-card">
-            <div className="ai-card-meta"><span>03 / ISOLATE</span><Sparkles size={17} /></div>
+            <div className="ai-card-meta"><span>03 / ISOLATE · COMING SOON</span><Sparkles size={17} /></div>
             <div className="ai-icon-art remove-art"><div className="remove-grid" /><div className="remove-subject"><div /><span /></div><span className="remove-sticker">PNG</span></div>
             <h3>Keep what matters.</h3><p>Remove backgrounds and export clean transparent assets.</p>
             <span className="ai-card-foot">BACKGROUND / OBJECT</span>
           </article>
         </div>
-        <div className="ai-disclosure"><ShieldCheck size={15} /><span>AI provider transparency: image enhancement may use an external API. The final product will show when a file leaves your device and which provider processes it.</span></div>
+        <div className="ai-disclosure"><ShieldCheck size={15} /><span>AI access is currently locked. Model processing will be enabled only after the tools are ready for release.</span></div>
       </motion.section>
 
       <motion.section initial={reducedMotion ? false : { opacity: 0, y: 26 }} whileInView={reducedMotion ? {} : { opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.12 }} transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }} className="workflow-section section-pad" id="workflow">

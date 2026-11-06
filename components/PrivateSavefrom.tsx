@@ -1,0 +1,95 @@
+"use client";
+
+import { FormEvent, useMemo, useState } from "react";
+import Link from "next/link";
+import { ArrowLeft, ArrowUpRight, ExternalLink, Instagram, LockKeyhole, Music2, Play, ShieldCheck, Youtube, LogOut, Download } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import BrandLogo from "@/components/BrandLogo";
+
+type Platform = "YouTube" | "Instagram" | "TikTok" | "Direct media";
+type Parsed = { platform: Platform; url: string; title: string; id?: string; kind: string; embed?: string };
+function parseInput(input: string): Parsed | null {
+  let url: URL;
+  try { url = new URL(input.trim()); } catch { return null; }
+  if (url.protocol !== "https:" && url.protocol !== "http:") return null;
+  const host = url.hostname.toLowerCase().replace(/^www\./, "");
+  if (["youtube.com", "m.youtube.com", "music.youtube.com", "youtu.be"].includes(host)) {
+    const id = host === "youtu.be" ? url.pathname.split("/").filter(Boolean)[0] : url.searchParams.get("v") || url.pathname.match(/^\/(?:shorts|embed|live)\/([^/?]+)/)?.[1] || "";
+    if (!/^[A-Za-z0-9_-]{11}$/.test(id)) return null;
+    return { platform: "YouTube", url: "https://www.youtube.com/watch?v=" + id, title: "YouTube link", id, kind: url.pathname.includes("/shorts/") ? "Short" : "video", embed: "https://www.youtube-nocookie.com/embed/" + id };
+  }
+  if (host === "instagram.com") {
+    const match = url.pathname.match(/^\/(reel|p|tv)\/([A-Za-z0-9_-]+)/);
+    if (!match) return null;
+    return { platform: "Instagram", url: "https://www.instagram.com/" + match[1] + "/" + match[2] + "/", title: "Instagram post", id: match[2], kind: match[1] === "reel" ? "Reel" : "post", embed: "https://www.instagram.com/" + match[1] + "/" + match[2] + "/embed/" };
+  }
+  if (["tiktok.com", "vm.tiktok.com", "vt.tiktok.com"].includes(host)) {
+    const match = url.pathname.match(/\/@[^/]+\/(?:video|photo)\/(\d+)/);
+    const id = match?.[1];
+    return { platform: "TikTok", url: url.href, title: "TikTok post", id, kind: url.pathname.includes("/photo/") ? "photo post" : "video", embed: id && !url.pathname.includes("/photo/") ? "https://www.tiktok.com/player/v1/" + id : undefined };
+  }
+  const ext = url.pathname.split(".").pop()?.toLowerCase() || "";
+  if (["mp4","webm","mov","m4v","jpg","jpeg","png","webp","gif","avif"].includes(ext)) {
+    return { platform: "Direct media", url: url.href, title: "Direct media file", kind: ext.toUpperCase() + " file" };
+  }
+  return null;
+}
+const guides = {
+  YouTube: { title: "Save through YouTube’s own tools", detail: "For a video you uploaded, YouTube Studio provides an official download. Premium offline viewing is provided inside the YouTube app, not as a standalone media file.", steps: ["Open YouTube Studio → Content → the video’s menu → Download.", "For offline viewing, use Download in the official YouTube app when available."], href: "https://support.google.com/youtube/answer/56100?hl=en", label: "YouTube download help", icon: Youtube },
+  Instagram: { title: "Export your own Instagram media", detail: "For photos and reels from your own profile, request an export of your account information through Meta Accounts Center.", steps: ["Open Accounts Center → Your information and permissions → Download your information.", "Select your Instagram profile and choose the media included in the export."], href: "https://help.instagram.com/181231772500920", label: "Instagram export help", icon: Instagram },
+  TikTok: { title: "Use the creator-enabled save action", detail: "TikTok offers Save video or Save photo when the creator allows downloads. If the action is missing, the creator has disabled downloads.", steps: ["Open the original post in the TikTok app.", "Tap Share → Save video or Save photo if the option is present."], href: "https://support.tiktok.com/en/using-tiktok/exploring-videos/video-downloads", label: "TikTok download help", icon: Music2 },
+};
+
+export default function PrivateSavefrom() {
+  const [value, setValue] = useState("");
+  const [submitted, setSubmitted] = useState("");
+  const [error, setError] = useState("");
+  const [signingOut, setSigningOut] = useState(false);
+  const parsed = useMemo(() => submitted ? parseInput(submitted) : null, [submitted]);
+  const guide = parsed && parsed.platform !== "Direct media" ? guides[parsed.platform] : null;
+
+  function analyse(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault(); setError("");
+    const parsedValue = parseInput(value);
+    if (!parsedValue) { setSubmitted(""); setError("Use a supported YouTube video, Instagram Reel/post, TikTok video/photo or direct media-file URL."); return; }
+    setSubmitted(parsedValue.url);
+  }
+  async function signOut() {
+    setSigningOut(true);
+    try { await fetch("/api/savefrom/access", { method: "DELETE" }); } finally { window.location.reload(); }
+  }
+
+  return (
+    <main className="tool-page savefrom-private-page">
+      <header className="tool-page-header"><BrandLogo className="brand-tool" width={190} priority /><nav><Link href="/">Home</Link><Link href="/dashboard">Workspace</Link></nav><button className="savefrom-signout" onClick={signOut} disabled={signingOut}><LogOut size={13} /> {signingOut ? "Locking…" : "Lock workspace"}</button></header>
+      <motion.section className="savefrom-private-hero" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .5 }}>
+        <span className="tool-detail-kicker"><LockKeyhole size={13} /> PRIVATE MEDIA WORKSPACE / NOT LISTED</span>
+        <h1>Drop the link.<br /><em>Know what you can save.</em></h1>
+        <p>Paste a public post URL to identify its platform, preview supported embeds and open the correct save flow. Direct media links can be opened from their source when you have rights to the file.</p>
+        <form className="savefrom-url-form" onSubmit={analyse}>
+          <div className="savefrom-url-control"><Download size={17} /><input type="url" aria-label="Media URL" required value={value} onChange={(event) => setValue(event.target.value)} placeholder="Paste a video, Reel, TikTok or media-file URL…" /><button type="submit">Analyse link <ArrowUpRight size={14} /></button></div>
+          {error && <small className="savefrom-error" role="alert">{error}</small>}
+        </form>
+        <div className="savefrom-platform-tags"><span><Youtube size={15} /> YouTube</span><span><Instagram size={15} /> Instagram</span><span><Music2 size={15} /> TikTok</span><span><Download size={15} /> Direct media</span></div>
+      </motion.section>
+      <AnimatePresence mode="wait">
+        {parsed && (
+          <motion.section className="savefrom-result-layout" key={parsed.platform+parsed.url} initial={{ opacity: 0, y: 13 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -7 }}>
+            <article className="savefrom-preview-card">
+              <div className="savefrom-card-head"><b>{parsed.title}</b><span>{parsed.platform.toUpperCase()} · {parsed.kind.toUpperCase()}</span></div>
+              {parsed.embed ? <iframe className="savefrom-embed" src={parsed.embed} title={parsed.platform+" preview"} loading="lazy" allow="encrypted-media; picture-in-picture; web-share" allowFullScreen /> : <div className="savefrom-preview-placeholder"><Play size={24} /><span>{parsed.platform === "Direct media" ? "Open your direct media file from its host." : "This post type may not offer an embedded preview. Open the original post to view it."}</span></div>}
+              <a className="savefrom-original-link" href={parsed.url} target="_blank" rel="noreferrer">Open original post <ExternalLink size={13} /></a>
+              {parsed.platform === "Direct media" && <a className="savefrom-direct-download" href={parsed.url} target="_blank" rel="noreferrer"><Download size={14} /> Open direct media file <ArrowUpRight size={13} /></a>}
+            </article>
+            <article className="savefrom-guide-card">
+              <span className="savefrom-guide-label"><ShieldCheck size={14} /> {guide ? "OFFICIAL SAVE ROUTE" : "DIRECT FILE LINK"}</span>
+              {guide ? <><h2>{guide.title}</h2><p>{guide.detail}</p><ol>{guide.steps.map((step,index)=><li key={index}><span>0{index+1}</span>{step}</li>)}</ol><a className="savefrom-help-link" href={guide.href} target="_blank" rel="noreferrer">{guide.label} <ArrowUpRight size={13} /></a></> : <><h2>Open the original hosted file.</h2><p>This is a direct media URL, not a social post. The file opens at its source. Browser download behaviour depends on the host’s response headers and access settings.</p><p className="savefrom-guidance-note">Only use direct links for files you own, have permission to save, or are licensed to download.</p></>}
+            </article>
+          </motion.section>
+        )}
+      </AnimatePresence>
+      <aside className="savefrom-legal-note"><LockKeyhole size={17} /><div><b>Private tool, platform-respecting behaviour.</b><p>This page does not bypass private accounts, DRM, login restrictions, watermarks or creator-disabled downloads. It does not scrape page source or extract platform media streams. Only save media that you own or are authorized to use.</p></div></aside>
+      <footer className="savefrom-private-footer"><Link href="/"><ArrowLeft size={13} /> Return to ConvoTools</Link><span>PRIVATE SESSION · FILE LINKS REMAIN IN THIS BROWSER</span></footer>
+    </main>
+  );
+}

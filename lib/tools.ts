@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
-  AudioLines, Braces, Check, Code2, Download, FileArchive, FileAudio, FileImage,
+  AudioLines, Braces, Check, Code2, FileArchive, FileAudio, FileImage,
   FilePenLine, FileSpreadsheet, FileText, FileVideo, Film, Image as ImageIcon,
   LockKeyhole, Merge, Minimize2, Music2, PanelTop, QrCode, ScanText,
   SlidersHorizontal, Sparkles, Split, WandSparkles
