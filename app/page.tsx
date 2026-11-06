@@ -74,7 +74,7 @@ export default function Home() {
         </nav>
         <div className="header-actions">
           <a className="header-github" href="https://github.com/RAJ-SUHANDANI/ConvoTools" target="_blank" rel="noreferrer"><Github size={15} /> <span>GitHub</span></a>
-          <a className="header-button" href="#workspace">Open workspace <ArrowUpRight size={14} /></a>
+          <a className="header-button" href="/workspace">Open workspace <ArrowUpRight size={14} /></a>
           <button className="mobile-toggle" onClick={() => setMenuOpen((value) => !value)} aria-label="Toggle navigation">{menuOpen ? <X size={19} /> : <Menu size={19} />}</button>
         </div>
       </header>
@@ -95,7 +95,7 @@ export default function Home() {
             <h1>Make files<br /><em>work for you.</em></h1>
             <p className="hero-lede">Convert, refine, organize and edit the files that keep your day moving. One considered toolkit, from quick fixes to bigger workflows.</p>
             <div className="hero-ctas">
-              <a className="button-primary" href="#workspace">Start with a file <ArrowUpRight size={16} /></a>
+              <a className="button-primary" href="/workspace">Start with a file <ArrowUpRight size={16} /></a>
               <a className="button-text" href="#toolkit">See everything you can do <ArrowDownRight size={16} /></a>
             </div>
             <div className="hero-note"><span className="hero-note-mark"><LockKeyhole size={14} /></span><span><strong>Private by default.</strong> Local-first tools wherever practical.</span></div>
@@ -398,14 +398,14 @@ export default function Home() {
       </section>
 
       <section className="final-cta section-pad">
-        <div className="final-cta-card"><div className="final-cta-copy"><span className="section-kicker">A BETTER PLACE FOR FILE WORK</span><h2>Make the next file task<br /><em>the easy one.</em></h2><p>Bring a file. Pick a task. Keep moving.</p><a className="button-light" href="#workspace">Open your workspace <ArrowUpRight size={15} /></a></div><div className="final-cta-mark"><div className="cta-mark-grid" /><div className="cta-file cta-file-one"><FileImage size={25} /></div><div className="cta-file cta-file-two"><FileText size={25} /></div><div className="cta-file cta-file-three"><FileSpreadsheet size={25} /></div><div className="cta-center"><span /><span /><span /></div></div></div>
+        <div className="final-cta-card"><div className="final-cta-copy"><span className="section-kicker">A BETTER PLACE FOR FILE WORK</span><h2>Make the next file task<br /><em>the easy one.</em></h2><p>Bring a file. Pick a task. Keep moving.</p><a className="button-light" href="/workspace">Open your workspace <ArrowUpRight size={15} /></a></div><div className="final-cta-mark"><div className="cta-mark-grid" /><div className="cta-file cta-file-one"><FileImage size={25} /></div><div className="cta-file cta-file-two"><FileText size={25} /></div><div className="cta-file cta-file-three"><FileSpreadsheet size={25} /></div><div className="cta-center"><span /><span /><span /></div></div></div>
       </section>
 
       <footer className="site-footer">
         <div className="footer-main">
           <a className="wordmark footer-wordmark" href="#"><span className="wordmark-symbol"><span /><span /><span /></span><span>convo<span className="wordmark-light">tools</span></span></a>
           <p>A more considered way to get<br />the everyday file jobs done.</p>
-          <div className="footer-nav"><div><b>EXPLORE</b><a href="#toolkit">All tools</a><a href="#pdf">PDF</a><a href="#image-lab">Image lab</a><a href="#ai">AI lab</a></div><div><b>WORKSPACE</b><a href="#workspace">Upload files</a><a href="#workflow">Workflows</a><a href="#developer">Developer tools</a><a href="#faq">FAQ</a></div><div><b>PROJECT</b><a href="https://github.com/RAJ-SUHANDANI/ConvoTools" target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={12} /></a><a href="#principles">Our approach</a></div></div>
+          <div className="footer-nav"><div><b>EXPLORE</b><a href="#toolkit">All tools</a><a href="#pdf">PDF</a><a href="#image-lab">Image lab</a><a href="#ai">AI lab</a></div><div><b>WORKSPACE</b><a href="/workspace">Upload files</a><a href="#workflow">Workflows</a><a href="#developer">Developer tools</a><a href="#faq">FAQ</a></div><div><b>PROJECT</b><a href="https://github.com/RAJ-SUHANDANI/ConvoTools" target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={12} /></a><a href="#principles">Our approach</a></div></div>
         </div>
         <div className="footer-bottom"><span>© 2026 CONVOTOOLS. MADE FOR THE WORK BETWEEN THE WORK.</span><span>EARLY INTERFACE PREVIEW <i /> PROCESSING ENGINES IN PROGRESS</span></div>
       </footer>
