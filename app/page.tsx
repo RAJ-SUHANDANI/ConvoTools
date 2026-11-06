@@ -422,7 +422,3 @@ export default function Home() {
     </main>
   );
 }
-
-function ArrowLeftRightIcon() {
-  return <span className="arrow-left-right">↔</span>;
-}
