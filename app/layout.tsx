@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   description:
     "A considered workspace for converting, refining, organizing and editing PDFs, images, documents, spreadsheets, presentations, video and audio.",
   applicationName: "ConvoTools",
+  icons: { icon: "/convotools-mark.svg", shortcut: "/convotools-mark.svg" },
   keywords: [
     "file converter",
     "PDF tools",

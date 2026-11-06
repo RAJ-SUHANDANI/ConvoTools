@@ -11,6 +11,7 @@ import {
   Sparkles, Star, UploadCloud, UserRound, WandSparkles, X, Zap
 } from "lucide-react";
 import FileActionPanel from "@/components/FileActionPanel";
+import BrandLogo from "@/components/BrandLogo";
 import { TOOLS, slugify } from "@/lib/tools";
 import {
   clearActivity, readActivity, readFavorites, readProfile, readSettings,
@@ -18,7 +19,7 @@ import {
   type ActivityItem, type ProfileData, type UserSettings
 } from "@/lib/activity";
 
-type Tab = "Overview" | "My files" | "Activity" | "Favorites" | "Settings";
+type Tab = "Overview" | "My files" | "Activity" | "Favorites" | "Settings" | "All tools" | "PDF tools" | "Image lab" | "AI tools";
 
 const tabIcons = {
   Overview: LayoutDashboard,
@@ -26,6 +27,10 @@ const tabIcons = {
   Activity: Activity,
   Favorites: Heart,
   Settings: Settings,
+  "All tools": Command,
+  "PDF tools": FileText,
+  "Image lab": ImageIcon,
+  "AI tools": WandSparkles,
 };
 
 function formatDate(timestamp: number) {
@@ -59,6 +64,8 @@ export default function DashboardPage() {
   const [profileSaved, setProfileSaved] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [fileSearch, setFileSearch] = useState("");
+  const [toolSearch, setToolSearch] = useState("");
+  const [dateLabel, setDateLabel] = useState("");
 
   const refreshLocalData = () => {
     setActivity(readActivity());
@@ -68,6 +75,10 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
+    // Keep locale-dependent date formatting out of the server-rendered tree.
+    setDateLabel(new Intl.DateTimeFormat("en-IN", {
+      weekday: "long", day: "numeric", month: "long", timeZone: "Asia/Kolkata",
+    }).format(new Date()).toUpperCase());
     refreshLocalData();
     const onData = () => refreshLocalData();
     window.addEventListener("convotools:local-data", onData);
@@ -85,6 +96,18 @@ export default function DashboardPage() {
     const term = fileSearch.trim().toLowerCase();
     return uploads.filter((item) => !term || (item.filename || item.title).toLowerCase().includes(term));
   }, [uploads, fileSearch]);
+  const libraryTools = useMemo(() => {
+    const category = activeTab === "PDF tools" ? "PDF"
+      : activeTab === "Image lab" ? "Images"
+      : activeTab === "AI tools" ? "AI lab"
+      : null;
+    const term = toolSearch.trim().toLowerCase();
+    return TOOLS.filter((tool) => {
+      const matchesCategory = !category || tool.category === category;
+      const matchesSearch = !term || (tool.name + " " + tool.description + " " + tool.category).toLowerCase().includes(term);
+      return matchesCategory && matchesSearch;
+    });
+  }, [activeTab, toolSearch]);
 
   const addFiles = (incoming: FileList | File[]) => {
     const next = Array.from(incoming).filter((file) => file.size > 0);
@@ -156,10 +179,7 @@ export default function DashboardPage() {
       </AnimatePresence>
       <aside className={"dashboard-sidebar" + (mobileSidebarOpen ? " sidebar-open" : "")}>
         <div className="dash-sidebar-top">
-          <Link className="dash-brand" href="/">
-            <span className="wordmark-symbol"><span /><span /><span /></span>
-            <span>convo<span className="wordmark-light">tools</span></span>
-          </Link>
+          <BrandLogo variant="inverse" className="brand-dashboard" width={176} priority />
           <span className="dash-workspace-label">PERSONAL WORKSPACE</span>
         </div>
 
@@ -172,10 +192,10 @@ export default function DashboardPage() {
         </div>
         <div className="dash-nav-group">
           <span className="dash-nav-caption">TOOLBOX</span>
-          <Link className="dash-nav-item" href="/#toolkit"><Command size={16} /><span>All tools</span><ArrowUpRight size={12} /></Link>
-          <Link className="dash-nav-item" href="/#pdf"><FileText size={16} /><span>PDF tools</span></Link>
-          <Link className="dash-nav-item" href="/#image-lab"><ImageIcon size={16} /><span>Image lab</span></Link>
-          <Link className="dash-nav-item" href="/#ai"><WandSparkles size={16} /><span>AI lab</span></Link>
+          {navButton("All tools")}
+          {navButton("PDF tools")}
+          {navButton("Image lab")}
+          {navButton("AI tools")}
         </div>
         <div className="dash-sidebar-bottom">
           <div className="dash-privacy-card"><ShieldCheck size={17} /><div><b>Local by default</b><span>Your history stays in this browser.</span></div></div>
@@ -207,8 +227,8 @@ export default function DashboardPage() {
               {activeTab === "Overview" && (
                 <>
                   <div className="dashboard-greeting">
-                    <div><span className="section-kicker">YOUR FILE DESK / {new Intl.DateTimeFormat(undefined, { weekday: "long", month: "long", day: "numeric" }).format(new Date()).toUpperCase()}</span><h1>{profile.name.trim() ? "Welcome back, " + profile.name.trim().split(" ")[0] + "." : "Your workspace."}<em> Ready when you are.</em></h1><p>Pick up where you left off, or drop in something new.</p></div>
-                    <Link className="dash-primary-action" href="/#toolkit">Explore all tools <ArrowUpRight size={14} /></Link>
+                    <div><span className="section-kicker">YOUR FILE DESK{dateLabel ? " / " + dateLabel : ""}</span><h1>{profile.name.trim() ? "Welcome back, " + profile.name.trim().split(" ")[0] + "." : "Your workspace."}<em> Ready when you are.</em></h1><p>Pick up where you left off, or drop in something new.</p></div>
+                    <button className="dash-primary-action" onClick={() => setActiveTab("All tools")}>Explore all tools <ArrowUpRight size={14} /></button>
                   </div>
 
                   <div className="dash-stat-grid">
@@ -236,7 +256,7 @@ export default function DashboardPage() {
                   </div>
 
                   <section className="dash-quick-tools">
-                    <div className="dash-card-heading compact"><div><span className="micro-label">QUICK ACCESS</span><h2>Popular tools</h2></div><Link href="/#toolkit">Browse library <ArrowUpRight size={13} /></Link></div>
+                    <div className="dash-card-heading compact"><div><span className="micro-label">QUICK ACCESS</span><h2>Popular tools</h2></div><button onClick={() => setActiveTab("All tools")}>Browse library <ArrowUpRight size={13} /></button></div>
                     <div className="dash-quick-grid">
                       {["PDF to Word", "Image to PDF", "PNG to JPG", "Image enhancer"].map((name) => {
                         const tool = TOOLS.find((item) => item.name === name)!;
@@ -268,9 +288,46 @@ export default function DashboardPage() {
 
               {activeTab === "Favorites" && (
                 <section className="dash-page-panel">
-                  <div className="dash-page-title"><div><span className="section-kicker">YOUR SHORTCUTS</span><h1>Favorites<em>.</em></h1><p>Keep the tools you reach for most close at hand.</p></div><Link className="dash-primary-action" href="/#toolkit">Find tools <ArrowUpRight size={14} /></Link></div>
+                  <div className="dash-page-title"><div><span className="section-kicker">YOUR SHORTCUTS</span><h1>Favorites<em>.</em></h1><p>Keep the tools you reach for most close at hand.</p></div><button className="dash-primary-action" onClick={() => setActiveTab("All tools")}>Find tools <ArrowUpRight size={14} /></button></div>
                   {favoriteTools.length === 0 ? <EmptyPanel icon={<Heart size={22} />} title="Save your go-to tools" copy="Open any tool page and choose “Save this tool” to pin it here." /> :
                     <div className="dash-favorite-grid">{favoriteTools.map((tool) => { const Icon = tool.icon; const slug = slugify(tool.name); return <div className="dash-favorite-card" key={slug}><Link href={"/tools/" + slug}><span><Icon size={18} /></span><b>{tool.name}</b><small>{tool.description}</small></Link><button aria-label={"Remove " + tool.name + " from favorites"} onClick={() => toggleFavorite(slug)}><Heart size={15} fill="currentColor" /></button></div>; })}</div>}
+                </section>
+              )}
+
+              {(activeTab === "All tools" || activeTab === "PDF tools" || activeTab === "Image lab" || activeTab === "AI tools") && (
+                <section className="dash-page-panel dash-tool-library-page">
+                  <div className="dash-page-title">
+                    <div>
+                      <span className="section-kicker">TOOLBOX / {activeTab.toUpperCase()}</span>
+                      <h1>{activeTab}<em>.</em></h1>
+                      <p>{activeTab === "AI tools"
+                        ? "Explore every AI-assisted tool in one place, from image enhancement to OCR."
+                        : activeTab === "Image lab"
+                          ? "Convert, resize, compress and refine images with dedicated tools."
+                          : activeTab === "PDF tools"
+                            ? "Convert, combine, split, organize and protect PDF documents."
+                            : "The complete ConvoTools library. Choose a category or search for the task you need."}</p>
+                    </div>
+                    <span className="dash-tool-count">{libraryTools.length} {libraryTools.length === 1 ? "TOOL" : "TOOLS"}</span>
+                  </div>
+                  <label className="dash-list-search dash-tool-library-search"><Search size={15} /><input value={toolSearch} onChange={(event) => setToolSearch(event.target.value)} placeholder={"Search " + activeTab.toLowerCase() + "..."} /></label>
+                  {libraryTools.length === 0 ? <EmptyPanel icon={<Search size={22} />} title="No matching tools" copy="Try another search term to find the tool you need." /> : (
+                    <div className="dash-tool-library-grid">
+                      {libraryTools.map((tool) => {
+                        const Icon = tool.icon;
+                        const slug = slugify(tool.name);
+                        return (
+                          <Link className="dash-tool-library-card" href={"/tools/" + slug} key={slug}>
+                            <div className="dash-tool-card-top"><span>{tool.category === "AI lab" ? "AI TOOLS" : tool.category.toUpperCase()}</span><ArrowUpRight size={14} /></div>
+                            <span className="dash-tool-card-icon"><Icon size={19} /></span>
+                            <b>{tool.name}</b>
+                            <p>{tool.description}</p>
+                            <span className="dash-tool-card-action">Open tool <ArrowRight size={13} /></span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
                 </section>
               )}
 

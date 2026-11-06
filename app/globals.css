@@ -1053,3 +1053,32 @@ button,a,.tool-result,.format-panel,.ai-card,.dash-stat-card,.dash-quick-tool{ -
 
 .comparison-range:focus-visible{outline:2px solid var(--blue);outline-offset:-3px;opacity:.18}
 @media(prefers-reduced-motion:reduce){.comparison-divider{transition:none}}
+
+
+/* ConvoTools identity — shared scalable artwork across the product */
+.brand-logo{display:inline-flex;align-items:center;justify-content:flex-start;flex:0 0 auto;min-width:0;line-height:0}
+.brand-logo img{display:block;width:var(--brand-width,205px);height:auto;max-width:100%;object-fit:contain}
+.brand-header{--brand-width:205px}
+.brand-footer{--brand-width:190px;align-self:flex-start}
+.brand-dashboard{--brand-width:176px;margin-left:3px}
+.brand-tool{--brand-width:190px}
+@media(max-width:560px){.brand-header{--brand-width:176px}.brand-footer{--brand-width:174px}.brand-tool{--brand-width:170px}}
+
+/* Dashboard toolbox pages */
+.dash-tool-count{display:inline-flex;align-items:center;justify-content:center;min-height:29px;padding:0 9px;border:1px solid #deddd6;color:#777980;background:#fff;font:7px var(--mono);letter-spacing:.1em;white-space:nowrap}
+.dash-tool-library-search{max-width:440px}
+.dash-tool-library-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.dash-tool-library-card{min-width:0;min-height:190px;display:flex;flex-direction:column;align-items:flex-start;padding:14px;border:1px solid #e2e1da;background:#fff;color:#34363d;transition:transform .22s cubic-bezier(.22,1,.36,1),border-color .22s ease,box-shadow .22s ease}
+.dash-tool-library-card:hover{transform:translateY(-3px);border-color:#c7c9ed;box-shadow:0 10px 24px rgba(31,33,38,.065)}
+.dash-tool-card-top{width:100%;display:flex;align-items:center;justify-content:space-between;color:#92949a;font:7px var(--mono);letter-spacing:.09em}
+.dash-tool-card-top svg{color:#a0a2aa;transition:transform .2s ease,color .2s ease}
+.dash-tool-library-card:hover .dash-tool-card-top svg{transform:translate(2px,-2px);color:var(--blue)}
+.dash-tool-card-icon{height:34px;width:34px;display:grid;place-items:center;margin:13px 0 10px;background:#e9eafd;color:var(--blue)}
+.dash-tool-library-card>b{font:600 11px var(--display);letter-spacing:-.02em}
+.dash-tool-library-card>p{margin:5px 0 12px;color:#898b91;font-size:8px;line-height:1.6}
+.dash-tool-card-action{display:flex;align-items:center;gap:6px;margin-top:auto;color:var(--blue);font-size:8px;font-weight:600}
+.dash-tool-card-action svg{transition:transform .2s ease}
+.dash-tool-library-card:hover .dash-tool-card-action svg{transform:translateX(3px)}
+@media(max-width:1100px){.dash-tool-library-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:760px){.dash-tool-library-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.brand-dashboard{--brand-width:170px}}
+@media(max-width:520px){.dash-tool-library-grid{grid-template-columns:1fr}.dash-tool-library-card{min-height:170px}.dash-tool-count{align-self:flex-start}}

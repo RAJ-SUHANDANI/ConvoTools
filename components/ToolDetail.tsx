@@ -8,6 +8,7 @@ import {
   Sparkles, UploadCloud, X
 } from "lucide-react";
 import { motion } from "motion/react";
+import BrandLogo from "@/components/BrandLogo";
 import { acceptedInputForTool, detectFileCategory, formatFileSize, isAudioFile, isVideoFile } from "@/lib/file-actions";
 import { clearPendingFiles, getPendingFiles } from "@/lib/file-session";
 import { readFavorites, recordActivity, saveFavorites } from "@/lib/activity";
@@ -129,7 +130,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
   return (
     <main className="tool-page">
       <motion.header className="tool-page-header" initial={{ y: -18, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
-        <Link className="tool-page-brand" href="/"><span className="mini-brand-mark"><i /><i /><i /></span> convotools</Link>
+        <BrandLogo className="brand-tool" width={190} priority />
         <nav><Link href="/#toolkit">All tools</Link><Link href="/dashboard">Workspace</Link><a href="https://github.com/RAJ-SUHANDANI/ConvoTools" target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={12} /></a></nav>
         <Link className="tool-header-cta" href="/dashboard">Open workspace <ArrowUpRight size={13} /></Link>
       </motion.header>

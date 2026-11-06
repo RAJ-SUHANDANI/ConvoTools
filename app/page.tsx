@@ -14,6 +14,7 @@ import { ChangeEvent, DragEvent, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import FileActionPanel from "@/components/FileActionPanel";
 import ImageComparison from "@/components/ImageComparison";
+import BrandLogo from "@/components/BrandLogo";
 import { recordActivity } from "@/lib/activity";
 import { TOOLS, TOOL_CATEGORIES, slugify } from "@/lib/tools";
 
@@ -69,10 +70,7 @@ export default function Home() {
       </div>
 
       <header className="site-header">
-        <a className="wordmark" href="#" aria-label="ConvoTools home">
-          <span className="wordmark-symbol"><span /><span /><span /></span>
-          <span>convo<span className="wordmark-light">tools</span></span>
-        </a>
+        <BrandLogo className="brand-header" width={205} priority />
         <nav className="desktop-nav">
           <a href="#toolkit">Tools</a>
           <a href="#pdf">PDF</a>
@@ -413,7 +411,7 @@ export default function Home() {
 
       <footer className="site-footer">
         <div className="footer-main">
-          <a className="wordmark footer-wordmark" href="#"><span className="wordmark-symbol"><span /><span /><span /></span><span>convo<span className="wordmark-light">tools</span></span></a>
+          <BrandLogo variant="inverse" className="brand-footer" width={190} />
           <p>A more considered way to get<br />the everyday file jobs done.</p>
           <div className="footer-nav"><div><b>EXPLORE</b><a href="#toolkit">All tools</a><a href="#pdf">PDF</a><a href="#image-lab">Image lab</a><a href="#ai">AI lab</a></div><div><b>WORKSPACE</b><a href="/dashboard">Dashboard</a><a href="#workflow">Workflows</a><a href="#developer">Developer tools</a><a href="#faq">FAQ</a></div><div><b>PROJECT</b><a href="https://github.com/RAJ-SUHANDANI/ConvoTools" target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={12} /></a><a href="#principles">Our approach</a></div></div>
         </div>

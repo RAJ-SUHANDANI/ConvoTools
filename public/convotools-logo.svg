@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 360" role="img" aria-labelledby="title desc">
+  <title id="title">ConvoTools</title><desc id="desc">ConvoTools logo with a folded dark and violet document mark and a forward arrow.</desc>
+  <defs><linearGradient id="ct-violet" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9b72ff"/><stop offset=".52" stop-color="#6542ed"/><stop offset="1" stop-color="#4127b8"/></linearGradient></defs>
+  <g transform="translate(12 10)">
+    <path d="M34 105c0-17 9-31 25-38L205 8c25-10 49 7 49 33v132l-137 55c-23 9-49 3-66-14-12-12-17-25-17-42V105Z" fill="#171d2b"/>
+    <path d="m135 127 116-46c26-10 52 7 52 34v130c0 19-10 33-28 40l-126 51c-24 10-48-7-48-33V174c0-21 12-38 34-47Z" fill="url(#ct-violet)"/>
+    <path d="m159 191 74-7m-34-40 39 39-37 43" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text y="264" font-family="Inter, Arial, Helvetica, sans-serif" font-size="214" font-weight="800" letter-spacing="-11"><tspan x="344" fill="#151a25" textLength="660" lengthAdjust="spacingAndGlyphs">Convo</tspan><tspan x="1002" fill="url(#ct-violet)" textLength="570" lengthAdjust="spacingAndGlyphs">Tools</tspan></text>
+</svg>
