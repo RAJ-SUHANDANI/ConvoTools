@@ -806,3 +806,6 @@ a{color:inherit;text-decoration:none}
   .chosen-action{align-items:flex-start}
   .chosen-action span{max-width:210px;line-height:1.5}
 }
+
+.no-file-actions{padding:13px 11px;background:#f4f3ef;border:1px solid #e7e6df;color:#81838a;font-size:8px;line-height:1.6}
+.operation-drop:focus-visible,.file-action-option:focus-visible,.tool-result:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
