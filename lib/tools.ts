@@ -41,7 +41,7 @@ export const TOOLS: Tool[] = [
   { name: "Background remover", description: "Separate a subject and export a transparent image.", category: "AI lab", icon: Sparkles, tag: "AI", inputLabel: "Image", outputLabel: "PNG" },
   { name: "Photo restoration", description: "Apply real-world AI super-resolution to low-resolution photos at 4× output. Not scratch repair.", category: "AI lab", icon: ImageIcon, tag: "AI", inputLabel: "Image", outputLabel: "Restored image" },
   { name: "OCR extractor", description: "Turn scanned pages and screenshots into editable text.", category: "AI lab", icon: ScanText, tag: "AI", inputLabel: "Image or PDF", outputLabel: "DOCX / TXT" },
-  { name: "Word editor", description: "Extract and rebuild clean editable text from a Word document.", category: "Documents", icon: FilePenLine, inputLabel: "DOCX", outputLabel: "DOCX" },
+  { name: "Word editor", description: "Edit extracted Word document text and export a clean DOCX file.", category: "Documents", icon: FilePenLine, inputLabel: "DOCX", outputLabel: "DOCX" },
   { name: "DOCX to TXT", description: "Extract clean plain text from Word documents.", category: "Documents", icon: FileText, inputLabel: "DOCX", outputLabel: "TXT" },
   { name: "Excel to PDF", description: "Export spreadsheet cell content into a simple PDF report; styling may differ.", category: "Spreadsheets", icon: FileSpreadsheet, inputLabel: "XLSX", outputLabel: "PDF" },
   { name: "CSV to XLSX", description: "Turn CSV data into a formatted workbook.", category: "Spreadsheets", icon: FileSpreadsheet, inputLabel: "CSV / XLSX", outputLabel: "XLSX" },

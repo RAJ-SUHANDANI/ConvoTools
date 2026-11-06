@@ -1094,3 +1094,5 @@ button,a,.tool-result,.format-panel,.ai-card,.dash-stat-card,.dash-quick-tool{ -
 .operation-password{width:100%;min-height:46px;padding:12px 14px;border:1px solid var(--line,#dedbd4);border-radius:12px;background:rgba(255,255,255,.72);color:var(--ink,#222);font:inherit;outline:none;transition:border-color .2s,box-shadow .2s}.operation-password:focus{border-color:#6268dd;box-shadow:0 0 0 3px rgba(98,104,221,.12)}.operation-hint{display:block;margin-top:7px;color:var(--muted,#777);font-size:11px;line-height:1.55}
 
 .operation-dimensions{display:grid;grid-template-columns:1fr 1fr;gap:12px}.operation-dimensions>div{min-width:0}
+
+.operation-document-editor{margin:18px 0}.operation-document-textarea{display:block;width:100%;min-height:220px;padding:14px;border:1px solid var(--line,#dedbd4);border-radius:12px;background:rgba(255,255,255,.72);color:var(--ink,#222);font:inherit;font-size:13px;line-height:1.65;resize:vertical;outline:none;transition:border-color .2s,box-shadow .2s}.operation-document-textarea:focus{border-color:#6268dd;box-shadow:0 0 0 3px rgba(98,104,221,.12)}
