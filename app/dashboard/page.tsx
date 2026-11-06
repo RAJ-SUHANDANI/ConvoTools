@@ -2,7 +2,7 @@
 
 import { ChangeEvent, DragEvent, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
   Activity, ArrowDownRight, ArrowRight, ArrowUpRight, Bell, Check,
   ChevronDown, Clock3, Command, FileClock, FileImage, FileText,
