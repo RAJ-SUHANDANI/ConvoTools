@@ -14,7 +14,7 @@ import ImageComparison from "@/components/ImageComparison";
 import BrandLogo from "@/components/BrandLogo";
 import { recordActivity } from "@/lib/activity";
 import { TOOLS, TOOL_CATEGORIES, slugify } from "@/lib/tools";
-import { AIGallery, FooterReveal, LandingNav, ScrollTextLines, TypewriterHeading, WorkflowWaypoints } from "@/components/LandingEnhancements";
+import { AIGallery, ApproachWaypoints, FooterReveal, LandingNav, ScrollTextLines, TypewriterHeading, WorkflowWaypoints } from "@/components/LandingEnhancements";
 
 export default function Home() {
   const reducedMotion = useReducedMotion();
@@ -334,12 +334,11 @@ export default function Home() {
       </motion.section>
 
       <motion.section initial={reducedMotion ? false : { opacity: 0, y: 26 }} whileInView={reducedMotion ? {} : { opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.12 }} transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }} className="principles-section section-pad" id="why">
-        <div className="principles-heading"><span className="section-kicker">10 / THE CONVOTOOLS APPROACH</span><h2>Useful first.<br /><em>Beautiful by design.</em></h2></div>
-        <div className="principles-grid">
-          <article><span className="principle-num">01</span><div className="principle-icon"><ShieldCheck size={20} /></div><h3>Privacy is a product feature.</h3><p>Prefer local processing for everyday tasks. When a server or AI provider is needed, make that choice clear.</p></article>
-          <article><span className="principle-num">02</span><div className="principle-icon"><Layers3 size={20} /></div><h3>Batch work is normal work.</h3><p>Handle collections of files in one go, with consistent settings and one final download.</p></article>
-          <article><span className="principle-num">03</span><div className="principle-icon"><Zap size={20} /></div><h3>Fast should feel effortless.</h3><p>Keep the interface calm, the controls obvious and motion purposeful rather than distracting.</p></article>
+        <div className="section-topline principles-waypoint-heading">
+          <div><span className="section-kicker">10 / THE CONVOTOOLS APPROACH</span><h2>Useful first.<br /><em>Beautiful by design.</em></h2></div>
+          <p>A good workspace should feel effortless without hiding the details that matter. These are the principles behind every ConvoTools interaction.</p>
         </div>
+        <ApproachWaypoints />
       </motion.section>
 
       <motion.section initial={reducedMotion ? false : { opacity: 0, y: 26 }} whileInView={reducedMotion ? {} : { opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.12 }} transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }} className="faq-section section-pad" id="faq">
@@ -352,9 +351,7 @@ export default function Home() {
         </div>
       </motion.section>
 
-      <motion.section initial={reducedMotion ? false : { opacity: 0, y: 26 }} whileInView={reducedMotion ? {} : { opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.12 }} transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }} className="final-cta section-pad">
-        <div className="final-cta-card"><div className="final-cta-copy"><span className="section-kicker">A BETTER PLACE FOR FILE WORK</span><h2>Make the next file task<br /><em>the easy one.</em></h2><p>Bring a file. Pick a task. Keep moving.</p><a className="button-light" href="/dashboard">Open your workspace <ArrowUpRight size={15} /></a></div><div className="final-cta-mark"><div className="cta-mark-grid" /><div className="cta-file cta-file-one"><FileImage size={25} /></div><div className="cta-file cta-file-two"><FileText size={25} /></div><div className="cta-file cta-file-three"><FileSpreadsheet size={25} /></div><div className="cta-center"><span /><span /><span /></div></div></div>
-      </motion.section>
+
 
       <FooterReveal />
     </main>

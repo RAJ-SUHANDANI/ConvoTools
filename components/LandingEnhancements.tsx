@@ -132,11 +132,21 @@ function ScrollLine({ progress, text, direction, index }: { progress: MotionValu
 }
 
 export function ScrollTextLines() {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 0.95", "end 0.25"] });
-  return <div className="scroll-text-lines" ref={ref} aria-label="Less busywork. More room for good work.">
-    <ScrollLine progress={scrollYProgress} text="LESS BUSYWORK." direction={-1} index={0} />
-    <ScrollLine progress={scrollYProgress} text="MORE ROOM FOR GOOD WORK." direction={1} index={1} />
+  const first = ["LESS BUSYWORK.", "MORE ROOM FOR GOOD WORK.", "FILE WORK, IN FLOW."];
+  const second = ["CONVERT.", "REFINE.", "ORGANIZE.", "GET BACK TO IT."];
+  const renderGroup = (items: string[]) => items.map((item, index) => <span className="scroll-marquee-item" key={item}><b>{item}</b><i /> <small>CT / 0{index + 1}</small></span>);
+  return <div className="scroll-text-lines" aria-label="Less busywork. More room for good work.">
+    <div className="scroll-text-heading"><span>THE CONVOTOOLS RHYTHM</span><small>LESS CLICKING. MORE DOING.</small></div>
+    <div className="scroll-marquee-window">
+      <div className="scroll-marquee-track scroll-marquee-track-one">
+        <div className="scroll-marquee-group">{renderGroup(first)}</div>
+        <div className="scroll-marquee-group" aria-hidden="true">{renderGroup(first)}</div>
+      </div>
+      <div className="scroll-marquee-track scroll-marquee-track-two">
+        <div className="scroll-marquee-group">{renderGroup(second)}</div>
+        <div className="scroll-marquee-group" aria-hidden="true">{renderGroup(second)}</div>
+      </div>
+    </div>
   </div>;
 }
 
@@ -256,16 +266,48 @@ export function FooterReveal() {
     </div>
     <div className="footer-main">
       <div className="footer-brand-column">
-        <BrandLogo variant="inverse" className="brand-footer" width={190}/>
+        <BrandLogo className="brand-footer" width={190}/>
         <p>A more considered way to get<br/>the everyday file jobs done.</p>
         <div className="footer-status"><span/> BROWSER-FIRST WORKSPACE <i/> BUILT TO KEEP YOU MOVING</div>
       </div>
       <div className="footer-nav">
         <div><b>EXPLORE</b><a href="#toolkit">All tools</a><a href="#pdf">PDF workbench</a><a href="#image-lab">Image lab</a><a href="#ai">AI lab</a></div>
         <div><b>WORKSPACE</b><a href="/dashboard">Dashboard</a><a href="#workflow">Workflows</a><a href="#developer">Developer utilities</a><a href="#faq">FAQ</a></div>
-        <div><b>THE PROJECT</b><a href="https://github.com/RAJ-SUHANDANI/ConvoTools" target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={12}/></a><a href="#why">Our approach</a><a href="/savefrom">Private workspace</a></div>
+        <div><b>THE PROJECT</b><a href="https://github.com/RAJ-SUHANDANI/ConvoTools" target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={12}/></a><a href="#why">Our approach</a></div>
       </div>
     </div>
     <div className="footer-bottom"><span>© 2026 CONVOTOOLS. MADE FOR THE WORK BETWEEN THE WORK.</span><span>LOCAL-FIRST FILE WORKSPACE <i/> 42 TOOLS · BROWSER PROCESSING</span><a href="#top">BACK TO TOP ↑</a></div>
   </motion.footer>;
+}
+
+
+const approachSteps = [
+  { number: "01", label: "PRIVACY", title: "Privacy is a product feature.", copy: "Everyday tools should work locally wherever practical, and make outside processing clear when it is needed.", meta: "TRUST / TRANSPARENCY", x: "5%", y: "14%" },
+  { number: "02", label: "BATCH WORK", title: "Collections are normal.", copy: "Work with multiple files in one place, using consistent settings and a clean final output.", meta: "FLOW / CONSISTENCY", x: "37%", y: "51%" },
+  { number: "03", label: "CLARITY", title: "Fast should feel effortless.", copy: "Keep the interface calm, the controls obvious and every animation useful rather than distracting.", meta: "CRAFT / PURPOSEFUL MOTION", x: "69%", y: "15%" },
+];
+
+export function ApproachWaypoints() {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const pathLength = useTransform(scrollYProgress, [0, .84], [0, 1]);
+  const path = "M125 95 C260 30 325 230 465 260 S695 45 850 105";
+  return <div className="workflow-waypoint-stage approach-waypoint-stage" ref={ref}>
+    <div className="waypoint-stage-top"><span><Sparkles size={14} /> THE PRINCIPLES / 03 WAYPOINTS</span><span>SCROLL TO EXPLORE <ArrowRight size={13} /></span></div>
+    <div className="waypoint-map approach-waypoint-map">
+      <svg className="waypoint-path" viewBox="0 0 1000 390" preserveAspectRatio="none" aria-hidden="true">
+        <path className="waypoint-path-base" d={path} />
+        <motion.path className="waypoint-path-progress" d={path} style={{ pathLength }} />
+      </svg>
+      {approachSteps.map((step, index) => <motion.article key={step.number} className={"waypoint-card approach-waypoint-card approach-waypoint-card-" + index}
+        style={{ left: step.x, top: step.y }} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .3 }}
+        transition={{ duration: .55, delay: index * .08 }}>
+        <div className="waypoint-card-head"><span>{step.number} / {step.label}</span><b>{step.meta}</b></div>
+        <h3>{step.title}</h3><p>{step.copy}</p><span className="waypoint-card-dot" />
+      </motion.article>)}
+      <div className="waypoint-orbit waypoint-orbit-one" /><div className="waypoint-orbit waypoint-orbit-two" />
+      <div className="waypoint-map-mark">CONVOTOOLS <i /> PRINCIPLES / 2026</div>
+    </div>
+    <div className="waypoint-stage-bottom"><span>USEFUL FIRST. BEAUTIFUL BY DESIGN.</span><span>TRUST · CLARITY · CRAFT <Sparkles size={12} /></span></div>
+  </div>;
 }
