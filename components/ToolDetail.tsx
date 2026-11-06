@@ -120,7 +120,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
         <div className="operation-card">
           <div className="operation-card-head"><div><span className="operation-step">STEP 01 / INPUT</span><h2>Add your file</h2><p>Expected format: <b>{tool.inputLabel || "Supported file"}</b></p></div><span className="operation-file-icon"><FileType2 size={21} /></span></div>
           <input ref={inputRef} type="file" accept={accept} multiple className="operation-input" onChange={onChoose} />
-          <button className={"operation-drop " + (files.length ? "has-files" : "")} onClick={() => inputRef.current?.click()}>
+          <button className={"operation-drop " + (files.length ? "has-files" : "")} onClick={() => inputRef.current?.click()} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); addFiles(event.dataTransfer.files); }}>
             <span className="operation-upload-icon"><UploadCloud size={25} /></span>
             <b>{files.length ? "Replace selected files" : "Choose files or drop them here"}</b>
             <small>Multiple files supported · {tool.inputLabel || "Common formats"}</small>
