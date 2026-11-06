@@ -1,16 +1,13 @@
 "use client";
 
 import {
-  Activity,
   ArrowDown,
-  ArrowDownToLine,
   ArrowRight,
   ArrowUpRight,
   AudioLines,
   BadgeCheck,
   Blocks,
   Check,
-  ChevronDown,
   Command,
   FileArchive,
   FileImage,
@@ -18,7 +15,6 @@ import {
   FileText,
   FileType2,
   Film,
-  FolderOpen,
   Github,
   Globe2,
   Image as ImageIcon,
