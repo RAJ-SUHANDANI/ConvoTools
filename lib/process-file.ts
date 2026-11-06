@@ -376,18 +376,19 @@ async function extractDocumentText(file:File):Promise<string>{
  if(ext==="rtf"){
   let value=await file.text();
   value=value.replace(/\\'([0-9a-f]{2})/gi,(_,hex:string)=>String.fromCharCode(parseInt(hex,16)));
-  value=value.replace(/\\u(-?\\d+)\\??/g,(_,code:string)=>String.fromCharCode((Number(code)+65536)%65536));
-  value=value.replace(/\\par[d]?\\b/g,"\\n").replace(/\\line\\b/g,"\\n").replace(/\\tab\\b/g,"\\t");
-  value=value.replace(/\\[a-zA-Z]+-?\\d* ?/g,"").replace(/\\([{}\\\\])/g,"$1").replace(/[{}]/g,"");
+  value=value.replace(/\\u(-?\d+)\??/g,(_,code:string)=>String.fromCharCode((Number(code)+65536)%65536));
+  value=value.replace(/\\par[d]?\b/g,"\n").replace(/\\line\b/g,"\n").replace(/\\tab\b/g,"\t");
+  value=value.replace(/\\[a-zA-Z]+-?\d* ?/g,"").replace(/\\([{}\\])/g,"$1").replace(/[{}]/g,"");
   return value.trim();
  }
  if(ext==="odt"){
-  const zip=await JSZip.loadAsync(file);const content=zip.file("content.xml");if(!content)throw new Error("This OpenDocument file has no readable content.xml.");
-  const xml=new DOMParser().parseFromString(await content.async("text"),"application/xml");
+  const zip=await JSZip.loadAsync(file);const contentFile=zip.file("content.xml");if(!contentFile)throw new Error("This OpenDocument file has no readable content.xml.");
+  const xml=new DOMParser().parseFromString(await contentFile.async("text"),"application/xml");
   const ns="urn:oasis:names:tc:opendocument:xmlns:text:1.0";
-  const paragraphs=[...Array.from(xml.getElementsByTagNameNS(ns,"h")),...Array.from(xml.getElementsByTagNameNS(ns,"p"))];
-  if(!paragraphs.length)return xml.documentElement.textContent||"";
-  return paragraphs.map(node=>node.textContent||"").join("\\n");
+  const blocks=[...Array.from(xml.getElementsByTagNameNS(ns,"h")),...Array.from(xml.getElementsByTagNameNS(ns,"p"))];
+  blocks.sort((left,right)=>left.compareDocumentPosition(right)&Node.DOCUMENT_POSITION_FOLLOWING?-1:1);
+  if(!blocks.length)return xml.documentElement.textContent||"";
+  return blocks.map(node=>node.textContent||"").join("\n");
  }
  if(ext==="doc")throw new Error("Legacy .doc files are not supported by the browser converter. Save the file as .docx, .odt, .rtf or .txt first.");
  throw new Error("This document format is not supported by the local converter.");
