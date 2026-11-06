@@ -109,7 +109,6 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
   };
 
   const invalidFiles = files.filter((file) => !compatible(tool, file));
-  const readyFiles = files.filter((file) => compatible(tool, file));
 
   const startOperation = () => {
     if (!files.length) {
@@ -144,9 +143,12 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
           <p>{tool.description} Add your file, review the settings and choose how you want the output prepared.</p>
           <motion.div className="tool-detail-benefits" variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}><span><ShieldCheck size={14} /> Local-first where supported</span><span><LockKeyhole size={14} /> No account required</span><span><Sparkles size={14} /> Batch-ready interface</span></div>
           <div className="tool-detail-tip"><span>01</span><div><b>A focused page for this job.</b><p>No crowded dashboard. The controls here are dedicated to {tool.name.toLowerCase()}.</p></div></div>
-        </div>
+          <motion.button className="tool-favorite-button" onClick={toggleFavorite} whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }}>
+            <Heart size={14} fill={isFavorite ? "currentColor" : "none"} /> {isFavorite ? "Saved to favorites" : "Save this tool"}
+          </motion.button>
+        </motion.div>
 
-        <div className="operation-card">
+        <motion.div className="operation-card" variants={{ hidden: { opacity: 0, y: 18, scale: 0.99 }, visible: { opacity: 1, y: 0, scale: 1 } }}>
           <div className="operation-card-head"><div><span className="operation-step">STEP 01 / INPUT</span><h2>Add your file</h2><p>Expected format: <b>{tool.inputLabel || "Supported file"}</b></p></div><span className="operation-file-icon"><FileType2 size={21} /></span></div>
           <input ref={inputRef} type="file" accept={accept} multiple className="operation-input" onChange={onChoose} />
           <motion.button className={"operation-drop " + (files.length ? "has-files" : "")} onClick={() => inputRef.current?.click()} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); addFiles(event.dataTransfer.files); }} whileHover={{ scale: 1.006, borderColor: "#5259d8" }} whileTap={{ scale: 0.995 }}>
