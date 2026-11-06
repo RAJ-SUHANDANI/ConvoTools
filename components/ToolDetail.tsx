@@ -3,13 +3,15 @@
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
-  ArrowLeft, ArrowRight, ArrowUpRight, Check, ChevronDown, FileImage,
+  ArrowLeft, ArrowRight, ArrowUpRight, Check, ChevronDown, FileImage, Heart,
   FileText, FileType2, LockKeyhole, Plus, Settings2, ShieldCheck,
   Sparkles, UploadCloud, X
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { acceptedInputForTool, detectFileCategory, formatFileSize, isAudioFile, isVideoFile } from "@/lib/file-actions";
 import { clearPendingFiles, getPendingFiles } from "@/lib/file-session";
+import { readFavorites, recordActivity, saveFavorites } from "@/lib/activity";
+import { slugify } from "@/lib/tools";
 
 type ToolData = {
   name: string;
@@ -60,6 +62,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
   const [quality, setQuality] = useState("Balanced");
   const [keepMetadata, setKeepMetadata] = useState(true);
   const [notice, setNotice] = useState("");
+  const [isFavorite, setIsFavorite] = useState(false);
   const accept = useMemo(() => acceptedInputForTool(tool.inputLabel || "", tool.category), [tool]);
 
   useEffect(() => {
@@ -68,11 +71,36 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
       setFiles(queued);
       clearPendingFiles();
     }
-  }, []);
+    const slug = slugify(tool.name);
+    setIsFavorite(readFavorites().includes(slug));
+    recordActivity({
+      type: "tool",
+      title: tool.name,
+      description: "Opened " + tool.category + " tool",
+      category: tool.category,
+      toolSlug: slug,
+    });
+  }, [tool.name, tool.category]);
 
   const addFiles = (list: FileList | File[]) => {
-    setFiles(Array.from(list).filter((file) => file.size > 0));
+    const next = Array.from(list).filter((file) => file.size > 0);
+    next.forEach((file) => recordActivity({
+      type: "upload",
+      title: file.name,
+      filename: file.name,
+      size: file.size,
+      description: "Added to " + tool.name,
+    }));
+    setFiles(next);
     setNotice("");
+  };
+
+  const toggleFavorite = () => {
+    const slug = slugify(tool.name);
+    const current = readFavorites();
+    const next = current.includes(slug) ? current.filter((value) => value !== slug) : [...current, slug];
+    saveFavorites(next);
+    setIsFavorite(next.includes(slug));
   };
 
   const onChoose = (event: ChangeEvent<HTMLInputElement>) => {
@@ -101,32 +129,32 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
 
   return (
     <main className="tool-page">
-      <header className="tool-page-header">
+      <motion.header className="tool-page-header" initial={{ y: -18, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
         <Link className="tool-page-brand" href="/"><span className="mini-brand-mark"><i /><i /><i /></span> convotools</Link>
-        <nav><Link href="/#toolkit">All tools</Link><Link href="/workspace">Workspace</Link><a href="https://github.com/RAJ-SUHANDANI/ConvoTools" target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={12} /></a></nav>
-        <Link className="tool-header-cta" href="/workspace">Open workspace <ArrowUpRight size={13} /></Link>
-      </header>
+        <nav><Link href="/#toolkit">All tools</Link><Link href="/dashboard">Workspace</Link><a href="https://github.com/RAJ-SUHANDANI/ConvoTools" target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={12} /></a></nav>
+        <Link className="tool-header-cta" href="/dashboard">Open workspace <ArrowUpRight size={13} /></Link>
+      </motion.header>
 
-      <div className="tool-breadcrumb"><Link href="/">Home</Link><span>/</span><Link href="/#toolkit">Tools</Link><span>/</span><b>{tool.name}</b></div>
+      <motion.div className="tool-breadcrumb" initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1, duration: 0.45 }}><Link href="/">Home</Link><span>/</span><Link href="/#toolkit">Tools</Link><span>/</span><b>{tool.name}</b></motion.div>
 
-      <section className="tool-detail-layout">
-        <div className="tool-detail-intro">
+      <motion.section className="tool-detail-layout" initial="hidden" animate="visible" variants={{ hidden: { opacity: 0, y: 18 }, visible: { opacity: 1, y: 0, transition: { staggerChildren: 0.09, delayChildren: 0.12, duration: 0.6, ease: [0.22, 1, 0.36, 1] } } }}>
+        <motion.div className="tool-detail-intro" variants={{ hidden: { opacity: 0, y: 14 }, visible: { opacity: 1, y: 0 } }}>
           <span className="tool-detail-kicker">{tool.category.toUpperCase()} TOOL <i /> CONVOTOOLS WORKSPACE</span>
           <h1>{tool.name.split(" to ").length > 1 ? <>{tool.name.split(" to ")[0]} <em>to</em><br />{tool.name.split(" to ")[1]}</> : <>{tool.name.split(" ").slice(0, -1).join(" ")} <em>{tool.name.split(" ").slice(-1)}</em></>}</h1>
           <p>{tool.description} Add your file, review the settings and choose how you want the output prepared.</p>
-          <div className="tool-detail-benefits"><span><ShieldCheck size={14} /> Local-first where supported</span><span><LockKeyhole size={14} /> No account required</span><span><Sparkles size={14} /> Batch-ready interface</span></div>
+          <motion.div className="tool-detail-benefits" variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}><span><ShieldCheck size={14} /> Local-first where supported</span><span><LockKeyhole size={14} /> No account required</span><span><Sparkles size={14} /> Batch-ready interface</span></div>
           <div className="tool-detail-tip"><span>01</span><div><b>A focused page for this job.</b><p>No crowded dashboard. The controls here are dedicated to {tool.name.toLowerCase()}.</p></div></div>
         </div>
 
         <div className="operation-card">
           <div className="operation-card-head"><div><span className="operation-step">STEP 01 / INPUT</span><h2>Add your file</h2><p>Expected format: <b>{tool.inputLabel || "Supported file"}</b></p></div><span className="operation-file-icon"><FileType2 size={21} /></span></div>
           <input ref={inputRef} type="file" accept={accept} multiple className="operation-input" onChange={onChoose} />
-          <button className={"operation-drop " + (files.length ? "has-files" : "")} onClick={() => inputRef.current?.click()} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); addFiles(event.dataTransfer.files); }}>
+          <motion.button className={"operation-drop " + (files.length ? "has-files" : "")} onClick={() => inputRef.current?.click()} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); addFiles(event.dataTransfer.files); }} whileHover={{ scale: 1.006, borderColor: "#5259d8" }} whileTap={{ scale: 0.995 }}>
             <span className="operation-upload-icon"><UploadCloud size={25} /></span>
             <b>{files.length ? "Replace selected files" : "Choose files or drop them here"}</b>
             <small>Multiple files supported · {tool.inputLabel || "Common formats"}</small>
             <span className="operation-browse">Browse files <ArrowUpRight size={13} /></span>
-          </button>
+          </motion.button>
 
           {files.length > 0 && (
             <div className="operation-file-list">
@@ -155,15 +183,15 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
           )}
           <label className="metadata-toggle"><input type="checkbox" checked={keepMetadata} onChange={(event) => setKeepMetadata(event.target.checked)} /><span className="fake-check"><Check size={11} /></span><span><b>Keep original metadata when possible</b><small>Preserve dates, orientation and other available file information.</small></span></label>
 
-          <button className="operation-submit" onClick={startOperation} disabled={files.length > 0 && invalidFiles.length > 0}><span>{isAI ? "Prepare enhancement" : "Prepare conversion"}</span><ArrowRight size={16} /></button>
+          <motion.button className="operation-submit" onClick={startOperation} disabled={files.length > 0 && invalidFiles.length > 0} whileHover={{ y: -2, boxShadow: "0 10px 24px rgba(82,89,216,.18)" }} whileTap={{ scale: 0.99 }}><span>{isAI ? "Prepare enhancement" : "Prepare conversion"}</span><ArrowRight size={16} /></motion.button>
           {notice && <div className="operation-notice"><Sparkles size={14} /> {notice}</div>}
           <div className="operation-secure"><LockKeyhole size={12} /> Files are only held in this browser preview. Processing is not yet enabled.</div>
-        </div>
-      </section>
-      <section className="tool-page-bottom">
+        </motion.div>
+      </motion.section>
+      <motion.section className="tool-page-bottom" initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.55 }}>
         <div><span className="tool-detail-kicker">NOT THE RIGHT TOOL?</span><h2>Start with your file instead.</h2><p>Upload any common format and ConvoTools will suggest the actions that fit it.</p></div>
-        <Link href="/workspace">Open universal workspace <ArrowUpRight size={14} /></Link>
-      </section>
+        <Link href="/dashboard">Open dashboard <ArrowUpRight size={14} /></Link>
+      </motion.section>
     </main>
   );
 }
