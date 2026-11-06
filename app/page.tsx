@@ -9,7 +9,7 @@ import {
   SlidersHorizontal, Sparkles, Split, UploadCloud, WandSparkles, Workflow,
   X, Zap
 } from "lucide-react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ChangeEvent, DragEvent, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import FileActionPanel from "@/components/FileActionPanel";
