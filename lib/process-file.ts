@@ -349,7 +349,7 @@ async function ffmpegRun(file:File,tool:string,options:ProcessOptions):Promise<P
  try{
   const core="https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/umd";
   await ffmpeg.load({coreURL:await toBlobURL(core+"/ffmpeg-core.js","text/javascript"),wasmURL:await toBlobURL(core+"/ffmpeg-core.wasm","application/wasm")});
-  const input="input-"+(file.name.split(".").pop()||"bin").replace(/[^a-z0-9]/gi,"");
+  const input="input."+(file.name.split(".").pop()||"bin").replace(/[^a-z0-9]/gi,"");
   const ext=(options.output||"MP3").toLowerCase().replace(/[^a-z0-9]/g,"");
   const outputExt=tool==="MP4 to GIF"?"gif":tool==="Video compressor"?"mp4":tool==="Extract audio"?"mp3":(["mp3","wav","aac","flac","ogg"].includes(ext)?ext:"mp3");
   const output="convotools-output."+outputExt;
@@ -362,10 +362,11 @@ async function ffmpegRun(file:File,tool:string,options:ProcessOptions):Promise<P
    const codec:Record<string,string[]>={mp3:["-c:a","libmp3lame","-q:a","2"],wav:["-c:a","pcm_s16le"],aac:["-c:a","aac","-b:a","192k"],flac:["-c:a","flac"],ogg:["-c:a","libvorbis","-q:a","5"]};
    args=["-i",input,...(codec[outputExt]||codec.mp3),output];
   }else throw new Error("Unsupported media operation.");
-  const exit=await ffmpeg.exec(args);
+  const exit=await ffmpeg.exec(args,120000);
   if(exit!==0)throw new Error("The media encoder could not process this file. Check that the input codec is supported.");
   const data=await ffmpeg.readFile(output);
   if(typeof data==="string")throw new Error("The encoder returned an invalid output.");
+  if(!data.byteLength)throw new Error("The encoder produced an empty file. Check that the source contains a supported video or audio stream.");
   const mime:Record<string,string>={gif:"image/gif",mp4:"video/mp4",mp3:"audio/mpeg",wav:"audio/wav",aac:"audio/aac",flac:"audio/flac",ogg:"audio/ogg"};
   const blob=bytesBlob(data as Uint8Array,mime[outputExt]||"application/octet-stream");
   return result(blob,name(file,outputExt),tool==="MP4 to GIF"?"First 30 seconds encoded locally as an animated GIF.": "Media encoded locally in your browser with FFmpeg.");

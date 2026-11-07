@@ -10,3 +10,5 @@ public/pdf.worker.mjs
 *.tsbuildinfo
 test-results/
 playwright-report/
+ui-results/
+matrix-results/

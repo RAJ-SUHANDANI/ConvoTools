@@ -13,7 +13,7 @@ import type { ProcessResult } from "@/lib/process-file";
 import { acceptedInputForTool, detectFileCategory, formatFileSize, isAudioFile, isVideoFile } from "@/lib/file-actions";
 import { clearPendingFiles, getPendingFiles } from "@/lib/file-session";
 import { readFavorites, recordActivity, saveFavorites } from "@/lib/activity";
-import { slugify } from "@/lib/tools";
+import { slugify, TOOLS } from "@/lib/tools";
 import { DownloadCelebration, LoadingPath, ProgressMeter } from "@/components/OperationMotion";
 
 type ToolData = {
@@ -199,6 +199,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
           <motion.button className="tool-favorite-button" onClick={toggleFavorite} whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }}>
             <Heart size={14} fill={isFavorite ? "currentColor" : "none"} /> {isFavorite ? "Saved to favorites" : "Save this tool"}
           </motion.button>
+          <nav className="tool-related-links" aria-label="Related tools">{TOOLS.filter(item => item.category === tool.category && item.name !== tool.name && item.category !== "AI lab").slice(0,3).map(item => <Link href={"/tools/" + slugify(item.name)} key={item.name}>{item.name} ↗</Link>)}</nav>
         </motion.div>
 
         <motion.div className="operation-card" variants={{ hidden: { opacity: 0, y: 18, scale: 0.99 }, visible: { opacity: 1, y: 0, scale: 1 } }} onMouseMove={(event) => { const rect = event.currentTarget.getBoundingClientRect(); event.currentTarget.style.setProperty("--pointer-x", ((event.clientX - rect.left) / rect.width * 100) + "%"); event.currentTarget.style.setProperty("--pointer-y", ((event.clientY - rect.top) / rect.height * 100) + "%"); }} onMouseLeave={(event) => { event.currentTarget.style.setProperty("--pointer-x", "50%"); event.currentTarget.style.setProperty("--pointer-y", "0%"); }}>
@@ -252,7 +253,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
           <motion.button className="operation-submit" onClick={startOperation} disabled={processing || documentLoading || (files.length > 0 && invalidFiles.length > 0)} whileHover={{ y: -2, boxShadow: "0 10px 24px rgba(82,89,216,.18)" }} whileTap={{ scale: 0.99 }}><span>{processing ? "Processing…" : isAI ? "Run tool" : "Process & download"}</span><ArrowRight size={16} /></motion.button>
           {processing && <><LoadingPath /><ProgressMeter progress={progress} determinate={mediaProgress} /></>}
           {downloadRun > 0 && !processing && <DownloadCelebration run={downloadRun} />}
-          {notice && <div className="operation-notice"><Sparkles size={14} /> {notice}</div>}
+          {notice && <div className="operation-notice" role="status" aria-live="polite"><Sparkles size={14} /> {notice}</div>}
           {results.length > 0 && <motion.div className="operation-results" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .32 }}><b><Check size={14} /> {results.length} output {results.length===1?"file":"files"} ready</b>{results.map((result,index) => <motion.button key={result.filename+index} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: Math.min(index*.035,.35) }} onClick={() => saveProcessedFile(result)}><FileText size={14} /><span>{result.filename}<small>{result.message}</small></span><ArrowUpRight size={13} /></motion.button>)}</motion.div>}
           <div className="operation-secure"><LockKeyhole size={12} /> Supported tools process locally in this browser. Files are not uploaded to a server.</div>
         </motion.div>

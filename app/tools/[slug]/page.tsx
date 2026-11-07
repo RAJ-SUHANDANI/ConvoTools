@@ -5,6 +5,7 @@ import ComingSoon from "@/components/ComingSoon";
 import ToolLandingContent from "@/components/ToolLandingContent";
 import WordEditorWorkspace from "@/components/WordEditorWorkspace";
 import JsonFormatterWorkspace from "@/components/JsonFormatterWorkspace";
+import EditorShell from "@/components/EditorShell";
 import { getToolBySlug, TOOLS, slugify } from "@/lib/tools";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -66,8 +67,8 @@ export default async function ToolPage({ params }: Props) {
   const tool = getToolBySlug(slug);
   if (!tool) notFound();
   if (tool.category === "AI lab") return <ComingSoon toolName={tool.name} />;
-  if (tool.name === "Word editor") return <><WordEditorWorkspace /><ToolLandingContent tool={tool} /></>;
-  if (tool.name === "JSON formatter") return <><JsonFormatterWorkspace /><ToolLandingContent tool={tool} /></>;
+  if (tool.name === "Word editor") return <><EditorShell><WordEditorWorkspace /></EditorShell><ToolLandingContent tool={tool} /></>;
+  if (tool.name === "JSON formatter") return <><EditorShell><JsonFormatterWorkspace /></EditorShell><ToolLandingContent tool={tool} /></>;
   return (
     <>
       <ToolDetail tool={{

@@ -1,4 +1,6 @@
-# ConvoTools: the file desk
+# ConvoTools: the product playground
+
+The approved expanded direction is recorded in [.tastemaker/style-lock.md](.tastemaker/style-lock.md) and [docs/EXPANDED-REDESIGN.md](docs/EXPANDED-REDESIGN.md). The original short file-desk composition below is historical context; the current page adds six product chapters, real interactive samples and a workspace feature before the complete tool directory. The user explicitly chose an expressive light product playground.
 
 ## Product and audience
 

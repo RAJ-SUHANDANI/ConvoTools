@@ -169,7 +169,7 @@ export default function JsonFormatterWorkspace() {
   return (
     <section className="json-workbench" aria-label="JSON formatter, tree viewer and converter">
       <header className="json-workbench-head">
-        <div className="json-workbench-title"><span className="json-app-icon"><Braces /></span><div><b>JSON Studio</b><small>FORMAT · INSPECT · CONVERT</small></div></div>
+        <div className="json-workbench-title"><span className="json-app-icon"><Braces /></span><div><h1>JSON Studio</h1><small>FORMAT · INSPECT · CONVERT</small></div></div>
         <div className="json-workbench-actions">
           <button onClick={() => fileRef.current?.click()}><FileInput size={14} /> Open JSON</button>
           <button onClick={() => { setSource("{}"); setMessage("Started a new JSON document."); }}><WandSparkles size={14} /> New</button>
@@ -193,7 +193,7 @@ export default function JsonFormatterWorkspace() {
         </div>}
         {(view === "split" || view === "tree") && <div className="json-panel json-tree-panel">
           <div className="json-panel-head"><span><TreePine size={14} /> TREE VIEW</span><span className="json-live-pill"><i /> LIVE</span></div>
-          <label className="json-tree-search"><Search size={14} /><input value={search} onChange={event => setSearch(event.target.value)} placeholder="Find a key or value…" /></label>
+          <label className="json-tree-search"><Search size={14} /><input aria-label="Find a JSON key or value" value={search} onChange={event => setSearch(event.target.value)} placeholder="Find a key or value…" /></label>
           <div className="json-tree-scroll">
             {parsed.error ? <div className="json-tree-empty-state"><Braces size={22} /><b>Waiting for valid JSON</b><span>Correct the syntax to explore your data tree.</span></div>
               : <TreeNode label="root" value={parsed.value as JsonValue} search={search.toLowerCase()} />}

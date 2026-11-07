@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import "./file-desk.css";
 import "./workspace-polish.css";
+import "./product-story.css";
 import ScrollProgress from "@/components/ScrollProgress";
 import MotionPolicy from "@/components/MotionPolicy";
 

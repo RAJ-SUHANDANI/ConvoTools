@@ -33,6 +33,7 @@ import {
   X,
 } from "lucide-react";
 import BrandLogo from "@/components/BrandLogo";
+import ProductStory from "@/components/ProductStory";
 import FileActionPanel from "@/components/FileActionPanel";
 import { recordActivity } from "@/lib/activity";
 import { TOOLS, TOOL_CATEGORIES, slugify } from "@/lib/tools";
@@ -396,13 +397,13 @@ export default function FileDesk() {
               A good place for your files.
             </div>
             <h1 id="hero-title">
-              A little less
+              Big ideas.
               <br />
-              file friction.
+              Little file jobs.
             </h1>
             <p>
-              Convert a document. Tidy up a PDF. Get an image just right. All
-              the little file jobs, together at last.
+              Turn the file you have into the file you need. A whole playground
+              for PDFs, images, documents, data and everything in between.
             </p>
             <div className="fd-hero-actions">
               <a href="#file-desk" className="fd-button">
@@ -503,6 +504,7 @@ export default function FileDesk() {
             }}
           />
         </section>
+        <ProductStory />
         <section
           id="toolkit"
           className="fd-library"

@@ -10,7 +10,7 @@ test("the desk is readable, accessible and fits the viewport", async ({
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "A little lessfile friction.",
+    "Big ideas.Little file jobs.",
   );
   await expect(page.locator(".fd-tool")).toHaveCount(9);
   expect(
@@ -228,4 +228,7 @@ test("workspace and image tool share a usable responsive surface", async ({
     path: testInfo.outputPath("tool.png"),
     fullPage: true,
   });
+  await page.goto("/tools/json-formatter");
+  await expect(page.getByRole("heading", { level: 1, name: "JSON Studio" })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Editor navigation" })).toBeVisible();
 });
