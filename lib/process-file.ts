@@ -138,30 +138,72 @@ async function pptxText(file:File):Promise<string>{
  for(const path of slideFiles){const xml=await zip.file(path)!.async("text");const parts=[...xml.matchAll(/<a:t>([\s\S]*?)<\/a:t>/g)].map(m=>m[1].replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&apos;/g,"'"));slides.push(parts.join(" "));}
  return slides.map((s,i)=>"SLIDE "+(i+1)+"\n"+s).join("\n\n");
 }
-async function pdfPagesToVisualDocx(file:File):Promise<ProcessResult>{
- const source=await pdfJsDocument(file);
- if(source.numPages>60)throw new Error("Visual PDF-to-Word conversion is limited to 60 pages per file to protect browser memory. Split the PDF into smaller parts and convert each part.");
- const children:Paragraph[]=[];
- for(let index=1;index<=source.numPages;index++){
-  const page=await source.getPage(index);
-  const viewport=page.getViewport({scale:1.7});
-  const canvas=document.createElement("canvas");
-  canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);
-  const context=canvas.getContext("2d");if(!context)throw new Error("Canvas is unavailable while rendering this PDF.");
-  await page.render({canvasContext:context,viewport,canvas}).promise;
-  const blob=await new Promise<Blob>((resolve,reject)=>canvas.toBlob(value=>value?resolve(value):reject(new Error("Could not render PDF page "+index+".")),"image/png"));
-  const bytes=new Uint8Array(await blob.arrayBuffer());
-  const maxWidth=768,maxHeight=1008,ratio=Math.min(maxWidth/canvas.width,maxHeight/canvas.height);
-  children.push(new Paragraph({
-   pageBreakBefore:index>1,
-   children:[new ImageRun({data:bytes,transformation:{width:Math.max(1,Math.round(canvas.width*ratio)),height:Math.max(1,Math.round(canvas.height*ratio))}})]
-  }));
-  canvas.width=0;canvas.height=0;
- }
- const document=new Document({sections:[{properties:{page:{size:{width:12240,height:15840},margin:{top:360,bottom:360,left:360,right:360}}},children}]});
- return result(await Packer.toBlob(document),name(file,"docx"),"Visually faithful Word document created with each PDF page embedded as a high-resolution page image. Text and graphics are not individually editable.");
-}
 
+type PdfTextFragment={text:string;x:number;y:number;width:number;height:number;fontSize:number;fontName:string};
+type PdfTextLine={y:number;fragments:PdfTextFragment[]};
+async function extractPdfLayout(file:File){
+ const doc=await pdfJsDocument(file),pages:{width:number;height:number;lines:PdfTextLine[];fragments:PdfTextFragment[]}[]=[];
+ for(let pageNo=1;pageNo<=doc.numPages;pageNo++){
+  const page=await doc.getPage(pageNo),viewport=page.getViewport({scale:1}),content=await page.getTextContent();
+  const fragments:PdfTextFragment[]=[];
+  for(const raw of content.items as Array<{str?:string;transform?:number[];width?:number;height?:number;fontName?:string}>){
+   const text=(raw.str||"").replace(/\u0000/g,"").trim();if(!text||!raw.transform)continue;
+   const fontSize=Math.max(5,Math.min(72,Math.hypot(raw.transform[2]||0,raw.transform[3]||0)||raw.height||10));
+   fragments.push({text,x:raw.transform[4]||0,y:viewport.height-(raw.transform[5]||0),width:Math.max(raw.width||0,fontSize*.25),height:Math.max(raw.height||0,fontSize),fontSize,fontName:raw.fontName||""});
+  }
+  const lines:PdfTextLine[]=[];
+  for(const item of fragments.sort((x,y)=>x.y-y.y||x.x-y.x)){
+   let line=lines.find(candidate=>Math.abs(candidate.y-item.y)<=Math.max(2,item.fontSize*.32));
+   if(!line){line={y:item.y,fragments:[]};lines.push(line);}line.fragments.push(item);
+  }
+  lines.forEach(line=>line.fragments.sort((x,y)=>x.x-y.x));lines.sort((x,y)=>x.y-y.y);
+  pages.push({width:viewport.width,height:viewport.height,lines,fragments});
+ }
+ return pages;
+}
+async function pdfToEditableDocx(file:File):Promise<ProcessResult>{
+ const pages=await extractPdfLayout(file);if(pages.every(p=>!p.fragments.length))throw new Error("No selectable PDF text found. This appears to be scanned or image-only; use OCR first. Images and vector artwork are not reconstructed.");
+ const children:Paragraph[]=[];
+ for(let pi=0;pi<pages.length;pi++){
+  if(pi)children.push(new Paragraph({pageBreakBefore:true,children:[new TextRun("")]}));
+  for(const line of pages[pi].lines){
+   const maxSize=Math.max(...line.fragments.map(f=>f.fontSize),10);
+   const runs:TextRun[]=[];let right:number|null=null;
+   for(const item of line.fragments){
+    const gap=right===null?0:item.x-right;
+    runs.push(new TextRun({text:(gap>Math.max(10,item.fontSize*1.1)?"   ":gap>item.fontSize*.25?" ":"")+item.text,bold:/bold|black|heavy|semibold/i.test(item.fontName),italics:/italic|oblique/i.test(item.fontName),size:Math.max(16,Math.round(item.fontSize*1.5))}));
+    right=item.x+item.width;
+   }
+   children.push(new Paragraph({children:runs,spacing:{after:Math.max(0,Math.round(maxSize*2))},heading:maxSize>=17?"Heading2":undefined}));
+  }
+ }
+ const docx=new Document({sections:[{properties:{page:{size:{width:12240,height:15840},margin:{top:720,bottom:720,left:900,right:900}}},children}]});
+ return result(await Packer.toBlob(docx),name(file,"docx"),"Editable text and paragraphs reconstructed from PDF text positions. Font sizes and bold/italic hints are approximated. Embedded images, vector artwork, complex tables and exact layout are not reconstructed; scanned PDFs require OCR.");
+}
+async function pdfToEditablePptx(file:File):Promise<ProcessResult>{
+ const pages=await extractPdfLayout(file);if(pages.every(p=>!p.fragments.length))throw new Error("No selectable PDF text found. Scanned or image-only pages require OCR first; graphics and images are not reconstructed.");
+ const PptxGenJS=(await import("pptxgenjs")).default,pptx=new PptxGenJS();pptx.layout="LAYOUT_WIDE";pptx.author="ConvoTools";pptx.subject="Editable text reconstructed from PDF";pptx.title=file.name;
+ const sw=13.333,sh=7.5;
+ for(const page of pages){const slide=pptx.addSlide();slide.background={color:"FFFFFF"};
+  for(const item of page.fragments){
+   const x=Math.max(0,Math.min(sw,item.x/page.width*sw)),y=Math.max(0,Math.min(sh,item.y/page.height*sh-item.fontSize/page.height*sh));
+   const w=Math.max(.08,Math.min(sw-x,Math.max(item.width,item.fontSize*.35)/page.width*sw)),h=Math.max(.12,Math.min(.8,item.fontSize/page.height*sh*1.65));
+   slide.addText(item.text,{x,y,w,h,fontFace:"Arial",fontSize:Math.max(5,Math.min(48,item.fontSize/page.height*sh*72)),bold:/bold|black|heavy|semibold/i.test(item.fontName),italic:/italic|oblique/i.test(item.fontName),margin:0,fit:"shrink",color:"222222",valign:"mid"});
+  }
+ }
+ return result(await pptx.write({outputType:"blob"}) as Blob,name(file,"pptx"),"Selectable PDF text rebuilt as individually editable PowerPoint text boxes. Position and style are approximate; images, vector artwork, charts and complex tables are not reconstructed. Scanned PDFs require OCR.");
+}
+async function pdfToEditableExcel(file:File):Promise<ProcessResult>{
+ const pages=await extractPdfLayout(file);if(pages.every(p=>!p.fragments.length))throw new Error("No selectable PDF text found. Scanned or image-only pages require OCR first.");
+ const wb=XLSX.utils.book_new();
+ pages.forEach((page,index)=>{
+  const anchors:number[]=[];for(const item of page.fragments)if(!anchors.some(x=>Math.abs(x-item.x)<18))anchors.push(item.x);anchors.sort((x,y)=>x-y);
+  const data=page.lines.map(line=>{const cells=Array(Math.max(1,anchors.length)).fill("");for(const item of line.fragments){let col=0,best=Infinity;anchors.forEach((x,i)=>{const d=Math.abs(x-item.x);if(d<best){best=d;col=i;}});cells[col]=(cells[col]?cells[col]+" ":"")+item.text;}return cells;});
+  const sheet=XLSX.utils.aoa_to_sheet(data);sheet["!cols"]=anchors.map((_,i)=>({wch:Math.max(12,Math.min(42,Math.max(...data.map(row=>(row[i]||"").length),12)+2))}));
+  XLSX.utils.book_append_sheet(wb,sheet,("Page "+(index+1)).slice(0,31));
+ });
+ return result(bytesBlob(XLSX.write(wb,{type:"array",bookType:"xlsx"}) as Uint8Array,"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),name(file,"xlsx"),"Selectable PDF text reconstructed into editable spreadsheet cells using approximate x-position columns. Tables, merged cells, formulas, charts, images and scanned content are not reliably inferred; review the result.");
+}
 async function imageToWordDocx(file:File,recognizedText:string):Promise<ProcessResult>{
  const bitmap=await createImageBitmap(file);
  const scale=Math.min(1,1800/Math.max(bitmap.width,bitmap.height));
@@ -180,10 +222,9 @@ async function imageToWordDocx(file:File,recognizedText:string):Promise<ProcessR
 }
 
 async function pdfAdvanced(files:File[],tool:string):Promise<ProcessResult[]>{
- if(tool==="PDF to Word")return [await pdfPagesToVisualDocx(files[0])];
- if(tool==="PDF to Excel"){const text=await pdfText(files[0]);if(!text.trim())throw new Error("No selectable text was found in this PDF.");const rows=text.split(/\r?\n/).filter(Boolean).map(line=>line.split(/\s{2,}|\t/));const sheet=XLSX.utils.aoa_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,sheet,"Extracted data");return [result(bytesBlob(XLSX.write(wb,{type:"array",bookType:"xlsx"}) as Uint8Array,"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),name(files[0],"xlsx"),"Text rows exported to a spreadsheet. PDF table structure may require manual cleanup.")];}
- if(tool==="PDF to JPG"||tool==="PDF to PNG"){const pages=await renderPdfPages(files[0],tool==="PDF to JPG"?"jpeg":"png");if(pages.length===1)return [result(pages[0],name(files[0],tool==="PDF to JPG"?"jpg":"png"),"PDF page rendered as an image.")];const zip=new JSZip();pages.forEach((p,i)=>zip.file("page-"+String(i+1).padStart(3,"0")+(tool==="PDF to JPG"?".jpg":".png"),p));return [result(await zip.generateAsync({type:"blob"}),name(files[0],"zip"),pages.length+" PDF pages rendered into image files.")];}
- if(tool==="PDF to PowerPoint"||tool==="PDF to PPTX"){const pages=await renderPdfPages(files[0],"jpeg");return [result(await pdfPagesToPptx(pages),name(files[0],"pptx"),"PDF pages placed as full-slide images in a PowerPoint file. Text is not editable.")];}
+ if(tool==="PDF to Word")return [await pdfToEditableDocx(files[0])];
+ if(tool==="PDF to Excel")return [await pdfToEditableExcel(files[0])];if(tool==="PDF to JPG"||tool==="PDF to PNG"){const pages=await renderPdfPages(files[0],tool==="PDF to JPG"?"jpeg":"png");if(pages.length===1)return [result(pages[0],name(files[0],tool==="PDF to JPG"?"jpg":"png"),"PDF page rendered as an image.")];const zip=new JSZip();pages.forEach((p,i)=>zip.file("page-"+String(i+1).padStart(3,"0")+(tool==="PDF to JPG"?".jpg":".png"),p));return [result(await zip.generateAsync({type:"blob"}),name(files[0],"zip"),pages.length+" PDF pages rendered into image files.")];}
+ if(tool==="PDF to PowerPoint"||tool==="PDF to PPTX")return [await pdfToEditablePptx(files[0])];
  throw new Error("Unsupported PDF operation.");
 }
 
