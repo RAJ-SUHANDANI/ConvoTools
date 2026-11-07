@@ -88,7 +88,7 @@ async function processBase64(file:File,options:ProcessOptions):Promise<ProcessRe
 }
 
 async function textTool(file:File,tool:string):Promise<ProcessResult>{
- const value=await file.text();if(tool==="JSON formatter")return textFile(JSON.stringify(JSON.parse(value),null,2)+"\n",name(file,"json"),"application/json");
+ const value=await file.text();
  
  if(tool==="DOCX to TXT"){const mammoth=await import("mammoth");const extracted=await mammoth.extractRawText({arrayBuffer:await file.arrayBuffer()});return textFile(extracted.value,name(file,"txt"));}
  throw new Error("Unsupported text operation.");
@@ -670,7 +670,7 @@ export async function processFiles(files:File[],tool:string,options:ProcessOptio
  if(tool==="Create ZIP")return archive(files,tool);
  if(tool==="Extract archive")return mapFileResults(files,file=>archive([file],tool));
  if(tool==="Base64 tools")return mapFileResults(files,file=>processBase64(file,options));
- if(["JSON formatter","DOCX to TXT"].includes(tool))return mapFileResults(files,async file=>[await textTool(file,tool)]);
+ if(tool==="DOCX to TXT")return mapFileResults(files,async file=>[await textTool(file,tool)]);
  if(tool==="Word to PDF")return mapFileResults(files,async file=>[await renderWordToPdf(file)]);
  if(tool==="PPTX to PDF"){const pages=await renderPresentationSlides(files[0]);return [await presentationToPdf(pages,name(files[0],"pdf"))];}
  if(tool==="Image to Word (OCR)"||tool==="OCR extractor"){const language=options.ocrLanguage||"eng";return mapFileResults(files,async file=>{const extracted=file.type==="application/pdf"||file.name.toLowerCase().endsWith(".pdf")?await ocrPdf(file,language):await ocrImage(file,language);return options.ocrFormat==="TXT"?[textFile(extracted,name(file,"txt"))]:[file.type.startsWith("image/")||/\\.(png|jpe?g|webp|bmp|tiff?)$/i.test(file.name)?await imageToWordDocx(file,extracted):await makeDocx(extracted,name(file,"docx"))];});}
@@ -695,7 +695,7 @@ export async function processFiles(files:File[],tool:string,options:ProcessOptio
   }
   return outputs;
  }
- if(tool==="Word editor"){const mammoth=await import("mammoth");const extracted=await mammoth.extractRawText({arrayBuffer:await files[0].arrayBuffer()});const text=options.textContent??extracted.value;return [await makeDocx(text,name(files[0],"docx"))];}
+ if(tool==="Word editor"||tool==="JSON formatter")throw new Error(tool+" is an interactive workspace. Open its tool page to edit or inspect your content; no placeholder conversion is generated.");
  throw new Error(tool+" is not connected to a real processing engine yet. No placeholder output was created. This operation needs a dedicated conversion or AI provider.");
 }
 export function saveProcessedFile(item:ProcessResult){const url=URL.createObjectURL(item.blob);const a=document.createElement("a");a.href=url;a.download=item.filename;document.body.appendChild(a);a.click();a.remove();window.setTimeout(()=>URL.revokeObjectURL(url),60000);}
