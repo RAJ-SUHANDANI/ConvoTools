@@ -594,7 +594,9 @@ async function renderWordToPdf(file:File):Promise<ProcessResult>{
   return makePdf(extracted,name(file,"pdf"));
  }
  if(file.size>80*1024*1024)throw new Error("For browser stability, Word-to-PDF conversion is limited to DOCX files smaller than 80 MB.");
- const [{renderAsync},html2canvas]=await Promise.all([import("docx-preview"),import("html2canvas")]);
+ const [docxPreview,html2canvasModule]=await Promise.all([import("docx-preview"),import("html2canvas")]);
+ const renderAsync=docxPreview.renderAsync;
+ const html2canvas=html2canvasModule.default;
  const host=document.createElement("div"),styleHost=document.createElement("div");
  host.style.cssText="position:fixed;left:-100000px;top:0;width:900px;z-index:-1;background:#fff;";
  styleHost.setAttribute("data-convotools-docx-styles","");
