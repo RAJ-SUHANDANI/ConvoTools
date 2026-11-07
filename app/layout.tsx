@@ -35,8 +35,8 @@ const structuredData = [
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: { default: "ConvoTools — Free Online File Converter & PDF Tools", template: "%s | ConvoTools" },
-  description: "Convert PDFs, images, Word documents, spreadsheets, presentations and media with practical online file tools. Browse 42 utilities in one workspace.",
+  title: { default: "ConvoTools — Online File Converter & PDF Tools", template: "%s | ConvoTools" },
+  description: "Convert PDFs, images, Word documents, spreadsheets, presentations and media with practical online file tools. Explore practical file tools in one workspace.",
   applicationName: "ConvoTools",
   category: "technology",
   icons: { icon: "/convotools-mark.svg", shortcut: "/convotools-mark.svg" },
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 } },
   openGraph: {
     title: "ConvoTools — Free Online File Converter & PDF Tools",
-    description: "Convert and prepare PDFs, images, documents, spreadsheets and media with 42 practical browser-based tools.",
+    description: "Convert and prepare PDFs, images, documents, spreadsheets and media with practical browser-based tools.",
     url: siteUrl,
     siteName: "ConvoTools",
     locale: "en_IN",
