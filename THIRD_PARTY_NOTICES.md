@@ -5,7 +5,7 @@
 ConvoTools can load the `pdf2docx-wasm` 0.1.0 package in a browser Web Worker for local PDF-to-DOCX conversion.
 
 - License: GNU Affero General Public License v3.0 (AGPL-3.0).
-- License text: [public/licenses/pdf2docx-wasm-AGPL-3.0.txt](public/licenses/pdf2docx-wasm-AGPL-3.0.txt)
+- License text: [public/licenses/AGPL-3.0-PDF2DOCX-WASM.txt](public/licenses/pdf2docx-wasm-AGPL-3.0.txt)
 - Corresponding source: https://github.com/jsscheller/pdf2docx-wasm
 - Runtime assets are fetched from the package distribution at jsDelivr. PDF document bytes are transferred to the local browser worker and are not uploaded to a ConvoTools conversion server.
 
