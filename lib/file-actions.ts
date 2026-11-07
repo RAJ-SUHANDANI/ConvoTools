@@ -37,7 +37,6 @@ const actions: Record<FileCategory, FileAction[]> = {
     { id: "image-jpg", label: "Convert to JPG", detail: "Create a widely compatible JPG image.", output: "JPG", toolSlug: "png-to-jpg", kind: "convert" },
     { id: "image-png", label: "Convert to PNG", detail: "Export a lossless PNG image.", output: "PNG", toolSlug: "jpg-to-png", kind: "convert" },
     { id: "image-webp", label: "Convert to WEBP", detail: "Create a compact web-ready image.", output: "WEBP", toolSlug: "png-to-webp", kind: "convert" },
-    { id: "image-enhance", label: "Enhance image", detail: "Upscale, sharpen and reduce noise.", output: "Enhanced image", toolSlug: "image-enhancer", kind: "ai" },
     { id: "image-compress", label: "Compress image", detail: "Reduce file size and choose quality.", output: "Optimized image", toolSlug: "image-compressor", kind: "edit" },
     { id: "image-resize", label: "Resize image", detail: "Set exact width, height or scale.", output: "Image", toolSlug: "resize-image", kind: "edit" },
   ],
@@ -50,7 +49,6 @@ const actions: Record<FileCategory, FileAction[]> = {
     { id: "pdf-compress", label: "Compress PDF", detail: "Reduce size with a quality preset.", output: "PDF", toolSlug: "compress-pdf", kind: "edit" },
     { id: "pdf-merge", label: "Merge PDFs", detail: "Combine this file with other PDFs.", output: "PDF", toolSlug: "merge-pdf", kind: "edit" },
     { id: "pdf-split", label: "Split PDF", detail: "Extract selected pages into new files.", output: "PDF", toolSlug: "split-pdf", kind: "edit" },
-    { id: "pdf-ocr", label: "Make searchable (OCR)", detail: "Recognize text in scanned pages.", output: "Searchable PDF", toolSlug: "ocr-extractor", kind: "extract" },
   ],
   Documents: [
     { id: "doc-pdf", label: "Convert to PDF", detail: "Export this document as PDF.", output: "PDF", toolSlug: "word-to-pdf", kind: "convert" },

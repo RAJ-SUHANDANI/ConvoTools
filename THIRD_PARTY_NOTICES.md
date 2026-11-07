@@ -1,5 +1,13 @@
 # Third-party software notices
 
+## Self-hosted typography
+
+DM Sans and Space Grotesk are distributed through their Fontsource variable-font
+packages under the SIL Open Font License 1.1. Their license texts are included in
+`node_modules/@fontsource-variable/dm-sans/LICENSE` and
+`node_modules/@fontsource-variable/space-grotesk/LICENSE`. Next.js serves the Latin
+variable font files with the application; no Google Fonts request is made.
+
 ## Browser PDF-to-DOCX engine
 
 ConvoTools can load the `pdf2docx-wasm` 0.1.0 package in a browser Web Worker for local PDF-to-DOCX conversion.

@@ -1,27 +1,26 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 :root{
-  --paper:#f2f1ec;
-  --paper-light:#faf9f5;
-  --paper-deep:#e9e7df;
-  --ink:#18191c;
+  --paper:#f8f9fc;
+  --paper-light:#ffffff;
+  --paper-deep:#eef0f6;
+  --ink:#222433;
   --ink-soft:#4c4e54;
   --muted:#7b7d82;
-  --line:#d9d8d1;
+  --line:#dfe1eb;
   --line-dark:#303238;
   --night:#17191d;
   --night-2:#202329;
   --night-muted:#a7a8ad;
-  --blue:#5259d8;
-  --blue-deep:#343bb6;
-  --blue-soft:#e7e9ff;
+  --blue:#5542cf;
+  --blue-deep:#4430b6;
+  --blue-soft:#e9e5fa;
   --lime:#c8f169;
   --green:#2f785c;
-  --mono:'DM Mono',monospace;
-  --sans:'DM Sans',sans-serif;
-  --display:'Space Grotesk',sans-serif;
-  --serif:'Instrument Serif',serif;
+  --mono:ui-monospace,monospace;
+  --sans:var(--font-dm-sans),sans-serif;
+  --display:var(--font-space-grotesk),sans-serif;
+  --serif:var(--display);
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:92px}

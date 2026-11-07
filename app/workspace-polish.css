@@ -1,0 +1,346 @@
+/* Product surfaces share the desk palette, with denser spacing for actual work. */
+.dashboard-shell,
+.tool-page {
+  background: #f8f9fc;
+}
+.dashboard-topbar {
+  background: #f8f9fcf5;
+  border-color: #dfe1eb;
+  backdrop-filter: none;
+}
+.dashboard-sidebar {
+  background: #252435;
+}
+.dash-nav-item {
+  font-size: 12px;
+  min-height: 43px;
+  border-radius: 6px;
+}
+.dash-nav-item.active {
+  background: #3b345a;
+  border-color: #5c507f;
+  box-shadow: inset 2px 0 #baaae7;
+}
+.dash-nav-caption,
+.dash-workspace-label {
+  font: 10px var(--sans);
+  letter-spacing: 0.02em;
+  color: #a6a2b8;
+}
+.dash-breadcrumb {
+  font: 11px var(--sans);
+}
+.dash-local-pill {
+  font: 9px var(--sans);
+  letter-spacing: 0;
+  border-radius: 5px;
+  padding: 7px 9px;
+}
+.dash-profile-button,
+.dash-icon-button,
+.dash-mobile-menu {
+  border-radius: 6px;
+  background: #fff;
+  border-color: #dfe1eb;
+}
+.dash-profile-button {
+  font-size: 11px;
+  min-height: 38px;
+}
+.dash-icon-button,
+.dash-mobile-menu {
+  min-width: 38px;
+  min-height: 38px;
+}
+.dashboard-greeting h1,
+.dash-page-title h1 {
+  font-size: clamp(32px, 3.6vw, 46px);
+  line-height: 1.16;
+  letter-spacing: -0.055em;
+}
+.dashboard-greeting h1 em,
+.dash-page-title h1 em {
+  font: inherit;
+  color: inherit;
+  display: block;
+}
+.dashboard-greeting p,
+.dash-page-title p {
+  font-size: 13px;
+  color: #64687a;
+}
+.dash-primary-action {
+  height: 43px;
+  border-radius: 6px;
+  font-size: 11px;
+  padding: 0 15px;
+}
+.dash-stat-card {
+  background: #fff;
+  border-color: #e1e3ec;
+  border-radius: 8px;
+  padding: 17px;
+  min-height: 147px;
+  will-change: auto;
+  transform-style: flat;
+}
+.dash-stat-card:after {
+  display: none;
+}
+.dash-stat-card small {
+  font: 10px var(--sans);
+  color: #636779;
+  letter-spacing: 0;
+}
+.dash-stat-card strong {
+  font-size: 30px;
+  margin-top: 4px;
+}
+.dash-stat-card > span:last-child {
+  font-size: 10px;
+  color: #737789;
+}
+.dash-upload-card,
+.dash-activity-card,
+.dash-quick-tools,
+.dash-settings-card,
+.dash-tool-library-card {
+  background: #fff;
+  border-color: #e1e3ec;
+  border-radius: 9px;
+}
+.dash-card-heading h2 {
+  font-size: 22px;
+}
+.dash-card-heading p {
+  font-size: 12px;
+  line-height: 1.7;
+  color: #64687a;
+}
+.dash-card-heading button {
+  font-size: 11px;
+  min-height: 36px;
+}
+.dashboard-shell .micro-label {
+  font: 10px var(--sans);
+  letter-spacing: 0.025em;
+  color: #686b7c;
+}
+.dash-upload-zone {
+  background: #f1eef9;
+  border-color: #b6aad6;
+  border-radius: 8px;
+  padding: 25px 15px;
+  min-height: 210px;
+}
+.dash-upload-zone > b {
+  font-size: 15px;
+}
+.dash-upload-zone > small {
+  font-size: 11px;
+  line-height: 1.8;
+  text-align: center;
+  color: #65697a;
+}
+.dash-upload-zone > button {
+  font-size: 12px;
+  min-height: 40px;
+  border-radius: 6px;
+}
+.dash-empty-state > b {
+  font-size: 13px;
+}
+.dash-empty-state > p {
+  font-size: 12px;
+  line-height: 1.8;
+  color: #65697a;
+}
+.dash-quick-tool {
+  border-color: #e2e4ed;
+  border-radius: 7px;
+  min-height: 115px;
+  padding: 14px;
+  will-change: auto;
+  transform-style: flat;
+}
+.dash-quick-tool:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: #a395cf;
+}
+.dash-quick-tool > b {
+  font-size: 12px;
+}
+.dash-quick-tool > small {
+  font-size: 10px;
+  color: #686c7e;
+}
+.dash-tool-library-card {
+  will-change: auto;
+  transform-style: flat;
+}
+.dash-tool-library-card h3 {
+  font-size: 19px;
+}
+.dash-tool-library-card p {
+  font-size: 12px;
+  line-height: 1.8;
+  color: #636779;
+}
+.dash-tool-library-card:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: #a395cf;
+}
+.dash-privacy-card {
+  background: #302e41;
+  border-color: #464258;
+  border-radius: 7px;
+}
+.dash-privacy-card b {
+  font-size: 11px;
+}
+.dash-privacy-card span {
+  font-size: 10px;
+  line-height: 1.7;
+}
+.dash-user-card b {
+  font-size: 11px;
+}
+.dash-user-card small {
+  font-size: 10px;
+}
+.operation-card {
+  background: #fff;
+  border-color: #dfe1eb;
+  border-radius: 11px;
+  box-shadow: 0 8px 28px #22243305;
+}
+.operation-card:hover {
+  box-shadow: 0 8px 28px #22243305;
+}
+.operation-card:before,
+.operation-drop:after,
+.operation-submit:after {
+  display: none;
+}
+.operation-card-head h2 {
+  font-size: 24px;
+  letter-spacing: -0.04em;
+}
+.operation-card-head p {
+  font-size: 12px;
+  color: #666b7d;
+  line-height: 1.7;
+}
+.operation-drop {
+  border-radius: 9px;
+  background: #f1eef9;
+  border-color: #b6aad6;
+  min-height: 165px;
+}
+.operation-drop b {
+  font-size: 14px;
+}
+.operation-drop small {
+  font-size: 11px;
+  color: #666b7d;
+}
+.operation-upload-icon {
+  animation: none;
+}
+.operation-submit {
+  border-radius: 7px;
+  font-size: 13px;
+  min-height: 48px;
+}
+.operation-file-row {
+  border-radius: 7px;
+}
+.operation-file-row:hover {
+  transform: none;
+}
+.operation-secure {
+  font-size: 11px;
+  line-height: 1.8;
+  color: #5e6c65;
+}
+.operation-notice {
+  font-size: 12px;
+  line-height: 1.8;
+}
+.operation-results > b,
+.operation-results > button > span {
+  font-size: 12px;
+}
+.operation-results > button small {
+  font-size: 10px;
+}
+.field-label {
+  font-size: 12px;
+  color: #4e5365;
+}
+.tool-detail-intro h1 em {
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+}
+.tool-detail-kicker {
+  font: 11px var(--sans);
+  letter-spacing: 0.02em;
+}
+.tool-detail-intro > p {
+  font-size: 14px;
+  line-height: 1.85;
+  color: #616577;
+}
+.tool-seo-content {
+  background: #f8f9fc;
+  border-color: #dfe1eb;
+}
+.tool-seo-content h2 em {
+  font: inherit;
+  color: inherit;
+}
+.tool-seo-content p,
+.tool-seo-faq details p {
+  font-size: 13px;
+  line-height: 1.85;
+}
+@media (max-width: 760px) {
+  .dashboard-greeting {
+    align-items: flex-start;
+  }
+  .dashboard-greeting h1 {
+    font-size: 34px;
+  }
+  .dashboard-topbar {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  .dash-quick-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .dashboard-content {
+    padding-top: 25px;
+  }
+  .dash-card-heading {
+    gap: 10px;
+  }
+  .operation-card {
+    padding: 21px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *:before,
+  *:after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

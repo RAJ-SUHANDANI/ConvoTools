@@ -11,7 +11,7 @@ type PptxShapeName = Parameters<PptxSlide["addShape"]>[0];
 export type ProcessOptions = { quality?: "Smaller file" | "Balanced" | "Best quality"; output?: string; password?: string; pdfPageOrder?: string; width?: string; height?: string; rotation?: number; cropMode?: "Original" | "Square center crop"; textContent?: string; base64Mode?: "Encode" | "Decode"; decodedFormat?: string; ocrFormat?: "DOCX" | "TXT"; ocrLanguage?: string; pdfRotation?: number; qrFormat?: "PNG" | "SVG"; hashAlgorithm?: "SHA-256" | "SHA-384" | "SHA-512"; qrText?: string; onProgress?: (progress: number, phase?: string) => void };
 export type ProcessResult = { blob: Blob; filename: string; mime: string; message: string };
 const result=(blob:Blob,filename:string,message:string):ProcessResult=>({blob,filename,mime:blob.type||"application/octet-stream",message});
-const bytesBlob=(bytes:Uint8Array,mime:string)=>{const safe=new Uint8Array(bytes.byteLength);safe.set(bytes);return new Blob([safe.buffer],{type:mime});};
+const bytesBlob=(bytes:Uint8Array|ArrayBuffer,mime:string)=>{const source=bytes instanceof Uint8Array?bytes:new Uint8Array(bytes);const safe=new Uint8Array(source.byteLength);safe.set(source);return new Blob([safe.buffer],{type:mime});};
 const name=(file:File,ext:string)=>((file.name.replace(/\.[^.]+$/,"")||"output")+"."+ext);
 const textFile=(text:string,filename:string,mime="text/plain;charset=utf-8")=>result(new Blob([text],{type:mime}),filename,"Your file is ready.");
 async function image(file:File,tool:string,options:ProcessOptions):Promise<ProcessResult>{

@@ -6,3 +6,7 @@ build
 *.log
 .env*
 !.env.example
+public/pdf.worker.mjs
+*.tsbuildinfo
+test-results/
+playwright-report/

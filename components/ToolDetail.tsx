@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import BrandLogo from "@/components/BrandLogo";
-import { processFiles, saveProcessedFile, type ProcessResult } from "@/lib/process-file";
+import type { ProcessResult } from "@/lib/process-file";
 import { acceptedInputForTool, detectFileCategory, formatFileSize, isAudioFile, isVideoFile } from "@/lib/file-actions";
 import { clearPendingFiles, getPendingFiles } from "@/lib/file-session";
 import { readFavorites, recordActivity, saveFavorites } from "@/lib/activity";
@@ -155,6 +155,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
     if (invalidFiles.length) { setNotice("One or more files do not match this tool's expected input format."); return; }
     setProcessing(true); setProgress(0); setMediaProgress(["MP4 to GIF","Video compressor","Extract audio","Audio converter","PDF to Word","PDF to Excel","PDF to PowerPoint","PDF to PPTX"].includes(tool.name)); setResults([]); setNotice("Processing locally in your browser…");
     try {
+      const { processFiles, saveProcessedFile } = await import("@/lib/process-file");
       const completed = await processFiles(files, tool.name, { output, quality, password, pdfPageOrder, width: imageWidth, height: imageHeight, rotation, cropMode, textContent: documentText, base64Mode, decodedFormat, ocrFormat, ocrLanguage, pdfRotation, qrFormat, hashAlgorithm, qrText, onProgress: (value, phase) => { setProgress(value); if (phase) setNotice(phase); } });
       setResults(completed);
       setDownloadRun((run) => run + 1);
@@ -165,6 +166,13 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
       setProgress(1); setNotice(completed.length + " output " + (completed.length === 1 ? "file is" : "files are") + " ready. Your download" + (completed.length === 1 ? " has" : "s have") + " started.");
     } catch (error) { setNotice(error instanceof Error ? error.message : "Something went wrong while processing this file."); }
     finally { setProcessing(false); }
+  };
+
+  const saveProcessedFile = async (result: ProcessResult) => {
+    try {
+      const engine = await import("@/lib/process-file");
+      engine.saveProcessedFile(result);
+    } catch { setNotice("The download could not start. Please try the output file again."); }
   };
 
   const options = tool.name === "Audio converter" ? ["MP3", "WAV", "AAC", "FLAC", "OGG"] : tool.name === "OCR extractor" ? ["DOCX", "TXT"] : tool.name === "WEBP converter" ? ["JPG", "PNG", "WEBP"] : tool.name === "Image compressor" ? ["Optimized image", "JPG", "PNG", "WEBP"] : ["Resize image", "Crop & rotate"].includes(tool.name) ? [defaultOutput(tool), "JPG", "PNG", "WEBP"] : [defaultOutput(tool)];

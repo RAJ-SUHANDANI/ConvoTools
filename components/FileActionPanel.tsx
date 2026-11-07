@@ -83,7 +83,7 @@ export default function FileActionPanel({ files, onRemove }: Props) {
           );
         })}
       </div>
-      <p className="file-action-disclaimer">Your files are selected in this browser session. Conversion starts on the dedicated tool page once its processing engine is connected.</p>
+      <p className="file-action-disclaimer">Your files are selected in this browser session. Open a tool to review its options and processing notice, then start when you’re ready.</p>
     </div>
   );
 }
