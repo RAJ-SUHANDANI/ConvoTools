@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import BrandLogo from "@/components/BrandLogo";
 import {
   ArrowRight, ArrowUpRight,
-  Github, Image as ImageIcon,
+  Image as ImageIcon,
   LockKeyhole, Menu, ScanText, Sparkles, WandSparkles,
   Workflow, X
 } from "lucide-react";
@@ -31,7 +31,7 @@ const navigation = [
   ]},
   { label: "About", href: "#why", eyebrow: "THE CONVOTOOLS APPROACH", groups: [
     { title: "OUR PRINCIPLES", items: [["Privacy by default", "#why"], ["How it works", "#faq"]] },
-    { title: "THE PROJECT", items: [["GitHub", "https://github.com/RAJ-SUHANDANI/ConvoTools"], ["Open workspace", "/dashboard"]] },
+    { title: "MORE", items: [["Our approach", "#why"], ["Open workspace", "/dashboard"]] },
   ]},
 ] as const;
 
@@ -56,7 +56,6 @@ export function LandingNav() {
           ))}
         </nav>
         <div className="header-actions">
-          <a className="header-github" href="https://github.com/RAJ-SUHANDANI/ConvoTools" target="_blank" rel="noreferrer"><Github size={15} /> <span>GitHub</span></a>
           <a className="header-button" href="/dashboard">Open workspace <ArrowUpRight size={14} /></a>
           <button className="mobile-toggle" onClick={() => setMobileOpen((value) => !value)} aria-label="Toggle navigation" aria-expanded={mobileOpen}>{mobileOpen ? <X size={19} /> : <Menu size={19} />}</button>
         </div>
@@ -267,10 +266,10 @@ export function FooterReveal() {
       <div className="footer-nav">
         <div><b>EXPLORE</b><a href="#toolkit">All tools</a><a href="#pdf">PDF workbench</a><a href="#image-lab">Image lab</a><a href="#ai">AI lab</a></div>
         <div><b>WORKSPACE</b><a href="/dashboard">Dashboard</a><a href="#workflow">Workflows</a><a href="#developer">Developer utilities</a><a href="#faq">FAQ</a></div>
-        <div><b>THE PROJECT</b><a href="https://github.com/RAJ-SUHANDANI/ConvoTools" target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={12}/></a><a href="#why">Our approach</a></div>
+        <div><b>MORE</b><a href="#why">Our approach</a><a href="#faq">How it works</a></div>
       </div>
     </div>
-    <div className="footer-bottom"><span>© 2026 CONVOTOOLS. MADE FOR THE WORK BETWEEN THE WORK.</span><span>LOCAL-FIRST FILE WORKSPACE <i/> 42 TOOLS · BROWSER PROCESSING</span><a href="#top">BACK TO TOP ↑</a></div>
+    <div className="footer-bottom"><span>© 2026 CONVOTOOLS. MADE FOR THE WORK BETWEEN THE WORK.</span><span>MADE BY RAJ SUHANDANI</span><a href="#top">BACK TO TOP ↑</a></div>
   </motion.footer>;
 }
 
