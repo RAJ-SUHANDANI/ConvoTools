@@ -366,10 +366,10 @@ export default function Home() {
       <motion.section initial={reducedMotion ? false : { opacity: 0, y: 26 }} whileInView={reducedMotion ? {} : { opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.12 }} transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }} className="faq-section section-pad" id="faq">
         <div><span className="section-kicker">11 / GOOD TO KNOW</span><h2>A few things,<br /><em>answered.</em></h2></div>
         <div className="faq-list">
-          <details><summary>Will ConvoTools be free? <span>+</span></summary><p>The goal is a free-first product without subscriptions or watermarks. Some AI providers may have their own free usage limits, and heavy server processing has real infrastructure costs.</p></details>
-          <details><summary>Do my files get uploaded? <span>+</span></summary><p>The product is being designed to process files in the browser wherever practical. Some complex conversions or optional AI tools may need server-side processing or an external provider, which should be disclosed before use.</p></details>
-          <details><summary>Can I process multiple files at once? <span>+</span></summary><p>Batch operations are a core part of the product direction. The workspace preview already demonstrates multi-file selection; processing will be connected tool by tool.</p></details>
-          <details><summary>Are all the tools working already? <span>+</span></summary><p>This is the interface foundation. The upload interaction and tool discovery work in this preview, while conversion, editing and AI processing engines are being built in later phases.</p></details>
+          <details><summary>Will ConvoTools be free? <span>+</span></summary><p>ConvoTools is being built as a free-first workspace. Availability and usage limits may vary by tool, especially when an external processing provider is required.</p></details>
+          <details><summary>Do my files get uploaded? <span>+</span></summary><p>Tools that support local processing work in your browser. Processing methods can differ by tool; review its on-page notice before selecting a file.</p></details>
+          <details><summary>Can I process multiple files at once? <span>+</span></summary><p>Several tools accept multiple files in one selection. Batch support depends on the tool and the formats it accepts.</p></details>
+          <details><summary>Are all the tools working already? <span>+</span></summary><p>Tool availability varies. Each tool page shows its supported input, output and processing controls. Some AI experiences are marked as coming soon.</p></details>
         </div>
       </motion.section>
 
