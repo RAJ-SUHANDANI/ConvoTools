@@ -99,7 +99,7 @@ function TreeNode({ label, value, depth = 0, search = "" }: { label: string; val
           ? <><span className="json-tree-type">{kind}</span><span className="json-tree-count">{children.length} {children.length === 1 ? "item" : "items"}</span>{children.length === 0 && <span className="json-tree-empty">{Array.isArray(value) ? "[]" : "{}"}</span>}</>
           : <span className={"json-tree-value json-tree-" + kind}>{value === null ? "null" : typeof value === "string" ? JSON.stringify(value) : String(value)}</span>}
       </div>
-      {container && expanded && children.length > 0 && <div>{children.map(([key, child]) => <TreeNode key={key} label={Array.isArray(value) ? "[" + key + "]" : key} value={child} depth={depth + 1} search={search} />)}</div>}
+      {container && (expanded || !!search) && children.length > 0 && <div>{children.map(([key, child]) => <TreeNode key={key} label={Array.isArray(value) ? "[" + key + "]" : key} value={child} depth={depth + 1} search={search} />)}</div>}
     </div>
   );
 }
