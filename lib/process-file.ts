@@ -88,8 +88,6 @@ async function processBase64(file:File,options:ProcessOptions):Promise<ProcessRe
 }
 
 async function textTool(file:File,tool:string):Promise<ProcessResult>{
- const value=await file.text();
- 
  if(tool==="DOCX to TXT"){const mammoth=await import("mammoth");const extracted=await mammoth.extractRawText({arrayBuffer:await file.arrayBuffer()});return textFile(extracted.value,name(file,"txt"));}
  throw new Error("Unsupported text operation.");
 }
