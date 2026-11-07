@@ -172,7 +172,7 @@ async function imageToWordDocx(file:File,recognizedText:string):Promise<ProcessR
  const imageBytes=new Uint8Array(await blob.arrayBuffer());
  const imageWidth=canvas.width,imageHeight=canvas.height;canvas.width=0;canvas.height=0;
  const doc=new Document({sections:[{children:[
-  new Paragraph({children:[new ImageRun({data:imageBytes,transformation:{width:Math.min(540,imageWidth),height:Math.min(720,imageHeight)*Math.min(1,540/imageWidth)}})]}),
+  new Paragraph({children:[new ImageRun({data:imageBytes,transformation:{width:imageWidth*Math.min(1,540/imageWidth,720/imageHeight),height:imageHeight*Math.min(1,540/imageWidth,720/imageHeight)}})]}),
   new Paragraph({children:[new TextRun({text:"Recognized text",bold:true})]}),
   ...recognizedText.split(/\\r?\\n/).map(line=>new Paragraph({children:[new TextRun(line)]}))
  ]}]});
@@ -432,6 +432,41 @@ async function workbookToPdf(file:File):Promise<ProcessResult>{
  }
  if(!started)pdf.text("The workbook contains no printable rows.",margin,margin);
  return result(pdf.output("blob"),name(file,"pdf"),"Workbook sheets exported as paginated PDF tables. Wide sheets are separated into column groups.");
+}
+
+
+async function renderWordToPdf(file:File):Promise<ProcessResult>{
+ if(file.size>80*1024*1024)throw new Error("For browser stability, Word-to-PDF conversion is limited to DOCX files smaller than 80 MB.");
+ const [{renderAsync},html2canvas]=await Promise.all([import("docx-preview"),import("html2canvas")]);
+ const host=document.createElement("div"),styleHost=document.createElement("div");
+ host.style.cssText="position:fixed;left:-100000px;top:0;width:900px;z-index:-1;background:#fff;";
+ styleHost.setAttribute("data-convotools-docx-styles","");
+ document.body.append(styleHost,host);
+ try{
+  await renderAsync(file,host,styleHost,{className:"docx",inWrapper:true,ignoreWidth:false,ignoreHeight:false,breakPages:true,renderHeaders:true,renderFooters:true,renderFootnotes:true,renderEndnotes:true});
+  await Promise.all(Array.from(host.querySelectorAll("img")).map(img=>img.decode().catch(()=>undefined)));
+  if("fonts" in document)await document.fonts.ready;
+  const pageElements=Array.from(host.querySelectorAll<HTMLElement>(".docx"));
+  if(!pageElements.length)throw new Error("The Word document could not be laid out into pages. Please check that it is a valid DOCX file.");
+  if(pageElements.length>100)throw new Error("Word-to-PDF conversion is limited to 100 pages per file in the browser.");
+  const {jsPDF}=await import("jspdf");
+  let pdf:InstanceType<typeof jsPDF>|null=null;
+  for(let index=0;index<pageElements.length;index++){
+   const page=pageElements[index];
+   const canvas=await html2canvas(page,{scale:1.5,backgroundColor:"#ffffff",useCORS:true,logging:false,windowWidth:Math.max(page.scrollWidth,900)});
+   const widthPt=Math.max(300,Math.round(page.offsetWidth*.75));
+   const heightPt=Math.max(300,Math.round(page.offsetHeight*.75));
+   if(!pdf)pdf=new jsPDF({unit:"pt",format:[widthPt,heightPt],orientation:widthPt>heightPt?"landscape":"portrait"});
+   else pdf.addPage([widthPt,heightPt],widthPt>heightPt?"landscape":"portrait");
+   const image=canvas.toDataURL("image/jpeg",.94);
+   pdf.addImage(image,"JPEG",0,0,widthPt,heightPt,undefined,"FAST");
+   canvas.width=0;canvas.height=0;
+  }
+  if(!pdf)throw new Error("No printable pages were found in this Word document.");
+  return result(pdf.output("blob"),name(file,"pdf"),"Word pages rendered with document layout, text, tables and embedded images preserved as page images. PDF content is visually rendered rather than independently editable.");
+ }finally{
+  host.remove();styleHost.remove();
+ }
 }
 
 
