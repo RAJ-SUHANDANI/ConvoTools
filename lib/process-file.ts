@@ -3,7 +3,10 @@ import JSZip from "jszip";
 import { PDFDocument, degrees } from "pdf-lib";
 import * as XLSX from "xlsx";
 import { Document, ImageRun, Packer, Paragraph, TextRun } from "docx";
-import { analyzePdfForOffice, reconstructPdfToDocx, type PdfDetectedTable, type PdfLayoutAnalysis, type PdfLayoutPage } from "@/lib/pdf-document-engine";
+import { analyzePdfForOffice, reconstructPdfToDocx, type PdfDetectedTable, type PdfLayoutPage } from "@/lib/pdf-document-engine";
+type PptxPresentation = InstanceType<typeof import("pptxgenjs").default>;
+type PptxSlide = ReturnType<PptxPresentation["addSlide"]>;
+type PptxShapeName = Parameters<PptxSlide["addShape"]>[0];
 
 export type ProcessOptions = { quality?: "Smaller file" | "Balanced" | "Best quality"; output?: string; password?: string; pdfPageOrder?: string; width?: string; height?: string; rotation?: number; cropMode?: "Original" | "Square center crop"; textContent?: string; base64Mode?: "Encode" | "Decode"; decodedFormat?: string; ocrFormat?: "DOCX" | "TXT"; ocrLanguage?: string; pdfRotation?: number; qrFormat?: "PNG" | "SVG"; hashAlgorithm?: "SHA-256" | "SHA-384" | "SHA-512"; qrText?: string; onProgress?: (progress: number, phase?: string) => void };
 export type ProcessResult = { blob: Blob; filename: string; mime: string; message: string };
@@ -169,10 +172,10 @@ function inTable(bbox:[number,number,number,number],tables:PdfDetectedTable[]):b
  const x=(bbox[0]+bbox[2])/2,y=(bbox[1]+bbox[3])/2;
  return tables.some(table=>x>=table.bbox[0]&&x<=table.bbox[2]&&y>=table.bbox[1]&&y<=table.bbox[3]);
 }
-function slideLine(slide:any,pptx:any,x1:number,y1:number,x2:number,y2:number,scale:number,offsetX:number,offsetY:number,color:string,width:number){
+function slideLine(slide:PptxSlide,shapeType:PptxShapeName,x1:number,y1:number,x2:number,y2:number,scale:number,offsetX:number,offsetY:number,color:string,width:number){
  const dx=(x2-x1)*scale,dy=(y2-y1)*scale;
  const x=offsetX+Math.min(x1,x2)*scale,y=offsetY+Math.min(y1,y2)*scale;
- slide.addShape(pptx.ShapeType.line,{x,y,w:Math.max(.001,Math.abs(dx)),h:Math.max(.001,Math.abs(dy)),flipH:dx<0,flipV:dy<0,line:{color,width:Math.max(.25,width*scale*72)}});
+ slide.addShape(shapeType,{x,y,w:Math.max(.001,Math.abs(dx)),h:Math.max(.001,Math.abs(dy)),flipH:dx<0,flipV:dy<0,line:{color,width:Math.max(.25,width*scale*72)}});
 }
 function bezierPoint(p0:number[],p1:number[],p2:number[],p3:number[],t:number):[number,number]{
  const mt=1-t;
@@ -237,13 +240,13 @@ async function pdfToEditablePptx(file:File,options:ProcessOptions):Promise<Proce
      slide.addShape(pptx.ShapeType.rect,{x:offsetX+x0*scale,y:offsetY+y0*scale,w:Math.max(.002,(x1-x0)*scale),h:Math.max(.002,(y1-y0)*scale),line:drawing.stroke?{color:stroke,width:Math.max(.25,drawing.width*scale*72)}:{color:"FFFFFF",transparency:100},fill:fill?{color:fill,transparency:Math.round((1-drawing.fillOpacity)*100)}:{color:"FFFFFF",transparency:100}});
      shapeCount++;
     }else if(path.type==="line"){
-     slideLine(slide,pptx,path.points[0][0],path.points[0][1],path.points[1][0],path.points[1][1],scale,offsetX,offsetY,stroke,drawing.width);shapeCount++;
+     slideLine(slide,pptx.ShapeType.line,path.points[0][0],path.points[0][1],path.points[1][0],path.points[1][1],scale,offsetX,offsetY,stroke,drawing.width);shapeCount++;
     }else if(path.type==="quad"){
      const pts=path.points;
-     for(let i=0;i<4;i++){slideLine(slide,pptx,pts[i][0],pts[i][1],pts[(i+1)%4][0],pts[(i+1)%4][1],scale,offsetX,offsetY,stroke,drawing.width);shapeCount++;}
+     for(let i=0;i<4;i++){slideLine(slide,pptx.ShapeType.line,pts[i][0],pts[i][1],pts[(i+1)%4][0],pts[(i+1)%4][1],scale,offsetX,offsetY,stroke,drawing.width);shapeCount++;}
     }else if(path.type==="curve"){
      const p=path.points;let prior=p[0];
-     for(let step=1;step<=12;step++){const next=bezierPoint(p[0],p[1],p[2],p[3],step/12);slideLine(slide,pptx,prior[0],prior[1],next[0],next[1],scale,offsetX,offsetY,stroke,drawing.width);prior=next;shapeCount++;}
+     for(let step=1;step<=12;step++){const next=bezierPoint(p[0],p[1],p[2],p[3],step/12);slideLine(slide,pptx.ShapeType.line,prior[0],prior[1],next[0],next[1],scale,offsetX,offsetY,stroke,drawing.width);prior=next;shapeCount++;}
     }
    }
   }
