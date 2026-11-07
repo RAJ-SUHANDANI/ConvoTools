@@ -96,7 +96,7 @@ async function pdfJsDocument(file:File) {
  const pdfjs=await import("pdfjs-dist/legacy/build/pdf.mjs");
  // Serve the exact matching PDF.js worker from the same origin. This avoids
  // webpack URL rewriting, CDN/CSP failures and the "workerSrc not specified" fallback.
- const workerUrl = "/pdf.worker.mjs";
+ const workerUrl = new URL("/pdf.worker.mjs", window.location.origin).href;
  pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
  const data = new Uint8Array(await file.arrayBuffer());
  try {
