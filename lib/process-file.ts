@@ -325,7 +325,7 @@ async function imageToWordDocx(file:File,recognizedText:string):Promise<ProcessR
  const imageBytes=new Uint8Array(await blob.arrayBuffer());
  const imageWidth=canvas.width,imageHeight=canvas.height;canvas.width=0;canvas.height=0;
  const doc=new Document({sections:[{children:[
-  new Paragraph({children:[new ImageRun({data:imageBytes,transformation:{width:imageWidth*Math.min(1,540/imageWidth,720/imageHeight),height:imageHeight*Math.min(1,540/imageWidth,720/imageHeight)}})]}),
+  new Paragraph({children:[new ImageRun({data:imageBytes,type:"png",transformation:{width:imageWidth*Math.min(1,540/imageWidth,720/imageHeight),height:imageHeight*Math.min(1,540/imageWidth,720/imageHeight)}})]}),
   new Paragraph({children:[new TextRun({text:"Recognized text",bold:true})]}),
   ...recognizedText.split(/\\r?\\n/).map(line=>new Paragraph({children:[new TextRun(line)]}))
  ]}]});
