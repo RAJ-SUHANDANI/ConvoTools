@@ -175,14 +175,13 @@ async function loadRuntime(id) {
   return runtimePromise;
 }
 
-self.addEventListener("message", async event => {
-  const { id, operation, pdfBuffer } = event.data || {};
-  if (!id || !(pdfBuffer instanceof ArrayBuffer)) return;
+let workQueue = Promise.resolve();
 
+async function handleJob({ id, operation, pdfBuffer }) {
+  if (!id || !(pdfBuffer instanceof ArrayBuffer)) return;
   try {
     const pyodide = await loadRuntime(id);
     sendPhase(id, operation === "docx" ? "Rebuilding editable Word content…" : "Analysing text, images, vector elements and tables…", 0.66);
-
     try { pyodide.FS.unlink("/input.pdf"); } catch {}
     try { pyodide.FS.unlink("/output.docx"); } catch {}
     pyodide.FS.writeFile("/input.pdf", new Uint8Array(pdfBuffer));
@@ -213,4 +212,11 @@ self.addEventListener("message", async event => {
       error: error instanceof Error ? error.message : String(error)
     });
   }
+}
+
+self.addEventListener("message", event => {
+  // Pyodide uses one in-memory virtual filesystem. Serialize jobs so parallel
+  // uploads cannot overwrite /input.pdf or /output.docx during reconstruction.
+  const job = event.data;
+  workQueue = workQueue.then(() => handleJob(job));
 });
