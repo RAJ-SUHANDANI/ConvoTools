@@ -1927,3 +1927,18 @@ img,video,iframe,canvas,svg{max-width:100%}
  .savefrom-header nav a{font-size:8px}
  .footer-nav{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+
+
+/* Direct-media download controls */
+.savefrom-direct-preview{display:block;width:100%;min-height:250px;max-height:480px;object-fit:contain;background:#17191d;border-radius:4px}
+.savefrom-direct-image{display:block;width:100%;max-height:480px;min-height:180px;object-fit:contain;background:#eeede8;border-radius:4px}
+.savefrom-download-panel{margin-top:14px;padding:14px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;background:#f4f3ee;border:1px solid #e4e2da;border-radius:5px}
+.savefrom-download-meta{display:flex;flex-direction:column;gap:5px;min-width:0}
+.savefrom-download-meta>span{color:#8c8e96;font:7px var(--mono);letter-spacing:.09em}
+.savefrom-download-meta>b{font:600 12px var(--display);color:#353740}
+.savefrom-download-meta>small{font-size:9px;line-height:1.5;color:#898b92}
+.savefrom-download-button{min-height:42px;padding:0 14px;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--blue);border:1px solid var(--blue);border-radius:4px;color:white;font-size:10px;font-weight:600;white-space:nowrap}
+.savefrom-download-button:hover{background:var(--blue-deep)}
+.savefrom-download-button:disabled{opacity:.6;cursor:wait}
+.savefrom-download-error{grid-column:1/-1;margin:0;color:#a45e51;font-size:9px;line-height:1.6;overflow-wrap:anywhere}
+@media(max-width:520px){.savefrom-download-panel{grid-template-columns:minmax(0,1fr)}.savefrom-download-button{width:100%}}
