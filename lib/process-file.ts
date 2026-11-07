@@ -436,6 +436,11 @@ async function workbookToPdf(file:File):Promise<ProcessResult>{
 
 
 async function renderWordToPdf(file:File):Promise<ProcessResult>{
+ const extension=file.name.split(".").pop()?.toLowerCase()||"";
+ if(extension!=="docx"){
+  const extracted=await extractDocumentText(file);
+  return [await makePdf(extracted,name(file,"pdf"))][0];
+ }
  if(file.size>80*1024*1024)throw new Error("For browser stability, Word-to-PDF conversion is limited to DOCX files smaller than 80 MB.");
  const [{renderAsync},html2canvas]=await Promise.all([import("docx-preview"),import("html2canvas")]);
  const host=document.createElement("div"),styleHost=document.createElement("div");
