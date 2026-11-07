@@ -78,7 +78,6 @@ export default function ToolLandingContent({ tool }: { tool: Tool }) {
       operatingSystem: "Any device with a modern web browser",
       url: SITE + "/tools/" + slugify(tool.name),
       description: answer,
-      isAccessibleForFree: true,
       inLanguage: "en-IN",
       provider: { "@type": "Organization", name: "ConvoTools", url: SITE },
     },
