@@ -54,11 +54,16 @@ export default async function ToolPage({ params }: Props) {
   const tool = getToolBySlug(slug);
   if (!tool) notFound();
   if (tool.category === "AI lab") return <ComingSoon toolName={tool.name} />;
-  return <><ToolDetail tool={{
-    name: tool.name,
-    description: tool.description,
-    category: tool.category,
-    inputLabel: tool.inputLabel,
-    outputLabel: tool.outputLabel,
-  }} />;
+  return (
+    <>
+      <ToolDetail tool={{
+        name: tool.name,
+        description: tool.description,
+        category: tool.category,
+        inputLabel: tool.inputLabel,
+        outputLabel: tool.outputLabel,
+      }} />
+      <ToolLandingContent tool={tool} />
+    </>
+  );
 }
