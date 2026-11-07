@@ -66,7 +66,7 @@ export default function PrivateSavefrom() {
       if (!response.ok) throw new Error("The media host returned HTTP " + response.status + ".");
       const blob = await response.blob();
       if (!blob.size) throw new Error("The source returned an empty file.");
-      if (!/^image\\//.test(blob.type) && !/^video\\//.test(blob.type) && !["application/octet-stream", ""].includes(blob.type)) {
+      if (!blob.type.startsWith("image/") && !blob.type.startsWith("video/") && !["application/octet-stream", ""].includes(blob.type)) {
         throw new Error("The source did not return a recognized image or video file.");
       }
       const objectUrl = URL.createObjectURL(blob);
@@ -108,8 +108,8 @@ export default function PrivateSavefrom() {
             <article className="savefrom-preview-card">
               <div className="savefrom-card-head"><b>{parsed.title}</b><span>{parsed.platform.toUpperCase()} · {parsed.kind.toUpperCase()}</span></div>
               {parsed.platform === "Direct media" && parsed.mediaType === "video" ? <video className="savefrom-embed savefrom-direct-preview" src={parsed.url} controls playsInline preload="metadata" onLoadedMetadata={(event) => setMediaDimensions(event.currentTarget.videoWidth + " × " + event.currentTarget.videoHeight)} /> : parsed.platform === "Direct media" && parsed.mediaType === "image" ? <img className="savefrom-embed savefrom-direct-image" src={parsed.url} alt="Preview of the direct image file" onLoad={(event) => setMediaDimensions(event.currentTarget.naturalWidth + " × " + event.currentTarget.naturalHeight)} /> : parsed.embed ? <iframe className="savefrom-embed" src={parsed.embed} title={parsed.platform+" preview"} loading="lazy" allow="encrypted-media; picture-in-picture; web-share" allowFullScreen /> : <div className="savefrom-preview-placeholder"><Play size={24} /><span>This post type may not offer an embedded preview. Open the original post to view it.</span></div>}
-              <a className="savefrom-original-link" href={parsed.url} target="_blank" rel="noreferrer">Open original post <ExternalLink size={13} /></a>
-              {parsed.platform === "Direct media" && <div className="savefrom-download-panel"><div className="savefrom-download-meta"><span>DOWNLOAD QUALITY</span><b>{mediaDimensions ? "Original · " + mediaDimensions : "Original source quality"}</b><small>Only the quality supplied by this direct file is available. No artificial upscaling.</small></div><button className="savefrom-download-button" type="button" onClick={downloadDirectMedia} disabled={downloading}><Download size={15} /> {downloading ? "Preparing download…" : "Download original file"}</button>{downloadError && <p className="savefrom-download-error" role="alert">{downloadError}</p>}</div>}
+              <a className="savefrom-original-link" href={parsed.url} target="_blank" rel="noreferrer">{parsed.platform === "Direct media" ? "Open source file" : "Open original post"} <ExternalLink size={13} /></a>
+              {parsed.platform === "Direct media" && <div className="savefrom-download-panel"><div className="savefrom-download-meta"><span>DOWNLOAD QUALITY</span><b>{mediaDimensions ? "Original · " + mediaDimensions : "Original source quality"}</b><small>Only the quality supplied by this direct file is available. No artificial upscaling.</small></div><button className="savefrom-download-button" type="button" onClick={downloadDirectMedia} disabled={downloading}><Download size={15} /> {downloading ? "Preparing download…" : "Download original file"}</button>{downloadError && <p className="savefrom-download-error" role="alert">{downloadError} <a href={parsed.url} target="_blank" rel="noreferrer">Open source file</a></p>}</div>}
             </article>
             <article className="savefrom-guide-card">
               <span className="savefrom-guide-label"><ShieldCheck size={14} /> {guide ? "OFFICIAL SAVE ROUTE" : "DIRECT FILE LINK"}</span>
