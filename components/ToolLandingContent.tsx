@@ -83,6 +83,15 @@ export default function ToolLandingContent({ tool }: { tool: Tool }) {
     },
     {
       "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: SITE },
+        { "@type": "ListItem", position: 2, name: "Tools", item: SITE + "/#toolkit" },
+        { "@type": "ListItem", position: 3, name: tool.name, item: SITE + "/tools/" + slugify(tool.name) },
+      ],
+    },
+    {
+      "@context": "https://schema.org",
       "@type": "FAQPage",
       mainEntity: faqs.map((item) => ({
         "@type": "Question",
