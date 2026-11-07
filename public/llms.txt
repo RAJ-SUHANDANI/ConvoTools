@@ -11,7 +11,7 @@ ConvoTools tool pages explain accepted inputs, output formats, the steps to use 
 
 ## Individual tool pages
 
-- [PDF to Word](https://convotool.vercel.app/tools/pdf-to-word) — Extract selectable PDF text into an editable Word document; page layout is not retained.
+- [PDF to Word](https://convotool.vercel.app/tools/pdf-to-word) — Reconstruct selectable PDF text, embedded images, detected tables and supported vector drawings as editable Word elements; complex layouts may need manual adjustment.
 - [Word to PDF](https://convotool.vercel.app/tools/word-to-pdf) — Extract Word document text and create a simple, paginated PDF; original layout may differ.
 - [Image to PDF](https://convotool.vercel.app/tools/image-to-pdf) — Combine images into a single PDF document.
 - [Image to Word (OCR)](https://convotool.vercel.app/tools/image-to-word-ocr) — Extract text from an image into an editable document.
@@ -21,8 +21,8 @@ ConvoTools tool pages explain accepted inputs, output formats, the steps to use 
 - [Organize PDF](https://convotool.vercel.app/tools/organize-pdf) — Reorder, rotate, delete or extract PDF pages.
 - [PDF to JPG](https://convotool.vercel.app/tools/pdf-to-jpg) — Export PDF pages as high-quality JPG images.
 - [PDF to PNG](https://convotool.vercel.app/tools/pdf-to-png) — Render PDF pages to crisp PNG images.
-- [PDF to Excel](https://convotool.vercel.app/tools/pdf-to-excel) — Extract selectable PDF text into spreadsheet rows; complex tables may need cleanup.
-- [PDF to PowerPoint](https://convotool.vercel.app/tools/pdf-to-powerpoint) — Turn PDF pages into presentation slides.
+- [PDF to Excel](https://convotool.vercel.app/tools/pdf-to-excel) — Extract detected PDF tables into editable Excel cells and place remaining selectable text into page worksheets; review detection and adjust the workbook.
+- [PDF to PowerPoint](https://convotool.vercel.app/tools/pdf-to-powerpoint) — Rebuild PDF text as editable slide text boxes, detected tables as native tables, embedded images and supported vector paths as editable objects.
 - [Protect PDF](https://convotool.vercel.app/tools/protect-pdf) — Add password protection to a PDF file.
 - [PNG to JPG](https://convotool.vercel.app/tools/png-to-jpg) — Convert PNG images to compact JPG files.
 - [JPG to PNG](https://convotool.vercel.app/tools/jpg-to-png) — Convert JPG images into PNG format.
@@ -37,7 +37,7 @@ ConvoTools tool pages explain accepted inputs, output formats, the steps to use 
 - [CSV to XLSX](https://convotool.vercel.app/tools/csv-to-xlsx) — Turn CSV data into a formatted workbook.
 - [Remove duplicates](https://convotool.vercel.app/tools/remove-duplicates) — Find and remove repeated spreadsheet rows.
 - [PPTX to PDF](https://convotool.vercel.app/tools/pptx-to-pdf) — Extract slide text into a simple PDF document; original slide layout is not retained.
-- [PDF to PPTX](https://convotool.vercel.app/tools/pdf-to-pptx) — Convert PDF pages into editable slide layouts.
+- [PDF to PPTX](https://convotool.vercel.app/tools/pdf-to-pptx) — Rebuild PDF text as editable slide text boxes, detected tables as native tables, embedded images and supported vector paths as editable objects.
 - [Slides to images](https://convotool.vercel.app/tools/slides-to-images) — Render slide text boxes, basic shapes and embedded images to PNG files.
 - [MP4 to GIF](https://convotool.vercel.app/tools/mp4-to-gif) — Turn a video clip into a lightweight looping GIF.
 - [Video compressor](https://convotool.vercel.app/tools/video-compressor) — Reduce video size for easier sharing.
