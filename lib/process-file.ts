@@ -2,7 +2,7 @@
 import JSZip from "jszip";
 import { PDFDocument, degrees } from "pdf-lib";
 import * as XLSX from "xlsx";
-import { Document, Packer, Paragraph, TextRun } from "docx";
+import { Document, ImageRun, Packer, Paragraph, TextRun } from "docx";
 
 export type ProcessOptions = { quality?: "Smaller file" | "Balanced" | "Best quality"; output?: string; password?: string; pdfPageOrder?: string; width?: string; height?: string; rotation?: number; cropMode?: "Original" | "Square center crop"; textContent?: string; base64Mode?: "Encode" | "Decode"; decodedFormat?: string; ocrFormat?: "DOCX" | "TXT"; ocrLanguage?: string; pdfRotation?: number; qrFormat?: "PNG" | "SVG"; hashAlgorithm?: "SHA-256" | "SHA-384" | "SHA-512"; qrText?: string; onProgress?: (progress: number) => void };
 export type ProcessResult = { blob: Blob; filename: string; mime: string; message: string };
@@ -92,6 +92,8 @@ async function textTool(file:File,tool:string):Promise<ProcessResult>{
 
 async function pdfJsDocument(file:File) {
  const pdfjs=await import("pdfjs-dist/legacy/build/pdf.mjs");
+ // PDF.js v5 requires an explicit worker URL in bundled browser applications.
+ pdfjs.GlobalWorkerOptions.workerSrc = new URL("pdfjs-dist/legacy/build/pdf.worker.mjs", import.meta.url).toString();
  return pdfjs.getDocument({data:await file.arrayBuffer()}).promise;
 }
 async function renderPdfPages(file:File,format:"png"|"jpeg"="png",scale=1.65,jpegQuality=.92):Promise<Blob[]> {
@@ -136,8 +138,49 @@ async function pptxText(file:File):Promise<string>{
  for(const path of slideFiles){const xml=await zip.file(path)!.async("text");const parts=[...xml.matchAll(/<a:t>([\s\S]*?)<\/a:t>/g)].map(m=>m[1].replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&apos;/g,"'"));slides.push(parts.join(" "));}
  return slides.map((s,i)=>"SLIDE "+(i+1)+"\n"+s).join("\n\n");
 }
+async function pdfPagesToVisualDocx(file:File):Promise<ProcessResult>{
+ const source=await pdfJsDocument(file);
+ if(source.numPages>60)throw new Error("Visual PDF-to-Word conversion is limited to 60 pages per file to protect browser memory. Split the PDF into smaller parts and convert each part.");
+ const children:Paragraph[]=[];
+ for(let index=1;index<=source.numPages;index++){
+  const page=await source.getPage(index);
+  const viewport=page.getViewport({scale:1.7});
+  const canvas=document.createElement("canvas");
+  canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);
+  const context=canvas.getContext("2d");if(!context)throw new Error("Canvas is unavailable while rendering this PDF.");
+  await page.render({canvasContext:context,viewport,canvas}).promise;
+  const blob=await new Promise<Blob>((resolve,reject)=>canvas.toBlob(value=>value?resolve(value):reject(new Error("Could not render PDF page "+index+".")),"image/png"));
+  const bytes=new Uint8Array(await blob.arrayBuffer());
+  const maxWidth=768,maxHeight=1008,ratio=Math.min(maxWidth/canvas.width,maxHeight/canvas.height);
+  children.push(new Paragraph({
+   pageBreakBefore:index>1,
+   children:[new ImageRun({data:bytes,transformation:{width:Math.max(1,Math.round(canvas.width*ratio)),height:Math.max(1,Math.round(canvas.height*ratio))}})]
+  }));
+  canvas.width=0;canvas.height=0;
+ }
+ const document=new Document({sections:[{properties:{page:{size:{width:12240,height:15840},margin:{top:360,bottom:360,left:360,right:360}}},children}]});
+ return result(await Packer.toBlob(document),name(file,"docx"),"Visually faithful Word document created with each PDF page embedded as a high-resolution page image. Text and graphics are not individually editable.");
+}
+
+async function imageToWordDocx(file:File,recognizedText:string):Promise<ProcessResult>{
+ const bitmap=await createImageBitmap(file);
+ const scale=Math.min(1,1800/Math.max(bitmap.width,bitmap.height));
+ const canvas=document.createElement("canvas");canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));
+ const context=canvas.getContext("2d");if(!context)throw new Error("Image canvas is unavailable.");
+ context.fillStyle="#fff";context.fillRect(0,0,canvas.width,canvas.height);context.drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close();
+ const blob=await new Promise<Blob>((resolve,reject)=>canvas.toBlob(value=>value?resolve(value):reject(new Error("Could not prepare the source image for Word.")),"image/png"));
+ const imageBytes=new Uint8Array(await blob.arrayBuffer());
+ const imageWidth=canvas.width,imageHeight=canvas.height;canvas.width=0;canvas.height=0;
+ const doc=new Document({sections:[{children:[
+  new Paragraph({children:[new ImageRun({data:imageBytes,transformation:{width:Math.min(540,imageWidth),height:Math.min(720,imageHeight)*Math.min(1,540/imageWidth)}})]}),
+  new Paragraph({children:[new TextRun({text:"Recognized text",bold:true})]}),
+  ...recognizedText.split(/\\r?\\n/).map(line=>new Paragraph({children:[new TextRun(line)]}))
+ ]}]});
+ return result(await Packer.toBlob(doc),name(file,"docx"),"Source image embedded in the Word document with OCR text below it. Review OCR text for recognition errors.");
+}
+
 async function pdfAdvanced(files:File[],tool:string):Promise<ProcessResult[]>{
- if(tool==="PDF to Word"){const text=await pdfText(files[0]);if(!text.trim())throw new Error("This PDF contains no selectable text. Try OCR extractor for scanned pages.");return [await makeDocx(text,name(files[0],"docx"))];}
+ if(tool==="PDF to Word")return [await pdfPagesToVisualDocx(files[0])];
  if(tool==="PDF to Excel"){const text=await pdfText(files[0]);if(!text.trim())throw new Error("No selectable text was found in this PDF.");const rows=text.split(/\r?\n/).filter(Boolean).map(line=>line.split(/\s{2,}|\t/));const sheet=XLSX.utils.aoa_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,sheet,"Extracted data");return [result(bytesBlob(XLSX.write(wb,{type:"array",bookType:"xlsx"}) as Uint8Array,"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),name(files[0],"xlsx"),"Text rows exported to a spreadsheet. PDF table structure may require manual cleanup.")];}
  if(tool==="PDF to JPG"||tool==="PDF to PNG"){const pages=await renderPdfPages(files[0],tool==="PDF to JPG"?"jpeg":"png");if(pages.length===1)return [result(pages[0],name(files[0],tool==="PDF to JPG"?"jpg":"png"),"PDF page rendered as an image.")];const zip=new JSZip();pages.forEach((p,i)=>zip.file("page-"+String(i+1).padStart(3,"0")+(tool==="PDF to JPG"?".jpg":".png"),p));return [result(await zip.generateAsync({type:"blob"}),name(files[0],"zip"),pages.length+" PDF pages rendered into image files.")];}
  if(tool==="PDF to PowerPoint"||tool==="PDF to PPTX"){const pages=await renderPdfPages(files[0],"jpeg");return [result(await pdfPagesToPptx(pages),name(files[0],"pptx"),"PDF pages placed as full-slide images in a PowerPoint file. Text is not editable.")];}
@@ -434,9 +477,9 @@ export async function processFiles(files:File[],tool:string,options:ProcessOptio
  if(tool==="Extract archive")return mapFileResults(files,file=>archive([file],tool));
  if(tool==="Base64 tools")return mapFileResults(files,file=>processBase64(file,options));
  if(["JSON formatter","DOCX to TXT"].includes(tool))return mapFileResults(files,async file=>[await textTool(file,tool)]);
- if(tool==="Word to PDF")return mapFileResults(files,async file=>{const extracted=await extractDocumentText(file);return [await makePdf(extracted,name(file,"pdf"))];});
+ if(tool==="Word to PDF")return mapFileResults(files,async file=>[await renderWordToPdf(file)]);
  if(tool==="PPTX to PDF"){const pages=await renderPresentationSlides(files[0]);return [await presentationToPdf(pages,name(files[0],"pdf"))];}
- if(tool==="Image to Word (OCR)"||tool==="OCR extractor"){const language=options.ocrLanguage||"eng";return mapFileResults(files,async file=>{const extracted=file.type==="application/pdf"||file.name.toLowerCase().endsWith(".pdf")?await ocrPdf(file,language):await ocrImage(file,language);return options.ocrFormat==="TXT"?[textFile(extracted,name(file,"txt"))]:[await makeDocx(extracted,name(file,"docx"))];});}
+ if(tool==="Image to Word (OCR)"||tool==="OCR extractor"){const language=options.ocrLanguage||"eng";return mapFileResults(files,async file=>{const extracted=file.type==="application/pdf"||file.name.toLowerCase().endsWith(".pdf")?await ocrPdf(file,language):await ocrImage(file,language);return options.ocrFormat==="TXT"?[textFile(extracted,name(file,"txt"))]:[file.type.startsWith("image/")||/\\.(png|jpe?g|webp|bmp|tiff?)$/i.test(file.name)?await imageToWordDocx(file,extracted):await makeDocx(extracted,name(file,"docx"))];});}
  if(tool==="Slides to images")return slidesToImageFiles(files[0]);
  if(tool==="Background remover")return mapFileResults(files,async file=>[await removeImageBackground(file)]);
  if(tool==="Image enhancer"||tool==="Photo restoration")return mapFileResults(files,async file=>[await upscaleImage(file,tool)]);
