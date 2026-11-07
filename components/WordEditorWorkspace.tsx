@@ -335,7 +335,7 @@ export default function WordEditorWorkspace() {
   return (
     <section className="word-editor-app" aria-label="Browser-based Word editor">
       <header className="word-editor-topbar">
-        <div className="word-editor-filebrand"><span className="word-editor-app-icon">W</span><div><b>ConvoTools Writer</b><small>{filename} {dirty ? "· Unsaved changes" : "· Saved locally"}</small></div></div>
+        <div className="word-editor-filebrand"><span className="word-editor-app-icon">W</span><div><b>ConvoTools Writer</b><small>{filename} {dirty ? "· Unsaved changes" : "· No unsaved changes"}</small></div></div>
         <div className="word-editor-top-actions">
           <button className="word-editor-secondary" onClick={startNewDocument}><FilePlus2 size={14}/> New</button>
           <button className="word-editor-secondary" onClick={() => fileRef.current?.click()}><Upload size={14}/> Open DOCX</button>
