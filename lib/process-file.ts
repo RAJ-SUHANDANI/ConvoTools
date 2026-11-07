@@ -93,9 +93,25 @@ async function textTool(file:File,tool:string):Promise<ProcessResult>{
 
 async function pdfJsDocument(file:File) {
  const pdfjs=await import("pdfjs-dist/legacy/build/pdf.mjs");
- // PDF.js v5 requires an explicit worker URL in bundled browser applications.
- pdfjs.GlobalWorkerOptions.workerSrc = new URL("pdfjs-dist/legacy/build/pdf.worker.mjs", import.meta.url).toString();
- return pdfjs.getDocument({data:await file.arrayBuffer()}).promise;
+ // Serve the exact matching PDF.js worker from the same origin. This avoids
+ // webpack URL rewriting, CDN/CSP failures and the "workerSrc not specified" fallback.
+ const workerUrl = "/pdf.worker.mjs";
+ pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
+ const data = new Uint8Array(await file.arrayBuffer());
+ try {
+  return await pdfjs.getDocument({
+   data,
+   isEvalSupported: false,
+   useWorkerFetch: false,
+   stopAtErrors: true
+  }).promise;
+ } catch (error) {
+  const message = error instanceof Error ? error.message : String(error);
+  if (/GlobalWorkerOptions\.workerSrc|fake worker|worker.*failed/i.test(message)) {
+   throw new Error("The local PDF.js worker could not start. Reload ConvoTools and try again. If the issue continues, check that /pdf.worker.mjs was deployed with the latest build.");
+  }
+  throw error;
+ }
 }
 async function renderPdfPages(file:File,format:"png"|"jpeg"="png",scale=1.65,jpegQuality=.92):Promise<Blob[]> {
  const doc=await pdfJsDocument(file);const pages:Blob[]=[];
