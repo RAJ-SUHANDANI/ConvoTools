@@ -15,7 +15,7 @@ const INITIAL_HTML = "<h1>Untitled document</h1><p>Start writing your document h
 function normalizedColor(value: string): string | undefined {
   const hex = value.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
   if (hex) return hex[1].length === 3 ? hex[1].split("").map(part => part + part).join("").toUpperCase() : hex[1].toUpperCase();
-  const rgb = value.match(/^rgba?\\(\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)/i);
+  const rgb = value.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
   if (rgb) return [rgb[1], rgb[2], rgb[3]].map(part => Math.max(0, Math.min(255, Number(part))).toString(16).padStart(2, "0")).join("").toUpperCase();
   return undefined;
 }
