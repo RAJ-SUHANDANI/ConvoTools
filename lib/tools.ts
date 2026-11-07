@@ -20,7 +20,7 @@ export const TOOLS: Tool[] = [
   { name: "PDF to Word", description: "Create a visually faithful Word document with each PDF page preserved as a high-resolution image; page content is not individually editable.", category: "PDF", icon: FileText, tag: "Popular", inputLabel: "PDF", outputLabel: "DOCX" },
   { name: "Word to PDF", description: "Render supported DOCX pages, including text, tables and embedded images, into a PDF.", category: "PDF", icon: FilePenLine, inputLabel: "Document", outputLabel: "PDF" },
   { name: "Image to PDF", description: "Combine images into a single PDF document.", category: "PDF", icon: FileImage, tag: "Popular", inputLabel: "Image", outputLabel: "PDF" },
-  { name: "Image to Word (OCR)", description: "Extract text from an image into an editable document.", category: "PDF", icon: ScanText, inputLabel: "Image", outputLabel: "DOCX" },
+  { name: "Image to Word (OCR)", description: "Keep the source image in a Word document and add OCR-extracted text beneath it for editing and searching.", category: "PDF", icon: ScanText, inputLabel: "Image", outputLabel: "DOCX" },
   { name: "Merge PDF", description: "Bring separate PDF files together in one document.", category: "PDF", icon: Merge, inputLabel: "PDF", outputLabel: "PDF" },
   { name: "Split PDF", description: "Separate selected pages into individual files.", category: "PDF", icon: Split, inputLabel: "PDF", outputLabel: "PDF" },
   { name: "Compress PDF", description: "Rewrite PDF structure with compact object streams; embedded images are not recompressed.", category: "PDF", icon: Minimize2, tag: "Popular", inputLabel: "PDF", outputLabel: "PDF" },
