@@ -215,10 +215,15 @@ async function pdfToEditablePptx(file:File,options:ProcessOptions):Promise<Proce
    const rows=table.rows.filter(row=>row.length>0).map(row=>row.map(cell=>cell??""));
    if(!rows.length)continue;
    const columns=Math.max(1,...rows.map(row=>row.length));
-   const normalized=rows.map(row=>Array.from({length:columns},(_,i)=>String(row[i]??"")));
+   const normalized=rows.map((row,rowIndex)=>Array.from({length:columns},(_,i)=>({
+    text:String(row[i]??""),
+    options:rowIndex===0
+     ? {bold:true,fill:"F0F1F5",color:"292B32",fontFace:"Arial",fontSize:Math.max(6,Math.min(11,9*scale*72))}
+     : {color:"292B32",fontFace:"Arial",fontSize:Math.max(6,Math.min(11,9*scale*72))}
+   })));
    const x=offsetX+table.bbox[0]*scale,y=offsetY+table.bbox[1]*scale;
    const w=Math.max(.25,(table.bbox[2]-table.bbox[0])*scale),h=Math.max(.25,(table.bbox[3]-table.bbox[1])*scale);
-   slide.addTable(normalized,{x,y,w,h,colW:Array(columns).fill(w/columns),rowH:Math.max(.14,h/normalized.length),fontFace:"Arial",fontSize:Math.max(6,Math.min(11,9*scale*72)),color:"292B32",margin:.035,border:{type:"solid",color:"D6D6D6",pt:.5},fill:"FFFFFF",breakLine:false,autoFit:false});
+   slide.addTable(normalized,{x,y,w,h,colW:Array(columns).fill(w/columns),rowH:Math.max(.14,h/normalized.length),margin:.035,border:{type:"solid",color:"D6D6D6",pt:.5},fill:"FFFFFF",breakLine:false,autoFit:false});
    tableCount++;
   }
   // Drawings are rebuilt as native PowerPoint shapes. Curves are approximated
