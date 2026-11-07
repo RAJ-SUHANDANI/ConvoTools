@@ -223,7 +223,7 @@ async function pdfToEditablePptx(file:File,options:ProcessOptions):Promise<Proce
    })));
    const x=offsetX+table.bbox[0]*scale,y=offsetY+table.bbox[1]*scale;
    const w=Math.max(.25,(table.bbox[2]-table.bbox[0])*scale),h=Math.max(.25,(table.bbox[3]-table.bbox[1])*scale);
-   slide.addTable(normalized,{x,y,w,h,colW:Array(columns).fill(w/columns),rowH:Math.max(.14,h/normalized.length),margin:.035,border:{type:"solid",color:"D6D6D6",pt:.5},fill:{color:"FFFFFF"},breakLine:false,autoFit:false});
+   slide.addTable(normalized,{x,y,w,h,colW:Array(columns).fill(w/columns),rowH:Math.max(.14,h/normalized.length),margin:.035,border:{type:"solid",color:"D6D6D6",pt:.5},fill:{color:"FFFFFF"},breakLine:false});
    tableCount++;
   }
   // Drawings are rebuilt as native PowerPoint shapes. Curves are approximated
