@@ -24,7 +24,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const keywords = [
     tool.name.toLowerCase() + " online",
     tool.name.toLowerCase() + " converter",
-    tool.name.toLowerCase() + " free",
     input.toLowerCase() + " to " + output.toLowerCase(),
     "online " + tool.category.toLowerCase() + " tool",
     "ConvoTools " + tool.name.toLowerCase(),
