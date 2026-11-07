@@ -174,7 +174,7 @@ async function pdfToEditableDocx(file:File):Promise<ProcessResult>{
     runs.push(new TextRun({text:(gap>Math.max(10,item.fontSize*1.1)?"   ":gap>item.fontSize*.25?" ":"")+item.text,bold:/bold|black|heavy|semibold/i.test(item.fontName),italics:/italic|oblique/i.test(item.fontName),size:Math.max(16,Math.round(item.fontSize*1.5))}));
     right=item.x+item.width;
    }
-   children.push(new Paragraph({children:runs,spacing:{after:Math.max(0,Math.round(maxSize*2))},heading:maxSize>=17?"Heading2":undefined}));
+   children.push(new Paragraph({children:runs,spacing:{after:Math.max(0,Math.round(maxSize*2))}}));
   }
  }
  const docx=new Document({sections:[{properties:{page:{size:{width:12240,height:15840},margin:{top:720,bottom:720,left:900,right:900}}},children}]});
