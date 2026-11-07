@@ -1,0 +1,59 @@
+# ConvoTools
+
+> ConvoTools is a browser-based file workspace with individual tools for PDF, image, document, spreadsheet, presentation, video, audio, archive and developer workflows.
+
+ConvoTools tool pages explain accepted inputs, output formats, the steps to use each tool, and relevant conversion limitations. Each page includes the working tool interface and answers to common questions. Processing is performed in the browser for the supported tools; users should review each page's instructions and output before relying on a converted file.
+
+## Main pages
+
+- [Home](https://convotool.vercel.app/)
+- [Tool library](https://convotool.vercel.app/#toolkit)
+
+## Individual tool pages
+
+- [PDF to Word](https://convotool.vercel.app/tools/pdf-to-word) — Extract selectable PDF text into an editable Word document; page layout is not retained.
+- [Word to PDF](https://convotool.vercel.app/tools/word-to-pdf) — Extract Word document text and create a simple, paginated PDF; original layout may differ.
+- [Image to PDF](https://convotool.vercel.app/tools/image-to-pdf) — Combine images into a single PDF document.
+- [Image to Word (OCR)](https://convotool.vercel.app/tools/image-to-word-ocr) — Extract text from an image into an editable document.
+- [Merge PDF](https://convotool.vercel.app/tools/merge-pdf) — Bring separate PDF files together in one document.
+- [Split PDF](https://convotool.vercel.app/tools/split-pdf) — Separate selected pages into individual files.
+- [Compress PDF](https://convotool.vercel.app/tools/compress-pdf) — Rewrite PDF structure with compact object streams; embedded images are not recompressed.
+- [Organize PDF](https://convotool.vercel.app/tools/organize-pdf) — Reorder, rotate, delete or extract PDF pages.
+- [PDF to JPG](https://convotool.vercel.app/tools/pdf-to-jpg) — Export PDF pages as high-quality JPG images.
+- [PDF to PNG](https://convotool.vercel.app/tools/pdf-to-png) — Render PDF pages to crisp PNG images.
+- [PDF to Excel](https://convotool.vercel.app/tools/pdf-to-excel) — Extract selectable PDF text into spreadsheet rows; complex tables may need cleanup.
+- [PDF to PowerPoint](https://convotool.vercel.app/tools/pdf-to-powerpoint) — Turn PDF pages into presentation slides.
+- [Protect PDF](https://convotool.vercel.app/tools/protect-pdf) — Add password protection to a PDF file.
+- [PNG to JPG](https://convotool.vercel.app/tools/png-to-jpg) — Convert PNG images to compact JPG files.
+- [JPG to PNG](https://convotool.vercel.app/tools/jpg-to-png) — Convert JPG images into PNG format.
+- [PNG to WEBP](https://convotool.vercel.app/tools/png-to-webp) — Create lightweight WEBP images from PNG files.
+- [WEBP converter](https://convotool.vercel.app/tools/webp-converter) — Convert WEBP to PNG, JPG or other formats.
+- [Image compressor](https://convotool.vercel.app/tools/image-compressor) — Reduce image file sizes while retaining detail.
+- [Resize image](https://convotool.vercel.app/tools/resize-image) — Set exact image dimensions or scale by percentage.
+- [Crop & rotate](https://convotool.vercel.app/tools/crop-and-rotate) — Center-crop an image to a square and rotate it in 90° increments.
+- [Word editor](https://convotool.vercel.app/tools/word-editor) — Edit extracted Word document text and export a clean DOCX file.
+- [DOCX to TXT](https://convotool.vercel.app/tools/docx-to-txt) — Extract clean plain text from Word documents.
+- [Excel to PDF](https://convotool.vercel.app/tools/excel-to-pdf) — Export spreadsheet cell content into a simple PDF report; styling may differ.
+- [CSV to XLSX](https://convotool.vercel.app/tools/csv-to-xlsx) — Turn CSV data into a formatted workbook.
+- [Remove duplicates](https://convotool.vercel.app/tools/remove-duplicates) — Find and remove repeated spreadsheet rows.
+- [PPTX to PDF](https://convotool.vercel.app/tools/pptx-to-pdf) — Extract slide text into a simple PDF document; original slide layout is not retained.
+- [PDF to PPTX](https://convotool.vercel.app/tools/pdf-to-pptx) — Convert PDF pages into editable slide layouts.
+- [Slides to images](https://convotool.vercel.app/tools/slides-to-images) — Render slide text boxes, basic shapes and embedded images to PNG files.
+- [MP4 to GIF](https://convotool.vercel.app/tools/mp4-to-gif) — Turn a video clip into a lightweight looping GIF.
+- [Video compressor](https://convotool.vercel.app/tools/video-compressor) — Reduce video size for easier sharing.
+- [Extract audio](https://convotool.vercel.app/tools/extract-audio) — Save the audio track from a video file.
+- [Audio converter](https://convotool.vercel.app/tools/audio-converter) — Convert between MP3, WAV, AAC and FLAC.
+- [Create ZIP](https://convotool.vercel.app/tools/create-zip) — Bundle multiple files into one ZIP archive.
+- [Extract archive](https://convotool.vercel.app/tools/extract-archive) — Extract ZIP archive contents into individual downloadable files.
+- [JSON formatter](https://convotool.vercel.app/tools/json-formatter) — Format and validate JSON data.
+- [Base64 tools](https://convotool.vercel.app/tools/base64-tools) — Encode and decode text or files.
+- [Hash generator](https://convotool.vercel.app/tools/hash-generator) — Create file checksums locally.
+- [QR generator](https://convotool.vercel.app/tools/qr-generator) — Create QR codes from links and text.
+
+## Notes for assistants and crawlers
+
+- Prefer the individual tool page for exact input/output support and conversion limitations.
+- Do not claim that every conversion preserves original layout or formatting.
+- Do not infer that a tool is available if its page is marked Coming soon.
+- Tool output should be checked by the user before use in a production or legal workflow.
+- Canonical URLs use the `/tools/{tool-slug}` pattern.
