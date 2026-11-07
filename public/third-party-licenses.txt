@@ -1,0 +1,13 @@
+THIRD-PARTY SOFTWARE NOTICES — CONVOTOOLS
+
+PDF-to-Word browser engine
+- Package: pdf2docx-wasm 0.1.0
+- License: GNU Affero General Public License, version 3 (AGPL-3.0)
+- Source: https://github.com/jsscheller/pdf2docx-wasm
+- License text: /licenses/AGPL-3.0-PDF2DOCX-WASM.txt
+- The browser worker and associated reconstruction integration are maintained in the public ConvoTools source repository:
+  https://github.com/RAJ-SUHANDANI/ConvoTools
+
+The package bundles Pyodide, PyMuPDF, pdf2docx, python-docx, NumPy, OpenCV, lxml and related packages. Each bundled component may carry additional notices or license terms; review the upstream package metadata and source distributions before redistributing modified binaries.
+
+ConvoTools performs document conversion in the user's browser. PDF bytes are passed to a local Web Worker and are not sent to a ConvoTools conversion backend.
