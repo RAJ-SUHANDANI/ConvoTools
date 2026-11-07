@@ -71,6 +71,70 @@ function createRequestId() {
     : "pdf-" + Date.now() + "-" + Math.random().toString(36).slice(2);
 }
 
+type PendingRequest = {
+  operation: "docx" | "analyze";
+  resolve: (value: unknown) => void;
+  reject: (error: Error) => void;
+  onProgress?: EngineProgress;
+};
+
+let sharedWorker: Worker | null = null;
+const pendingRequests = new Map<string, PendingRequest>();
+
+function getSharedWorker(): Worker {
+  if (sharedWorker) return sharedWorker;
+  const worker = new Worker("/workers/pdf-document-engine.worker.js", {
+    type: "module",
+    name: "convotools-pdf-document-engine",
+  });
+  worker.onmessage = (event: MessageEvent<WorkerResponse>) => {
+    const message = event.data;
+    if (!message) return;
+    const pending = pendingRequests.get(message.id);
+    if (!pending) return;
+    if (message.type === "phase") {
+      pending.onProgress?.(Math.max(0, Math.min(1, message.progress)), message.phase);
+      return;
+    }
+    pendingRequests.delete(message.id);
+    if (message.type === "error") {
+      pending.reject(new Error(message.error || "The PDF reconstruction engine could not process this file."));
+      return;
+    }
+    if (message.type === "result" && message.operation === "docx" && pending.operation === "docx") {
+      pending.resolve(new Blob([message.output], {
+        type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      }));
+      return;
+    }
+    if (message.type === "result" && message.operation === "analyze" && pending.operation === "analyze") {
+      try {
+        pending.resolve(JSON.parse(message.json) as PdfLayoutAnalysis);
+      } catch {
+        pending.reject(new Error("The PDF engine returned an invalid document structure. Please try another PDF."));
+      }
+      return;
+    }
+    pending.reject(new Error("The PDF engine returned an unexpected response for this operation."));
+  };
+  const failAll = (detail: string) => {
+    sharedWorker = null;
+    const requests = Array.from(pendingRequests.values());
+    pendingRequests.clear();
+    worker.terminate();
+    requests.forEach(request => request.reject(new Error(detail)));
+  };
+  worker.onerror = (event) => {
+    event.preventDefault();
+    failAll(event.message || "The local PDF worker stopped unexpectedly.");
+  };
+  worker.onmessageerror = () => {
+    failAll("The browser could not read the PDF engine response. Try a smaller PDF or another browser.");
+  };
+  sharedWorker = worker;
+  return worker;
+}
+
 function runWorker<T>(
   file: File,
   operation: "docx" | "analyze",
@@ -85,61 +149,32 @@ function runWorker<T>(
 
   return new Promise<T>((resolve, reject) => {
     const id = createRequestId();
-    const worker = new Worker("/workers/pdf-document-engine.worker.js", {
-      type: "module",
-      name: "convotools-pdf-document-engine",
-    });
-    let settled = false;
-
-    const finish = (callback: () => void) => {
-      if (settled) return;
-      settled = true;
-      worker.terminate();
-      callback();
+    const request: PendingRequest = {
+      operation,
+      resolve: value => resolve(value as T),
+      reject,
+      onProgress,
     };
+    let worker: Worker;
+    try {
+      worker = getSharedWorker();
+      pendingRequests.set(id, request);
+    } catch (error) {
+      reject(error instanceof Error ? error : new Error("Could not start the local PDF worker."));
+      return;
+    }
 
-    worker.onmessage = (event: MessageEvent<WorkerResponse>) => {
-      const message = event.data;
-      if (!message || message.id !== id) return;
-      if (message.type === "phase") {
-        onProgress?.(Math.max(0, Math.min(1, message.progress)), message.phase);
-        return;
+    file.arrayBuffer().then(pdfBuffer => {
+      if (!pendingRequests.has(id)) return;
+      try {
+        worker.postMessage({ id, operation, pdfBuffer }, [pdfBuffer]);
+      } catch (error) {
+        pendingRequests.delete(id);
+        reject(error instanceof Error ? error : new Error("Could not send the PDF to the local worker."));
       }
-      if (message.type === "error") {
-        finish(() => reject(new Error(message.error || "The PDF reconstruction engine could not process this file.")));
-        return;
-      }
-      if (message.type === "result" && message.operation === "docx" && operation === "docx") {
-        finish(() => resolve(new Blob([message.output], {
-          type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        }) as T));
-        return;
-      }
-      if (message.type === "result" && message.operation === "analyze" && operation === "analyze") {
-        try {
-          const analysis = JSON.parse(message.json) as PdfLayoutAnalysis;
-          finish(() => resolve(analysis as T));
-        } catch {
-          finish(() => reject(new Error("The PDF engine returned an invalid document structure. Please try another PDF.")));
-        }
-      }
-    };
-
-    worker.onerror = (event) => {
-      event.preventDefault();
-      const detail = event.message || "The local PDF worker stopped unexpectedly.";
-      finish(() => reject(new Error(detail)));
-    };
-
-    worker.onmessageerror = () => {
-      finish(() => reject(new Error("The browser could not read the PDF engine response. Try a smaller PDF or another browser.")));
-    };
-
-    file.arrayBuffer().then((pdfBuffer) => {
-      if (settled) return;
-      worker.postMessage({ id, operation, pdfBuffer }, [pdfBuffer]);
-    }).catch((error) => {
-      finish(() => reject(error instanceof Error ? error : new Error("Could not read the selected PDF.")));
+    }).catch(error => {
+      pendingRequests.delete(id);
+      reject(error instanceof Error ? error : new Error("Could not read the selected PDF."));
     });
   });
 }
