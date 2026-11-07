@@ -12,6 +12,31 @@ type InlineRun = TextRun | ImageRun;
 
 const INITIAL_HTML = "<h1>Untitled document</h1><p>Start writing your document here. Select text to format it with the toolbar.</p>";
 
+function normalizedColor(value: string): string | undefined {
+  const hex = value.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+  if (hex) return hex[1].length === 3 ? hex[1].split("").map(part => part + part).join("").toUpperCase() : hex[1].toUpperCase();
+  const rgb = value.match(/^rgba?\\(\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)/i);
+  if (rgb) return [rgb[1], rgb[2], rgb[3]].map(part => Math.max(0, Math.min(255, Number(part))).toString(16).padStart(2, "0")).join("").toUpperCase();
+  return undefined;
+}
+
+function docxFontSize(element: HTMLElement, inherited?: number): number | undefined {
+  const cssSize = element.style.fontSize;
+  if (cssSize) {
+    const number = Number.parseFloat(cssSize);
+    if (Number.isFinite(number) && number > 0) {
+      if (cssSize.endsWith("pt")) return Math.round(number * 2);
+      if (cssSize.endsWith("px")) return Math.round(number * 1.5);
+    }
+  }
+  if (element.tagName === "FONT") {
+    const legacySize = Number((element as HTMLFontElement).size);
+    const halfPoints: Record<number, number> = { 1: 16, 2: 18, 3: 24, 4: 28, 5: 36, 6: 48, 7: 72 };
+    return halfPoints[legacySize] || inherited;
+  }
+  return inherited;
+}
+
 function decodeDataUrl(value: string): Uint8Array {
   const base64 = value.split(",")[1] || "";
   const binary = atob(base64);
@@ -36,10 +61,15 @@ async function inlineChildren(node: Node, state: { bold?: boolean; italic?: bool
       continue;
     }
     if (!(child instanceof HTMLElement)) continue;
+    const styleColor = normalizedColor(child.style.color);
+    const family = child.style.fontFamily.split(",")[0]?.trim().replace(/^["']|["']$/g, "");
     const next = {
-      bold: state.bold || child.tagName === "B" || child.tagName === "STRONG",
-      italic: state.italic || child.tagName === "I" || child.tagName === "EM",
-      underline: state.underline || child.tagName === "U",
+      bold: state.bold || child.tagName === "B" || child.tagName === "STRONG" || Number.parseInt(child.style.fontWeight, 10) >= 600,
+      italic: state.italic || child.tagName === "I" || child.tagName === "EM" || child.style.fontStyle === "italic",
+      underline: state.underline || child.tagName === "U" || child.style.textDecoration.includes("underline"),
+      size: docxFontSize(child, state.size),
+      color: styleColor || state.color,
+      font: family || state.font,
     };
     if (child.tagName === "BR") {
       runs.push(new TextRun({ text: "", break: 1 }));
