@@ -4,7 +4,7 @@ import { ChangeEvent, useEffect, useRef, useState } from "react";
 import {
   AlignCenter, AlignLeft, AlignRight, Bold, Check, ChevronDown, Download,
   FilePlus2, Heading1, Heading2, ImagePlus, Italic, List, ListOrdered,
-  LoaderCircle, Redo2, Save, Underline, Undo2, Upload, X
+  LoaderCircle, Redo2, Save, Table2, Underline, Undo2, Upload
 } from "lucide-react";
 import { Document, ImageRun, Packer, Paragraph, Table, TableCell, TableRow, TextRun, WidthType, HeadingLevel, AlignmentType } from "docx";
 
@@ -27,12 +27,12 @@ function imageDimensions(element: HTMLImageElement) {
   return { width: Math.round(width * scale), height: Math.round(height * scale) };
 }
 
-async function inlineChildren(node: Node, state: { bold?: boolean; italic?: boolean; underline?: boolean }): Promise<InlineRun[]> {
+async function inlineChildren(node: Node, state: { bold?: boolean; italic?: boolean; underline?: boolean; size?: number; color?: string; font?: string }): Promise<InlineRun[]> {
   const runs: InlineRun[] = [];
   for (const child of Array.from(node.childNodes)) {
     if (child.nodeType === Node.TEXT_NODE) {
       const text = child.textContent || "";
-      if (text) runs.push(new TextRun({ text, bold: state.bold, italics: state.italic, underline: state.underline ? {} : undefined }));
+      if (text) runs.push(new TextRun({ text, bold: state.bold, italics: state.italic, underline: state.underline ? {} : undefined, size: state.size, color: state.color, font: state.font }));
       continue;
     }
     if (!(child instanceof HTMLElement)) continue;
@@ -193,6 +193,23 @@ export default function WordEditorWorkspace() {
     }
   };
 
+  const startNewDocument = () => {
+    if (dirty && !window.confirm("Discard the current unsaved edits and start a new document?")) return;
+    if (editorRef.current) editorRef.current.innerHTML = INITIAL_HTML;
+    setFilename("Untitled document.docx");
+    setDirty(false);
+    setStatus("New document created. Start typing on the page.");
+  };
+
+  const insertTable = () => {
+    if (!editorRef.current) return;
+    editorRef.current.focus();
+    document.execCommand("insertHTML", false,
+      '<table><tbody><tr><th>Header 1</th><th>Header 2</th><th>Header 3</th></tr><tr><td>Cell</td><td>Cell</td><td>Cell</td></tr><tr><td>Cell</td><td>Cell</td><td>Cell</td></tr></tbody></table><p><br /></p>');
+    setDirty(true);
+    setStatus("Editable table inserted. Click any cell to change its content.");
+  };
+
   const insertImage = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = "";
@@ -252,7 +269,7 @@ export default function WordEditorWorkspace() {
         <button title="Align left" onClick={()=>runCommand("justifyLeft")}><AlignLeft/></button><button title="Align center" onClick={()=>runCommand("justifyCenter")}><AlignCenter/></button><button title="Align right" onClick={()=>runCommand("justifyRight")}><AlignRight/></button>
         <i/>
         <button title="Bulleted list" onClick={()=>runCommand("insertUnorderedList")}><List/></button><button title="Numbered list" onClick={()=>runCommand("insertOrderedList")}><ListOrdered/></button>
-        <button title="Insert image" onClick={()=>imageRef.current?.click()}><ImagePlus/></button>
+        <button title="Insert image" onClick={()=>imageRef.current?.click()}><ImagePlus/></button><button title="Insert editable table" onClick={insertTable}><Table2/></button>
       </div>
       <div className="word-editor-canvas-wrap">
         <article
