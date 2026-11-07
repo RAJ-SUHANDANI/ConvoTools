@@ -28,7 +28,8 @@
     "@cantoo/pdf-lib": "^2.11.0",
     "@huggingface/transformers": "^3.8.1",
     "docx-preview": "^0.3.6",
-    "html2canvas": "^1.4.1"
+    "html2canvas": "^1.4.1",
+    "pptxgenjs": "^3.12.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.16",
