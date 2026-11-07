@@ -69,7 +69,8 @@ export default function Home() {
   }, [category, query]);
 
   return (
-    <main className="app-shell" id="top">\n      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homepageFaqSchema) }} />
+    <main className="app-shell" id="top">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homepageFaqSchema) }} />
       <div className="announcement-bar">
         <span className="announcement-pulse" />
         <span>THE FILE WORKSPACE FOR PEOPLE WHO MAKE THINGS</span>
