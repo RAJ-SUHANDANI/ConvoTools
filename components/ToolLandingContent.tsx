@@ -39,24 +39,28 @@ function answerFor(tool: Tool) {
   if (tool.name === "Audio converter") return "Convert supported audio files between formats such as MP3, WAV, AAC, FLAC and OGG. Choose an available output format and download the converted audio.";
   if (tool.name === "Create ZIP") return "Bundle multiple selected files into one ZIP archive for easier storage and sharing. Select the files you want to include and create the archive.";
   if (tool.name === "Extract archive") return "Extract the files inside a ZIP archive and download the extracted contents. Choose a supported ZIP file to begin.";
-  if (tool.name === "JSON formatter") return "Format and validate a JSON file so its structure is easier to read and inspect. Invalid JSON is reported instead of being silently rewritten.";
+  if (tool.name === "JSON formatter") return "Format and validate JSON in a live code editor while exploring the parsed data in a collapsible, searchable tree. Open JSON files, pretty-print or minify them, and export JSON as XML or CSV without sending the data to a server.";
   if (tool.name === "Base64 tools") return "Encode files as Base64 text or decode Base64 content back into a file. Choose encode or decode mode and select the expected decoded file type when decoding.";
   if (tool.name === "Hash generator") return "Generate a SHA-256, SHA-384 or SHA-512 checksum for a file. A checksum can help compare file integrity; matching hashes do not prove who created a file.";
   if (tool.name === "QR generator") return "Create a QR code from text or a URL and export it as PNG or SVG. Scan the exported code with a phone to verify that it contains the intended destination.";
-  if (tool.name === "Word editor") return "Open a DOCX document, edit its extracted text and export a clean DOCX file. This text-focused editor does not promise to preserve the original document layout.";
+  if (tool.name === "Word editor") return "Open a DOCX document in a browser-based Word workspace. Edit text directly on the page, apply headings, bold, italic, underline and alignment, create lists, insert images, edit tables and export a new DOCX file. Advanced Word features such as tracked changes, macros, SmartArt and complex page layouts may need adjustment.";
   return "Use this online "+tool.name.toLowerCase()+" tool to work with "+input+" and create "+output+". Add a compatible file, review the available settings, then process and download the result.";
 }
 
 function faqFor(tool: Tool) {
   const input = tool.inputLabel || "the listed input format";
   const output = tool.outputLabel || "the listed output format";
-  const specific = tool.name === "PDF to Word"
-    ? "No. The current converter extracts selectable text into DOCX; it does not retain the original PDF page layout."
-    : tool.name === "Word to PDF" || tool.name === "PPTX to PDF" || tool.name === "Excel to PDF"
-      ? "Not necessarily. This converter focuses on extracting content into a simple PDF, and the original styling or layout may differ."
-      : tool.name === "Compress PDF"
-        ? "Not always. This tool rewrites PDF structure but does not recompress embedded images, so image-heavy files may not become much smaller."
-        : "Output fidelity depends on the source file, its contents and the conversion format. Review the downloaded result before relying on it.";
+  const specific = tool.name === "Word editor"
+    ? "Yes. Open a DOCX, click in the page and edit the content with the formatting toolbar. Export creates a new editable DOCX; advanced Word features and complex layouts may need review."
+    : tool.name === "JSON formatter"
+      ? "Yes. It validates JSON as you type, shows a collapsible tree, lets you search keys and values, and exports formatted JSON, minified JSON, XML or CSV."
+      : tool.name === "PDF to Word"
+        ? "Selectable text, images, tables and supported vector drawings are reconstructed as Word objects. Complex layouts and some graphics may need manual adjustment."
+        : tool.name === "Word to PDF" || tool.name === "PPTX to PDF" || tool.name === "Excel to PDF"
+          ? "Output fidelity depends on the source file, its contents and browser rendering support. Review the downloaded PDF before sharing."
+          : tool.name === "Compress PDF"
+            ? "Not always. This tool rewrites PDF structure but does not recompress embedded images, so image-heavy files may not become much smaller."
+            : "Output fidelity depends on the source file, its contents and the conversion format. Review the downloaded result before relying on it.";
   return [
     { q: "How do I use the "+tool.name.toLowerCase()+" tool?", a: "Choose a compatible "+input+" file, adjust any available settings and select Process & download. When processing finishes, the output is downloaded and remains available in the result list." },
     { q: "Which file formats does this tool support?", a: "The listed input is "+input+" and the intended output is "+output+". Check the file type shown in the upload panel before processing." },
