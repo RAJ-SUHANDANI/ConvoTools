@@ -6,6 +6,7 @@ import {
   LoaderCircle, Redo2, Save, Table2, Underline, Undo2, Upload
 } from "lucide-react";
 import { Document, ImageRun, Packer, Paragraph, Table, TableCell, TableRow, TextRun, WidthType, HeadingLevel, AlignmentType } from "docx";
+import { clearPendingFiles, getPendingFiles } from "@/lib/file-session";
 
 type InlineRun = TextRun | ImageRun;
 
@@ -168,6 +169,40 @@ export default function WordEditorWorkspace() {
       editorRef.current.innerHTML = INITIAL_HTML;
       editorRef.current.dataset.initialized = "true";
     }
+  }, []);
+
+  useEffect(() => {
+    const queued = getPendingFiles();
+    if (!queued.length) return;
+    clearPendingFiles();
+    const file = queued[0];
+    if (!file.name.toLowerCase().endsWith(".docx")) {
+      setStatus("The selected file is not a DOCX document. Open a .docx file to edit it here.");
+      return;
+    }
+    let active = true;
+    setLoading(true);
+    setStatus("Opening the selected Word document…");
+    import("mammoth").then(async mammoth => {
+      const converted = await mammoth.convertToHtml(
+        { arrayBuffer: await file.arrayBuffer() },
+        { convertImage: mammoth.images.inline(async image => ({
+          src: "data:" + image.contentType + ";base64," + await image.read("base64"),
+        })) },
+      );
+      if (!converted.value.trim()) throw new Error("No editable document content could be read from this file.");
+      if (active && editorRef.current) {
+        editorRef.current.innerHTML = converted.value;
+        setFilename(file.name);
+        setDirty(false);
+        setStatus(converted.messages.length
+          ? "Document opened. Some advanced Word features may need review."
+          : "Document opened from your workspace. Edit the page and export an editable DOCX.");
+      }
+    }).catch(error => {
+      if (active) setStatus(error instanceof Error ? error.message : "Could not open the selected Word document.");
+    }).finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
   }, []);
 
   const runCommand = (command: string, value?: string) => {
