@@ -149,6 +149,13 @@ export default function ToolLandingContent({ tool }: { tool: Tool }) {
             ))}</div>
           </nav>
         )}
+        {tool.name === "PDF to Word" && (
+          <p className="tool-seo-license">
+            PDF-to-DOCX conversion uses a browser-based open-source engine under AGPL-3.0.
+            <a href="/licenses/pdf2docx-wasm-AGPL-3.0.txt" target="_blank" rel="noreferrer">View license</a>
+            <a href="https://github.com/jsscheller/pdf2docx-wasm" target="_blank" rel="noreferrer">View corresponding source</a>
+          </p>
+        )}
         <p className="tool-seo-note">ConvoTools publishes tool-specific format requirements and conversion limitations so people and answer engines can understand what this tool does. Always check the downloaded result before using it in a production workflow.</p>
       </div>
     </section>
