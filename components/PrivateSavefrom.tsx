@@ -2,7 +2,7 @@
 
 import { FormEvent, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowUpRight, ExternalLink, Instagram, LockKeyhole, Music2, Play, ShieldCheck, Youtube, LogOut, Download } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, ExternalLink, Instagram, Music2, Play, ShieldCheck, Youtube, Download } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import BrandLogo from "@/components/BrandLogo";
 
@@ -44,7 +44,6 @@ export default function PrivateSavefrom() {
   const [value, setValue] = useState("");
   const [submitted, setSubmitted] = useState("");
   const [error, setError] = useState("");
-  const [signingOut, setSigningOut] = useState(false);
   const parsed = useMemo(() => submitted ? parseInput(submitted) : null, [submitted]);
   const guide = parsed && parsed.platform !== "Direct media" ? guides[parsed.platform] : null;
 
@@ -54,16 +53,11 @@ export default function PrivateSavefrom() {
     if (!parsedValue) { setSubmitted(""); setError("Use a supported YouTube video, Instagram Reel/post, TikTok video/photo or direct media-file URL."); return; }
     setSubmitted(parsedValue.url);
   }
-  async function signOut() {
-    setSigningOut(true);
-    try { await fetch("/api/savefrom/access", { method: "DELETE" }); } finally { window.location.reload(); }
-  }
-
   return (
     <main className="tool-page savefrom-private-page">
-      <header className="tool-page-header"><BrandLogo className="brand-tool" width={190} priority /><nav><Link href="/">Home</Link><Link href="/dashboard">Workspace</Link></nav><button className="savefrom-signout" onClick={signOut} disabled={signingOut}><LogOut size={13} /> {signingOut ? "Locking…" : "Lock workspace"}</button></header>
+      <header className="tool-page-header savefrom-header"><BrandLogo className="brand-tool" width={190} priority /><nav aria-label="Main navigation"><Link href="/">Home</Link><Link href="/dashboard">Workspace</Link></nav></header>
       <motion.section className="savefrom-private-hero" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .5 }}>
-        <span className="tool-detail-kicker"><LockKeyhole size={13} /> PRIVATE MEDIA WORKSPACE / NOT LISTED</span>
+        <span className="tool-detail-kicker"><Download size={13} /> MEDIA LINK WORKSPACE</span>
         <h1>Drop the link.<br /><em>Know what you can save.</em></h1>
         <p>Paste a public post URL to identify its platform, preview supported embeds and open the correct save flow. Direct media links can be opened from their source when you have rights to the file.</p>
         <form className="savefrom-url-form" onSubmit={analyse}>
@@ -88,8 +82,8 @@ export default function PrivateSavefrom() {
           </motion.section>
         )}
       </AnimatePresence>
-      <aside className="savefrom-legal-note"><LockKeyhole size={17} /><div><b>Private tool, platform-respecting behaviour.</b><p>This page does not bypass private accounts, DRM, login restrictions, watermarks or creator-disabled downloads. It does not scrape page source or extract platform media streams. Only save media that you own or are authorized to use.</p></div></aside>
-      <footer className="savefrom-private-footer"><Link href="/"><ArrowLeft size={13} /> Return to ConvoTools</Link><span>PRIVATE SESSION · FILE LINKS REMAIN IN THIS BROWSER</span></footer>
+      <aside className="savefrom-legal-note"><ShieldCheck size={17} /><div><b>Platform-respecting behaviour.</b><p>This page does not bypass private accounts, DRM, login restrictions, watermarks or creator-disabled downloads. It does not scrape page source or extract platform media streams. Only save media that you own or are authorized to use.</p></div></aside>
+      <footer className="savefrom-private-footer"><Link href="/"><ArrowLeft size={13} /> Return to ConvoTools</Link><span>MEDIA LINKS · OPENED FROM THEIR ORIGINAL SOURCE</span></footer>
     </main>
   );
 }
