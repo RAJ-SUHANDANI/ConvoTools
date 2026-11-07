@@ -31,7 +31,7 @@ ConvoTools tool pages explain accepted inputs, output formats, the steps to use 
 - [Image compressor](https://convotool.vercel.app/tools/image-compressor) — Reduce image file sizes while retaining detail.
 - [Resize image](https://convotool.vercel.app/tools/resize-image) — Set exact image dimensions or scale by percentage.
 - [Crop & rotate](https://convotool.vercel.app/tools/crop-and-rotate) — Center-crop an image to a square and rotate it in 90° increments.
-- [Word editor](https://convotool.vercel.app/tools/word-editor) — Edit extracted Word document text and export a clean DOCX file.
+- [Word editor](https://convotool.vercel.app/tools/word-editor) — Open and edit DOCX documents in a browser workspace with formatting, lists, tables and image insertion; export an editable DOCX.
 - [DOCX to TXT](https://convotool.vercel.app/tools/docx-to-txt) — Extract clean plain text from Word documents.
 - [Excel to PDF](https://convotool.vercel.app/tools/excel-to-pdf) — Export spreadsheet cell content into a simple PDF report; styling may differ.
 - [CSV to XLSX](https://convotool.vercel.app/tools/csv-to-xlsx) — Turn CSV data into a formatted workbook.
@@ -45,7 +45,7 @@ ConvoTools tool pages explain accepted inputs, output formats, the steps to use 
 - [Audio converter](https://convotool.vercel.app/tools/audio-converter) — Convert between MP3, WAV, AAC and FLAC.
 - [Create ZIP](https://convotool.vercel.app/tools/create-zip) — Bundle multiple files into one ZIP archive.
 - [Extract archive](https://convotool.vercel.app/tools/extract-archive) — Extract ZIP archive contents into individual downloadable files.
-- [JSON formatter](https://convotool.vercel.app/tools/json-formatter) — Format and validate JSON data.
+- [JSON formatter](https://convotool.vercel.app/tools/json-formatter) — Format and validate JSON with live code editing, a searchable collapsible tree, minification and JSON-to-XML/CSV export.
 - [Base64 tools](https://convotool.vercel.app/tools/base64-tools) — Encode and decode text or files.
 - [Hash generator](https://convotool.vercel.app/tools/hash-generator) — Create file checksums locally.
 - [QR generator](https://convotool.vercel.app/tools/qr-generator) — Create QR codes from links and text.
