@@ -66,6 +66,8 @@ export default async function ToolPage({ params }: Props) {
   const tool = getToolBySlug(slug);
   if (!tool) notFound();
   if (tool.category === "AI lab") return <ComingSoon toolName={tool.name} />;
+  if (tool.name === "Word editor") return <><WordEditorWorkspace /><ToolLandingContent tool={tool} /></>;
+  if (tool.name === "JSON formatter") return <><JsonFormatterWorkspace /><ToolLandingContent tool={tool} /></>;
   return (
     <>
       <ToolDetail tool={{
