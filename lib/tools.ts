@@ -17,7 +17,7 @@ export type Tool = {
 };
 
 export const TOOLS: Tool[] = [
-  { name: "PDF to Word", description: "Rebuild selectable PDF text as editable Word paragraphs with approximate position and styling. Embedded images, vector graphics and complex tables are not reconstructed.", category: "PDF", icon: FileText, tag: "Popular", inputLabel: "PDF", outputLabel: "DOCX" },
+  { name: "PDF to Word", description: "Reconstruct PDF text, embedded images, detected tables and supported vector drawings as editable Word elements. Complex layouts and some effects may need manual adjustment.", category: "PDF", icon: FileText, tag: "Popular", inputLabel: "PDF", outputLabel: "DOCX" },
   { name: "Word to PDF", description: "Render supported DOCX pages, including text, tables and embedded images, into a PDF.", category: "PDF", icon: FilePenLine, inputLabel: "Document", outputLabel: "PDF" },
   { name: "Image to PDF", description: "Combine images into a single PDF document.", category: "PDF", icon: FileImage, tag: "Popular", inputLabel: "Image", outputLabel: "PDF" },
   { name: "Image to Word (OCR)", description: "Keep the source image in a Word document and add OCR-extracted text beneath it for editing and searching.", category: "PDF", icon: ScanText, inputLabel: "Image", outputLabel: "DOCX" },
@@ -27,8 +27,8 @@ export const TOOLS: Tool[] = [
   { name: "Organize PDF", description: "Reorder, rotate, delete or extract PDF pages.", category: "PDF", icon: PanelTop, inputLabel: "PDF", outputLabel: "PDF" },
   { name: "PDF to JPG", description: "Export PDF pages as high-quality JPG images.", category: "PDF", icon: ImageIcon, inputLabel: "PDF", outputLabel: "JPG" },
   { name: "PDF to PNG", description: "Render PDF pages to crisp PNG images.", category: "PDF", icon: ImageIcon, inputLabel: "PDF", outputLabel: "PNG" },
-  { name: "PDF to Excel", description: "Rebuild selectable PDF text into editable spreadsheet cells using approximate text positions. Complex tables, formulas and graphics require manual review.", category: "PDF", icon: FileSpreadsheet, inputLabel: "PDF", outputLabel: "XLSX" },
-  { name: "PDF to PowerPoint", description: "Rebuild selectable PDF text as editable PowerPoint text boxes with approximate positioning. Images, charts and complex vector artwork are not reconstructed.", category: "PDF", icon: PanelTop, inputLabel: "PDF", outputLabel: "PPTX" },
+  { name: "PDF to Excel", description: "Extract detected PDF tables into editable Excel cells and organize remaining selectable text into worksheets. Review table detection, formulas and layout manually.", category: "PDF", icon: FileSpreadsheet, inputLabel: "PDF", outputLabel: "XLSX" },
+  { name: "PDF to PowerPoint", description: "Rebuild PDF text as editable PowerPoint text boxes, detected tables as native slide tables, embedded images and supported vector paths as editable objects.", category: "PDF", icon: PanelTop, inputLabel: "PDF", outputLabel: "PPTX" },
   { name: "Protect PDF", description: "Add password protection to a PDF file.", category: "PDF", icon: LockKeyhole, inputLabel: "PDF", outputLabel: "PDF" },
   { name: "PNG to JPG", description: "Convert PNG images to compact JPG files.", category: "Images", icon: FileImage, tag: "Popular", inputLabel: "Image", outputLabel: "JPG" },
   { name: "JPG to PNG", description: "Convert JPG images into PNG format.", category: "Images", icon: ImageIcon, inputLabel: "Image", outputLabel: "PNG" },
@@ -47,7 +47,7 @@ export const TOOLS: Tool[] = [
   { name: "CSV to XLSX", description: "Turn CSV data into a formatted workbook.", category: "Spreadsheets", icon: FileSpreadsheet, inputLabel: "CSV / XLSX", outputLabel: "XLSX" },
   { name: "Remove duplicates", description: "Find and remove repeated spreadsheet rows.", category: "Spreadsheets", icon: Check, inputLabel: "CSV / XLSX", outputLabel: "Cleaned XLSX" },
   { name: "PPTX to PDF", description: "Render PowerPoint slide content and embedded images into a PDF; complex slide elements may differ.", category: "Presentations", icon: PanelTop, tag: "Popular", inputLabel: "PPTX", outputLabel: "PDF" },
-  { name: "PDF to PPTX", description: "Rebuild selectable PDF text as individually editable PowerPoint text boxes. Images, charts and complex graphics are not reconstructed.", category: "Presentations", icon: FileText, inputLabel: "PDF", outputLabel: "PPTX" },
+  { name: "PDF to PPTX", description: "Rebuild PDF text as editable PowerPoint text boxes, detected tables as native slide tables, embedded images and supported vector paths as editable objects.", category: "Presentations", icon: FileText, inputLabel: "PDF", outputLabel: "PPTX" },
   { name: "Slides to images", description: "Render slide text boxes, basic shapes and embedded images to PNG files.", category: "Presentations", icon: ImageIcon, inputLabel: "PPTX", outputLabel: "PNG" },
   { name: "MP4 to GIF", description: "Turn a video clip into a lightweight looping GIF.", category: "Video & audio", icon: Film, inputLabel: "MP4", outputLabel: "GIF" },
   { name: "Video compressor", description: "Reduce video size for easier sharing.", category: "Video & audio", icon: FileVideo, inputLabel: "Video", outputLabel: "MP4" },
