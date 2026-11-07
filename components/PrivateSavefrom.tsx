@@ -57,6 +57,38 @@ export default function PrivateSavefrom() {
     if (!parsedValue) { setSubmitted(""); setError("Use a supported YouTube video, Instagram Reel/post, TikTok video/photo or direct media-file URL."); return; }
     setDownloadError(""); setMediaDimensions(""); setSubmitted(parsedValue.url);
   }
+  async function downloadDirectMedia() {
+    if (!parsed || parsed.platform !== "Direct media") return;
+    setDownloading(true);
+    setDownloadError("");
+    try {
+      const response = await fetch(parsed.url, { mode: "cors", credentials: "omit" });
+      if (!response.ok) throw new Error("The media host returned HTTP " + response.status + ".");
+      const blob = await response.blob();
+      if (!blob.size) throw new Error("The source returned an empty file.");
+      if (!/^image\\//.test(blob.type) && !/^video\\//.test(blob.type) && !["application/octet-stream", ""].includes(blob.type)) {
+        throw new Error("The source did not return a recognized image or video file.");
+      }
+      const objectUrl = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      const filename = decodeURIComponent(new URL(parsed.url).pathname.split("/").pop() || "media-file").replace(/[^a-zA-Z0-9._-]/g, "_");
+      anchor.href = objectUrl;
+      anchor.download = filename;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+    } catch (cause) {
+      setDownloadError(
+        cause instanceof Error
+          ? cause.message + " This host may block cross-origin downloads. Open the original file and use its download control if available."
+          : "This host blocked the browser download. Open the original file and use its download control if available."
+      );
+    } finally {
+      setDownloading(false);
+    }
+  }
+
   return (
     <main className="tool-page savefrom-private-page">
       <header className="tool-page-header savefrom-header"><BrandLogo className="brand-tool" width={190} priority /><nav aria-label="Main navigation"><Link href="/">Home</Link><Link href="/dashboard">Workspace</Link></nav></header>
