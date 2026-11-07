@@ -42,10 +42,6 @@ export default function ImageComparison() {
         aria-label="Move the before and after image comparison divider"
       />
       <div className="comparison-hint"><Sparkles size={12} /> VISUAL DEMO · DRAG TO COMPARE</div>
-      <div className="comparison-credit">
-        <span>Portrait photo by Arturo Añez</span>
-        <a href="https://unsplash.com/photos/a-smiling-woman-poses-outdoors-in-nature-nGnQpHSZaQ4" target="_blank" rel="noreferrer">Unsplash photo ↗</a>
-      </div>
     </motion.div>
   );
 }
