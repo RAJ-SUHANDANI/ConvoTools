@@ -115,7 +115,7 @@ export default function JsonFormatterWorkspace() {
   const pretty = useMemo(() => parsed.error ? "" : JSON.stringify(parsed.value, null, 2), [parsed]);
   const compact = useMemo(() => parsed.error ? "" : JSON.stringify(parsed.value), [parsed]);
   const output = useMemo(() => {
-    if (parsed.error || parsed.value === null) return "";
+    if (parsed.error) return "";
     if (outputFormat === "xml") return '<?xml version="1.0" encoding="UTF-8"?>\n' + toXml(parsed.value);
     if (outputFormat === "csv") return toCsv(parsed.value);
     if (outputFormat === "min.json") return compact;
@@ -150,7 +150,7 @@ export default function JsonFormatterWorkspace() {
     catch { setMessage("Clipboard access is unavailable. Select the text and copy it manually."); }
   };
   const download = () => {
-    if (parsed.error || parsed.value === null) { setMessage("Enter valid JSON before exporting."); return; }
+    if (parsed.error) { setMessage("Enter valid JSON before exporting."); return; }
     const mime = outputFormat === "xml" ? "application/xml;charset=utf-8" : outputFormat === "csv" ? "text/csv;charset=utf-8" : "application/json;charset=utf-8";
     downloadText(output, outputFormat === "min.json" ? "minified.json" : "converted." + outputFormat, mime);
     setMessage("Your " + outputFormat.toUpperCase() + " file is ready.");
@@ -185,8 +185,7 @@ export default function JsonFormatterWorkspace() {
           <label className="json-tree-search"><Search size={14} /><input value={search} onChange={event => setSearch(event.target.value)} placeholder="Find a key or value…" /></label>
           <div className="json-tree-scroll">
             {parsed.error ? <div className="json-tree-empty-state"><Braces size={22} /><b>Waiting for valid JSON</b><span>Correct the syntax to explore your data tree.</span></div>
-              : parsed.value === null ? <div className="json-tree-empty-state">Enter a JSON value.</div>
-              : <TreeNode label="root" value={parsed.value} search={search.toLowerCase()} />}
+              : <TreeNode label="root" value={parsed.value as JsonValue} search={search.toLowerCase()} />}
           </div>
         </div>}
         {view === "output" && <div className="json-panel json-output-panel">
