@@ -218,7 +218,7 @@ async function pdfToEditablePptx(file:File,options:ProcessOptions):Promise<Proce
    const normalized=rows.map((row,rowIndex)=>Array.from({length:columns},(_,i)=>({
     text:String(row[i]??""),
     options:rowIndex===0
-     ? {bold:true,fill:"F0F1F5",color:"292B32",fontFace:"Arial",fontSize:Math.max(6,Math.min(11,9*scale*72))}
+     ? {bold:true,fill:{color:"F0F1F5"},color:"292B32",fontFace:"Arial",fontSize:Math.max(6,Math.min(11,9*scale*72))}
      : {color:"292B32",fontFace:"Arial",fontSize:Math.max(6,Math.min(11,9*scale*72))}
    })));
    const x=offsetX+table.bbox[0]*scale,y=offsetY+table.bbox[1]*scale;
