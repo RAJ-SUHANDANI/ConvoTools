@@ -89,6 +89,15 @@ export default function DashboardPage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!mobileSidebarOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMobileSidebarOpen(false);
+    };
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [mobileSidebarOpen]);
+
   const uploads = useMemo(() => activity.filter((item) => item.type === "upload"), [activity]);
   const openedTools = useMemo(() => activity.filter((item) => item.type === "tool"), [activity]);
   const favoriteTools = useMemo(() => TOOLS.filter((tool) => favorites.includes(slugify(tool.name))), [favorites]);
@@ -177,7 +186,7 @@ export default function DashboardPage() {
       <AnimatePresence>
         {mobileSidebarOpen && <motion.button className="dash-sidebar-scrim" aria-label="Close navigation" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setMobileSidebarOpen(false)} />}
       </AnimatePresence>
-      <aside className={"dashboard-sidebar" + (mobileSidebarOpen ? " sidebar-open" : "")}>
+      <aside id="dashboard-sidebar" aria-label="Workspace navigation" className={"dashboard-sidebar" + (mobileSidebarOpen ? " sidebar-open" : "")}>
         <div className="dash-sidebar-top">
           <BrandLogo variant="inverse" className="brand-dashboard" width={176} priority />
           <span className="dash-workspace-label">PERSONAL WORKSPACE</span>
@@ -199,7 +208,7 @@ export default function DashboardPage() {
         </div>
         <div className="dash-sidebar-bottom">
           <div className="dash-privacy-card"><ShieldCheck size={17} /><div><b>Local by default</b><span>Your history stays in this browser.</span></div></div>
-          <button className="dash-nav-item" onClick={() => setActiveTab("Settings")}><Settings size={16} /><span>Settings</span></button>
+          <button className="dash-nav-item" onClick={() => { setActiveTab("Settings"); setMobileSidebarOpen(false); }}><Settings size={16} /><span>Settings</span></button>
           <Link className="dash-user-card" href="/dashboard">
             <span className="dash-user-avatar">{(profile.name.trim()[0] || "G").toUpperCase()}</span>
             <span><b>{profile.name.trim() || "Guest workspace"}</b><small>{profile.email || "Local profile"}</small></span>
@@ -211,7 +220,7 @@ export default function DashboardPage() {
       <div className="dashboard-main">
         <header className="dashboard-topbar">
           <div className="dash-topbar-left">
-            <button className="dash-mobile-menu" aria-label="Open navigation" onClick={() => setMobileSidebarOpen(true)}><Menu size={18} /></button>
+            <button className="dash-mobile-menu" aria-label={mobileSidebarOpen ? "Close navigation" : "Open navigation"} aria-expanded={mobileSidebarOpen} aria-controls="dashboard-sidebar" onClick={() => setMobileSidebarOpen((open) => !open)}>{mobileSidebarOpen ? <X size={18} /> : <Menu size={18} />}</button>
             <div className="dash-breadcrumb"><span>ConvoTools</span><i>/</i><b>{activeTab}</b></div>
           </div>
           <div className="dash-topbar-actions">
