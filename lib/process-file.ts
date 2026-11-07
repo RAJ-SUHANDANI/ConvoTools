@@ -3,8 +3,9 @@ import JSZip from "jszip";
 import { PDFDocument, degrees } from "pdf-lib";
 import * as XLSX from "xlsx";
 import { Document, ImageRun, Packer, Paragraph, TextRun } from "docx";
+import { analyzePdfForOffice, reconstructPdfToDocx, type PdfDetectedTable, type PdfLayoutAnalysis, type PdfLayoutPage } from "@/lib/pdf-document-engine";
 
-export type ProcessOptions = { quality?: "Smaller file" | "Balanced" | "Best quality"; output?: string; password?: string; pdfPageOrder?: string; width?: string; height?: string; rotation?: number; cropMode?: "Original" | "Square center crop"; textContent?: string; base64Mode?: "Encode" | "Decode"; decodedFormat?: string; ocrFormat?: "DOCX" | "TXT"; ocrLanguage?: string; pdfRotation?: number; qrFormat?: "PNG" | "SVG"; hashAlgorithm?: "SHA-256" | "SHA-384" | "SHA-512"; qrText?: string; onProgress?: (progress: number) => void };
+export type ProcessOptions = { quality?: "Smaller file" | "Balanced" | "Best quality"; output?: string; password?: string; pdfPageOrder?: string; width?: string; height?: string; rotation?: number; cropMode?: "Original" | "Square center crop"; textContent?: string; base64Mode?: "Encode" | "Decode"; decodedFormat?: string; ocrFormat?: "DOCX" | "TXT"; ocrLanguage?: string; pdfRotation?: number; qrFormat?: "PNG" | "SVG"; hashAlgorithm?: "SHA-256" | "SHA-384" | "SHA-512"; qrText?: string; onProgress?: (progress: number, phase?: string) => void };
 export type ProcessResult = { blob: Blob; filename: string; mime: string; message: string };
 const result=(blob:Blob,filename:string,message:string):ProcessResult=>({blob,filename,mime:blob.type||"application/octet-stream",message});
 const bytesBlob=(bytes:Uint8Array,mime:string)=>{const safe=new Uint8Array(bytes.byteLength);safe.set(bytes);return new Blob([safe.buffer],{type:mime});};
@@ -139,70 +140,163 @@ async function pptxText(file:File):Promise<string>{
  return slides.map((s,i)=>"SLIDE "+(i+1)+"\n"+s).join("\n\n");
 }
 
-type PdfTextFragment={text:string;x:number;y:number;width:number;height:number;fontSize:number;fontName:string};
-type PdfTextLine={y:number;fragments:PdfTextFragment[]};
-async function extractPdfLayout(file:File){
- const doc=await pdfJsDocument(file),pages:{width:number;height:number;lines:PdfTextLine[];fragments:PdfTextFragment[]}[]=[];
- for(let pageNo=1;pageNo<=doc.numPages;pageNo++){
-  const page=await doc.getPage(pageNo),viewport=page.getViewport({scale:1}),content=await page.getTextContent();
-  const fragments:PdfTextFragment[]=[];
-  for(const raw of content.items as Array<{str?:string;transform?:number[];width?:number;height?:number;fontName?:string}>){
-   const text=(raw.str||"").replace(/\u0000/g,"").trim();if(!text||!raw.transform)continue;
-   const fontSize=Math.max(5,Math.min(72,Math.hypot(raw.transform[2]||0,raw.transform[3]||0)||raw.height||10));
-   fragments.push({text,x:raw.transform[4]||0,y:viewport.height-(raw.transform[5]||0),width:Math.max(raw.width||0,fontSize*.25),height:Math.max(raw.height||0,fontSize),fontSize,fontName:raw.fontName||""});
-  }
-  const lines:PdfTextLine[]=[];
-  for(const item of fragments.sort((x,y)=>x.y-y.y||x.x-y.x)){
-   let line=lines.find(candidate=>Math.abs(candidate.y-item.y)<=Math.max(2,item.fontSize*.32));
-   if(!line){line={y:item.y,fragments:[]};lines.push(line);}line.fragments.push(item);
-  }
-  lines.forEach(line=>line.fragments.sort((x,y)=>x.x-y.x));lines.sort((x,y)=>x.y-y.y);
-  pages.push({width:viewport.width,height:viewport.height,lines,fragments});
- }
- return pages;
+
+function pdfHexColor(color: number | null | undefined): string {
+ if(color===null||color===undefined)return "222222";
+ return (color>>>0).toString(16).padStart(6,"0").slice(-6).toUpperCase();
 }
-async function pdfToEditableDocx(file:File):Promise<ProcessResult>{
- const pages=await extractPdfLayout(file);if(pages.every(p=>!p.fragments.length))throw new Error("No selectable PDF text found. This appears to be scanned or image-only; use OCR first. Images and vector artwork are not reconstructed.");
- const children:Paragraph[]=[];
- for(let pi=0;pi<pages.length;pi++){
-  if(pi)children.push(new Paragraph({pageBreakBefore:true,children:[new TextRun("")]}));
-  for(const line of pages[pi].lines){
-   const maxSize=Math.max(...line.fragments.map(f=>f.fontSize),10);
-   const runs:TextRun[]=[];let right:number|null=null;
-   for(const item of line.fragments){
-    const gap=right===null?0:item.x-right;
-    runs.push(new TextRun({text:(gap>Math.max(10,item.fontSize*1.1)?"   ":gap>item.fontSize*.25?" ":"")+item.text,bold:/bold|black|heavy|semibold/i.test(item.fontName),italics:/italic|oblique/i.test(item.fontName),size:Math.max(16,Math.round(item.fontSize*1.5))}));
-    right=item.x+item.width;
+function officeRgb(color:[number,number,number]|null|undefined):string{
+ if(!color)return "222222";
+ return color.map(value=>Math.max(0,Math.min(255,Math.round(value*255))).toString(16).padStart(2,"0")).join("").toUpperCase();
+}
+function inTable(bbox:[number,number,number,number],tables:PdfDetectedTable[]):boolean{
+ const x=(bbox[0]+bbox[2])/2,y=(bbox[1]+bbox[3])/2;
+ return tables.some(table=>x>=table.bbox[0]&&x<=table.bbox[2]&&y>=table.bbox[1]&&y<=table.bbox[3]);
+}
+function slideLine(slide:any,pptx:any,x1:number,y1:number,x2:number,y2:number,scale:number,offsetX:number,offsetY:number,color:string,width:number){
+ const dx=(x2-x1)*scale,dy=(y2-y1)*scale;
+ const x=offsetX+Math.min(x1,x2)*scale,y=offsetY+Math.min(y1,y2)*scale;
+ slide.addShape(pptx.ShapeType.line,{x,y,w:Math.max(.001,Math.abs(dx)),h:Math.max(.001,Math.abs(dy)),flipH:dx<0,flipV:dy<0,line:{color,width:Math.max(.25,width*scale*72)}});
+}
+function bezierPoint(p0:number[],p1:number[],p2:number[],p3:number[],t:number):[number,number]{
+ const mt=1-t;
+ return [
+  mt*mt*mt*p0[0]+3*mt*mt*t*p1[0]+3*mt*t*t*p2[0]+t*t*t*p3[0],
+  mt*mt*mt*p0[1]+3*mt*mt*t*p1[1]+3*mt*t*t*p2[1]+t*t*t*p3[1]
+ ];
+}
+async function pdfImageData(item:Extract<PdfLayoutPage["items"][number],{type:"image"}>):Promise<string>{
+ const ext=item.ext.toLowerCase();
+ const mime=ext==="jpg"||ext==="jpeg"?"image/jpeg":ext==="gif"?"image/gif":ext==="png"?"image/png":ext==="bmp"?"image/bmp":"";
+ const dataUrl="data:"+(mime||"application/octet-stream")+";base64,"+item.data;
+ if(mime)return dataUrl;
+ try{
+  const response=await fetch(dataUrl);const blob=await response.blob();const bitmap=await createImageBitmap(blob);
+  const canvas=document.createElement("canvas");canvas.width=bitmap.width;canvas.height=bitmap.height;
+  const context=canvas.getContext("2d");if(!context)throw new Error("Canvas unavailable.");
+  context.drawImage(bitmap,0,0);bitmap.close();
+  const png=await new Promise<Blob>((resolve,reject)=>canvas.toBlob(value=>value?resolve(value):reject(new Error("Image encoding failed.")),"image/png"));
+  canvas.width=0;canvas.height=0;
+  return "data:image/png;base64,"+await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(",")[1]||"");reader.onerror=()=>reject(new Error("Could not encode embedded PDF image."));reader.readAsDataURL(png);});
+ }catch{return "";}
+}
+async function pdfToEditableDocx(file:File,options:ProcessOptions):Promise<ProcessResult>{
+ const blob=await reconstructPdfToDocx(file,options.onProgress);
+ return result(blob,name(file,"docx"),"Editable DOCX reconstructed in your browser. Text, paragraphs, detected tables, embedded images and many vector drawings are rebuilt as Word objects. Complex multi-column layouts, unusual fonts, advanced clipping and some graphics may need manual adjustment.");
+}
+async function pdfToEditablePptx(file:File,options:ProcessOptions):Promise<ProcessResult>{
+ const analysis=await analyzePdfForOffice(file,options.onProgress);
+ const pages=analysis.pages;
+ if(!pages.length||pages.every(page=>!page.items.length&&!page.drawings.length))throw new Error("No extractable text, images or vector elements were found in this PDF. Scanned pages need OCR before they can be reconstructed.");
+ const PptxGenJS=(await import("pptxgenjs")).default,pptx=new PptxGenJS();
+ const first=pages[0],sw=Math.max(1,Math.min(56,first.width/72)),sh=Math.max(1,Math.min(56,first.height/72));
+ pptx.defineLayout({name:"PDF_SOURCE_PAGE",width:sw,height:sh});pptx.layout="PDF_SOURCE_PAGE";
+ pptx.author="ConvoTools";pptx.subject="Editable PowerPoint reconstruction from PDF";pptx.title=file.name;
+ let textCount=0,imageCount=0,shapeCount=0,tableCount=0,skippedImageCount=0;
+ for(const page of pages){
+  const slide=pptx.addSlide();slide.background={color:"FFFFFF"};
+  const scale=Math.min(sw/page.width,sh/page.height),offsetX=(sw-page.width*scale)/2,offsetY=(sh-page.height*scale)/2;
+  const detectedTables=page.tables||[];
+  // Convert detected PDF tables into native PowerPoint tables first, then skip
+  // their source text fragments to avoid duplicating table content.
+  for(const table of detectedTables){
+   const rows=table.rows.filter(row=>row.length>0).map(row=>row.map(cell=>cell??""));
+   if(!rows.length)continue;
+   const columns=Math.max(1,...rows.map(row=>row.length));
+   const normalized=rows.map(row=>Array.from({length:columns},(_,i)=>String(row[i]??"")));
+   const x=offsetX+table.bbox[0]*scale,y=offsetY+table.bbox[1]*scale;
+   const w=Math.max(.25,(table.bbox[2]-table.bbox[0])*scale),h=Math.max(.25,(table.bbox[3]-table.bbox[1])*scale);
+   slide.addTable(normalized,{x,y,w,h,colW:Array(columns).fill(w/columns),rowH:Math.max(.14,h/normalized.length),fontFace:"Arial",fontSize:Math.max(6,Math.min(11,9*scale*72)),color:"292B32",margin:.035,border:{type:"solid",color:"D6D6D6",pt:.5},fill:"FFFFFF",breakLine:false,autoFit:false});
+   tableCount++;
+  }
+  // Drawings are rebuilt as native PowerPoint shapes. Curves are approximated
+  // with short editable line segments instead of being flattened to a page image.
+  for(const drawing of page.drawings||[]){
+   const stroke=drawing.stroke?officeRgb(drawing.stroke):"777777";
+   const fill=drawing.fill?officeRgb(drawing.fill):undefined;
+   for(const path of drawing.items||[]){
+    if(shapeCount>12000)throw new Error("This PDF contains more than 12,000 vector path elements. Split it into smaller files for browser-based PowerPoint reconstruction.");
+    if(path.type==="rect"){
+     const [x0,y0,x1,y1]=path.rect;
+     slide.addShape(pptx.ShapeType.rect,{x:offsetX+x0*scale,y:offsetY+y0*scale,w:Math.max(.002,(x1-x0)*scale),h:Math.max(.002,(y1-y0)*scale),line:drawing.stroke?{color:stroke,width:Math.max(.25,drawing.width*scale*72)}:{color:"FFFFFF",transparency:100},fill:fill?{color:fill,transparency:Math.round((1-drawing.fillOpacity)*100)}:{color:"FFFFFF",transparency:100}});
+     shapeCount++;
+    }else if(path.type==="line"){
+     slideLine(slide,pptx,path.points[0][0],path.points[0][1],path.points[1][0],path.points[1][1],scale,offsetX,offsetY,stroke,drawing.width);shapeCount++;
+    }else if(path.type==="quad"){
+     const pts=path.points;
+     for(let i=0;i<4;i++){slideLine(slide,pptx,pts[i][0],pts[i][1],pts[(i+1)%4][0],pts[(i+1)%4][1],scale,offsetX,offsetY,stroke,drawing.width);shapeCount++;}
+    }else if(path.type==="curve"){
+     const p=path.points;let prior=p[0];
+     for(let step=1;step<=12;step++){const next=bezierPoint(p[0],p[1],p[2],p[3],step/12);slideLine(slide,pptx,prior[0],prior[1],next[0],next[1],scale,offsetX,offsetY,stroke,drawing.width);prior=next;shapeCount++;}
+    }
    }
-   children.push(new Paragraph({children:runs,spacing:{after:Math.max(0,Math.round(maxSize*2))}}));
+  }
+  // Embedded PDF image blocks remain separate, selectable/resizable picture objects.
+  for(const item of page.items){
+   if(item.type!=="image")continue;
+   const data=await pdfImageData(item);
+   if(!data){skippedImageCount++;continue;}
+   const [x0,y0,x1,y1]=item.bbox;
+   slide.addImage({data,x:offsetX+x0*scale,y:offsetY+y0*scale,w:Math.max(.02,(x1-x0)*scale),h:Math.max(.02,(y1-y0)*scale)});
+   imageCount++;
+  }
+  // Each text span becomes its own editable text box with source position,
+  // font-size, bold/italic hints and colour retained where available.
+  for(const item of page.items){
+   if(item.type!=="text"||inTable(item.bbox,detectedTables)||!item.text.trim())continue;
+   const [x0,y0,x1,y1]=item.bbox;
+   const directionAngle=Math.atan2(item.direction[1],item.direction[0])*180/Math.PI;
+   const fontName=item.font.replace(/^[A-Z]{6}\+/,"").replace(/[^a-zA-Z0-9 _-]/g,"").trim()||"Arial";
+   slide.addText(item.text,{x:offsetX+x0*scale,y:offsetY+y0*scale,w:Math.max(.04,(x1-x0)*scale),h:Math.max(.08,(y1-y0)*scale),fontFace:fontName,fontSize:Math.max(4,Math.min(72,item.size*scale*72)),bold:(item.flags&16)!==0,italic:(item.flags&2)!==0,rotate:Math.abs(directionAngle)>.7?directionAngle:0,color:pdfHexColor(item.color),margin:0,fit:"shrink",valign:"middle",breakLine:false});
+   textCount++;
   }
  }
- const docx=new Document({sections:[{properties:{page:{size:{width:12240,height:15840},margin:{top:720,bottom:720,left:900,right:900}}},children}]});
- return result(await Packer.toBlob(docx),name(file,"docx"),"Editable text and paragraphs reconstructed from PDF text positions. Font sizes and bold/italic hints are approximated. Embedded images, vector artwork, complex tables and exact layout are not reconstructed; scanned PDFs require OCR.");
+ if(!textCount&&!imageCount&&!shapeCount&&!tableCount)throw new Error("The PDF contains no supported page elements to reconstruct.");
+ const blob=await pptx.write({outputType:"blob"}) as Blob;
+ const notes=[];
+ if(skippedImageCount)notes.push(skippedImageCount+" unsupported embedded image(s) were skipped");
+ notes.push("Text, detected tables, embedded images and supported vector paths are separate editable PowerPoint objects.");
+ notes.push("Complex clipping masks, transparency blends, gradients, chart data and some vector paths may need manual adjustment.");
+ return result(blob,name(file,"pptx"),notes.join(" "));
 }
-async function pdfToEditablePptx(file:File):Promise<ProcessResult>{
- const pages=await extractPdfLayout(file);if(pages.every(p=>!p.fragments.length))throw new Error("No selectable PDF text found. Scanned or image-only pages require OCR first; graphics and images are not reconstructed.");
- const PptxGenJS=(await import("pptxgenjs")).default,pptx=new PptxGenJS();pptx.layout="LAYOUT_WIDE";pptx.author="ConvoTools";pptx.subject="Editable text reconstructed from PDF";pptx.title=file.name;
- const sw=13.333,sh=7.5;
- for(const page of pages){const slide=pptx.addSlide();slide.background={color:"FFFFFF"};
-  for(const item of page.fragments){
-   const x=Math.max(0,Math.min(sw,item.x/page.width*sw)),y=Math.max(0,Math.min(sh,item.y/page.height*sh-item.fontSize/page.height*sh));
-   const w=Math.max(.08,Math.min(sw-x,Math.max(item.width,item.fontSize*.35)/page.width*sw)),h=Math.max(.12,Math.min(.8,item.fontSize/page.height*sh*1.65));
-   slide.addText(item.text,{x,y,w,h,fontFace:"Arial",fontSize:Math.max(5,Math.min(48,item.fontSize/page.height*sh*72)),bold:/bold|black|heavy|semibold/i.test(item.fontName),italic:/italic|oblique/i.test(item.fontName),margin:0,fit:"shrink",color:"222222",valign:"mid"});
-  }
+function addPdfPageTextToSheet(sheetRows:string[][],page:PdfLayoutPage){
+ const textItems=page.items.filter((item):item is Extract<PdfLayoutPage["items"][number],{type:"text"}>=>item.type==="text"&&item.text.trim().length>0);
+ const lines:{y:number;items:typeof textItems}[]=[];
+ for(const item of textItems.sort((a,b)=>a.bbox[1]-b.bbox[1]||a.bbox[0]-b.bbox[0])){
+  let line=lines.find(candidate=>Math.abs(candidate.y-item.bbox[1])<=Math.max(2,item.size*.28));
+  if(!line){line={y:item.bbox[1],items:[]};lines.push(line);}line.items.push(item);
  }
- return result(await pptx.write({outputType:"blob"}) as Blob,name(file,"pptx"),"Selectable PDF text rebuilt as individually editable PowerPoint text boxes. Position and style are approximate; images, vector artwork, charts and complex tables are not reconstructed. Scanned PDFs require OCR.");
+ lines.sort((a,b)=>a.y-b.y);
+ for(const line of lines){
+  const text=line.items.sort((a,b)=>a.bbox[0]-b.bbox[0]).map(item=>item.text).join(" ").replace(/\s+/g," ").trim();
+  if(text)sheetRows.push([text]);
+ }
 }
-async function pdfToEditableExcel(file:File):Promise<ProcessResult>{
- const pages=await extractPdfLayout(file);if(pages.every(p=>!p.fragments.length))throw new Error("No selectable PDF text found. Scanned or image-only pages require OCR first.");
- const wb=XLSX.utils.book_new();
- pages.forEach((page,index)=>{
-  const anchors:number[]=[];for(const item of page.fragments)if(!anchors.some(x=>Math.abs(x-item.x)<18))anchors.push(item.x);anchors.sort((x,y)=>x-y);
-  const data=page.lines.map(line=>{const cells=Array(Math.max(1,anchors.length)).fill("");for(const item of line.fragments){let col=0,best=Infinity;anchors.forEach((x,i)=>{const d=Math.abs(x-item.x);if(d<best){best=d;col=i;}});cells[col]=(cells[col]?cells[col]+" ":"")+item.text;}return cells;});
-  const sheet=XLSX.utils.aoa_to_sheet(data);sheet["!cols"]=anchors.map((_,i)=>({wch:Math.max(12,Math.min(42,Math.max(...data.map(row=>(row[i]||"").length),12)+2))}));
-  XLSX.utils.book_append_sheet(wb,sheet,("Page "+(index+1)).slice(0,31));
- });
- return result(bytesBlob(XLSX.write(wb,{type:"array",bookType:"xlsx"}) as Uint8Array,"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),name(file,"xlsx"),"Selectable PDF text reconstructed into editable spreadsheet cells using approximate x-position columns. Tables, merged cells, formulas, charts, images and scanned content are not reliably inferred; review the result.");
+async function pdfToEditableExcel(file:File,options:ProcessOptions):Promise<ProcessResult>{
+ const analysis=await analyzePdfForOffice(file,options.onProgress);
+ const workbook=XLSX.utils.book_new();let tableCount=0,otherTextPages=0;
+ for(const page of analysis.pages){
+  for(const table of page.tables||[]){
+   const rows=table.rows.map(row=>row.map(cell=>String(cell??"")));
+   if(!rows.length)continue;
+   const columns=Math.max(1,...rows.map(row=>row.length));
+   const normalized=rows.map(row=>Array.from({length:columns},(_,i)=>row[i]??""));
+   const sheet=XLSX.utils.aoa_to_sheet(normalized);
+   sheet["!cols"]=Array.from({length:columns},(_,index)=>({wch:Math.max(12,Math.min(42,Math.max(...normalized.map(row=>(row[index]||"").length),12)+2))}));
+   sheet["!autofilter"]={ref:XLSX.utils.encode_range({s:{r:0,c:0},e:{r:Math.max(0,normalized.length-1),c:columns-1}})};
+   const sheetName=("P"+page.page+" Table "+(++tableCount)).slice(0,31);
+   XLSX.utils.book_append_sheet(workbook,sheet,sheetName);
+  }
+  const otherRows:string[][]=[];
+  const outsideItems=page.items.filter(item=>item.type==="text"&&!inTable(item.bbox,page.tables||[]));
+  if(outsideItems.length){addPdfPageTextToSheet(otherRows,{...page,items:outsideItems});if(otherRows.length){const sheet=XLSX.utils.aoa_to_sheet([["Extracted text"],...otherRows]);sheet["!cols"]=[{wch:100}];XLSX.utils.book_append_sheet(workbook,sheet,("P"+page.page+" Text").slice(0,31));otherTextPages++;}}
+ }
+ if(!workbook.SheetNames.length)throw new Error("No selectable text or table structure was detected. This PDF may be scanned or image-only; run OCR first.");
+ const bytes=XLSX.write(workbook,{type:"array",bookType:"xlsx"});
+ const notes=tableCount
+  ? tableCount+" detected PDF table(s) reconstructed as editable spreadsheet cells. "+otherTextPages+" page(s) also contain extracted text."
+  : "No reliable table grid was detected. Selectable text was exported into editable worksheet rows in reading order; arrange columns manually.";
+ return result(bytesBlob(bytes as Uint8Array,"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),name(file,"xlsx"),notes+" Merged cells, formulas, charts and semantic relationships are not inferred from PDF content.");
 }
 async function imageToWordDocx(file:File,recognizedText:string):Promise<ProcessResult>{
  const bitmap=await createImageBitmap(file);
@@ -221,10 +315,10 @@ async function imageToWordDocx(file:File,recognizedText:string):Promise<ProcessR
  return result(await Packer.toBlob(doc),name(file,"docx"),"Source image embedded in the Word document with OCR text below it. Review OCR text for recognition errors.");
 }
 
-async function pdfAdvanced(files:File[],tool:string):Promise<ProcessResult[]>{
- if(tool==="PDF to Word")return [await pdfToEditableDocx(files[0])];
- if(tool==="PDF to Excel")return [await pdfToEditableExcel(files[0])];if(tool==="PDF to JPG"||tool==="PDF to PNG"){const pages=await renderPdfPages(files[0],tool==="PDF to JPG"?"jpeg":"png");if(pages.length===1)return [result(pages[0],name(files[0],tool==="PDF to JPG"?"jpg":"png"),"PDF page rendered as an image.")];const zip=new JSZip();pages.forEach((p,i)=>zip.file("page-"+String(i+1).padStart(3,"0")+(tool==="PDF to JPG"?".jpg":".png"),p));return [result(await zip.generateAsync({type:"blob"}),name(files[0],"zip"),pages.length+" PDF pages rendered into image files.")];}
- if(tool==="PDF to PowerPoint"||tool==="PDF to PPTX")return [await pdfToEditablePptx(files[0])];
+async function pdfAdvanced(files:File[],tool:string,options:ProcessOptions):Promise<ProcessResult[]>{
+ if(tool==="PDF to Word")return [await pdfToEditableDocx(files[0],options)];
+ if(tool==="PDF to Excel")return [await pdfToEditableExcel(files[0],options)];if(tool==="PDF to JPG"||tool==="PDF to PNG"){const pages=await renderPdfPages(files[0],tool==="PDF to JPG"?"jpeg":"png");if(pages.length===1)return [result(pages[0],name(files[0],tool==="PDF to JPG"?"jpg":"png"),"PDF page rendered as an image.")];const zip=new JSZip();pages.forEach((p,i)=>zip.file("page-"+String(i+1).padStart(3,"0")+(tool==="PDF to JPG"?".jpg":".png"),p));return [result(await zip.generateAsync({type:"blob"}),name(files[0],"zip"),pages.length+" PDF pages rendered into image files.")];}
+ if(tool==="PDF to PowerPoint"||tool==="PDF to PPTX")return [await pdfToEditablePptx(files[0],options)];
  throw new Error("Unsupported PDF operation.");
 }
 
@@ -550,7 +644,7 @@ export async function processFiles(files:File[],tool:string,options:ProcessOptio
  if(["Image to PDF","Merge PDF"].includes(tool))return pdf(files,tool,options);
  if(["Split PDF","Compress PDF","Organize PDF"].includes(tool))return mapFileResults(files,file=>pdf([file],tool,options));
  if(tool==="Protect PDF"){const password=options.password?.trim();if(!password||password.length<6)throw new Error("Enter a password with at least 6 characters.");return mapFileResults(files,async file=>{const {PDFDocument:SecurePDF}=await import("@cantoo/pdf-lib");const doc=await SecurePDF.load(await file.arrayBuffer());doc.encrypt({userPassword:password,ownerPassword:password+"-"+crypto.randomUUID()});return [result(bytesBlob(await doc.save(),"application/pdf"),name(file,"pdf"),"PDF encrypted with AES-256 password protection.")];});}
- if(["PDF to Word","PDF to Excel","PDF to JPG","PDF to PNG","PDF to PowerPoint","PDF to PPTX"].includes(tool))return mapFileResults(files,file=>pdfAdvanced([file],tool));
+ if(["PDF to Word","PDF to Excel","PDF to JPG","PDF to PNG","PDF to PowerPoint","PDF to PPTX"].includes(tool))return mapFileResults(files,file=>pdfAdvanced([file],tool,options));
  if(tool==="PPTX to PDF"||tool==="Slides to images")return mapFileResults(files,async file=>{if(tool==="PPTX to PDF"){const pages=await renderPresentationSlides(file);return [await presentationToPdf(pages,name(file,"pdf"))];}return slidesToImageFiles(file);});
  if(["CSV to XLSX","Remove duplicates"].includes(tool))return mapFileResults(files,file=>spreadsheet(file,tool));
  if(tool==="Excel to PDF")return mapFileResults(files,async file=>[await workbookToPdf(file)]);
