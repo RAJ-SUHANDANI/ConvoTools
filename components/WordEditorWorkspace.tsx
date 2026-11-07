@@ -2,8 +2,7 @@
 
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import {
-  AlignCenter, AlignLeft, AlignRight, Bold, Check, ChevronDown, Download,
-  FilePlus2, Heading1, Heading2, ImagePlus, Italic, List, ListOrdered,
+  AlignCenter, AlignLeft, AlignRight, Bold, FilePlus2, ImagePlus, Italic, List, ListOrdered,
   LoaderCircle, Redo2, Save, Table2, Underline, Undo2, Upload
 } from "lucide-react";
 import { Document, ImageRun, Packer, Paragraph, Table, TableCell, TableRow, TextRun, WidthType, HeadingLevel, AlignmentType } from "docx";
@@ -252,6 +251,7 @@ export default function WordEditorWorkspace() {
       <header className="word-editor-topbar">
         <div className="word-editor-filebrand"><span className="word-editor-app-icon">W</span><div><b>ConvoTools Writer</b><small>{filename} {dirty ? "· Unsaved changes" : "· Saved locally"}</small></div></div>
         <div className="word-editor-top-actions">
+          <button className="word-editor-secondary" onClick={startNewDocument}><FilePlus2 size={14}/> New</button>
           <button className="word-editor-secondary" onClick={() => fileRef.current?.click()}><Upload size={14}/> Open DOCX</button>
           <button className="word-editor-primary" onClick={exportDocument} disabled={exporting || loading}><Save size={14}/>{exporting ? "Exporting…" : "Export DOCX"}</button>
         </div>
