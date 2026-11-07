@@ -17,8 +17,8 @@ export type Tool = {
 };
 
 export const TOOLS: Tool[] = [
-  { name: "PDF to Word", description: "Extract selectable PDF text into an editable Word document; page layout is not retained.", category: "PDF", icon: FileText, tag: "Popular", inputLabel: "PDF", outputLabel: "DOCX" },
-  { name: "Word to PDF", description: "Extract Word document text and create a simple, paginated PDF; original layout may differ.", category: "PDF", icon: FilePenLine, inputLabel: "Document", outputLabel: "PDF" },
+  { name: "PDF to Word", description: "Create a visually faithful Word document with each PDF page preserved as a high-resolution image; page content is not individually editable.", category: "PDF", icon: FileText, tag: "Popular", inputLabel: "PDF", outputLabel: "DOCX" },
+  { name: "Word to PDF", description: "Render supported DOCX pages, including text, tables and embedded images, into a PDF.", category: "PDF", icon: FilePenLine, inputLabel: "Document", outputLabel: "PDF" },
   { name: "Image to PDF", description: "Combine images into a single PDF document.", category: "PDF", icon: FileImage, tag: "Popular", inputLabel: "Image", outputLabel: "PDF" },
   { name: "Image to Word (OCR)", description: "Extract text from an image into an editable document.", category: "PDF", icon: ScanText, inputLabel: "Image", outputLabel: "DOCX" },
   { name: "Merge PDF", description: "Bring separate PDF files together in one document.", category: "PDF", icon: Merge, inputLabel: "PDF", outputLabel: "PDF" },
@@ -46,7 +46,7 @@ export const TOOLS: Tool[] = [
   { name: "Excel to PDF", description: "Export spreadsheet cell content into a simple PDF report; styling may differ.", category: "Spreadsheets", icon: FileSpreadsheet, inputLabel: "XLSX", outputLabel: "PDF" },
   { name: "CSV to XLSX", description: "Turn CSV data into a formatted workbook.", category: "Spreadsheets", icon: FileSpreadsheet, inputLabel: "CSV / XLSX", outputLabel: "XLSX" },
   { name: "Remove duplicates", description: "Find and remove repeated spreadsheet rows.", category: "Spreadsheets", icon: Check, inputLabel: "CSV / XLSX", outputLabel: "Cleaned XLSX" },
-  { name: "PPTX to PDF", description: "Extract slide text into a simple PDF document; original slide layout is not retained.", category: "Presentations", icon: PanelTop, tag: "Popular", inputLabel: "PPTX", outputLabel: "PDF" },
+  { name: "PPTX to PDF", description: "Render PowerPoint slide content and embedded images into a PDF; complex slide elements may differ.", category: "Presentations", icon: PanelTop, tag: "Popular", inputLabel: "PPTX", outputLabel: "PDF" },
   { name: "PDF to PPTX", description: "Convert PDF pages into editable slide layouts.", category: "Presentations", icon: FileText, inputLabel: "PDF", outputLabel: "PPTX" },
   { name: "Slides to images", description: "Render slide text boxes, basic shapes and embedded images to PNG files.", category: "Presentations", icon: ImageIcon, inputLabel: "PPTX", outputLabel: "PNG" },
   { name: "MP4 to GIF", description: "Turn a video clip into a lightweight looping GIF.", category: "Video & audio", icon: Film, inputLabel: "MP4", outputLabel: "GIF" },
