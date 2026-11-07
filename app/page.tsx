@@ -15,6 +15,17 @@ import { recordActivity } from "@/lib/activity";
 import { TOOLS, TOOL_CATEGORIES, slugify } from "@/lib/tools";
 import { AIGallery, ApproachWaypoints, FooterReveal, LandingNav, LiveCodeTerminal, ScrollTextLines, TypewriterHeading, WorkflowWaypoints } from "@/components/LandingEnhancements";
 
+const homepageFaqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: [
+    { "@type": "Question", name: "Will ConvoTools be free?", acceptedAnswer: { "@type": "Answer", text: "ConvoTools is being built as a free-first workspace. Availability and usage limits may vary by tool, especially when an external processing provider is required." } },
+    { "@type": "Question", name: "Do my files get uploaded?", acceptedAnswer: { "@type": "Answer", text: "Tools that support local processing work in your browser. Processing methods can differ by tool; review its on-page notice before selecting a file." } },
+    { "@type": "Question", name: "Can I process multiple files at once?", acceptedAnswer: { "@type": "Answer", text: "Several tools accept multiple files in one selection. Batch support depends on the tool and the formats it accepts." } },
+    { "@type": "Question", name: "Are all the tools working already?", acceptedAnswer: { "@type": "Answer", text: "Tool availability varies. Each tool page shows its supported input, output and processing controls. Some AI experiences are marked as coming soon." } },
+  ],
+};
+
 export default function Home() {
   const reducedMotion = useReducedMotion();
   const router = useRouter();
@@ -58,7 +69,7 @@ export default function Home() {
   }, [category, query]);
 
   return (
-    <main className="app-shell" id="top">
+    <main className="app-shell" id="top">\n      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homepageFaqSchema) }} />
       <div className="announcement-bar">
         <span className="announcement-pulse" />
         <span>THE FILE WORKSPACE FOR PEOPLE WHO MAKE THINGS</span>
