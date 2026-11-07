@@ -153,9 +153,9 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
     if (!files.length && !(tool.name === "QR generator" && qrText.trim())) { setNotice("Choose a file or enter text before processing."); inputRef.current?.click(); return; }
     if (tool.name === "Word editor" && files.length > 1) { setNotice("The text editor works with one DOCX file at a time. Choose a single document."); return; }
     if (invalidFiles.length) { setNotice("One or more files do not match this tool's expected input format."); return; }
-    setProcessing(true); setProgress(0); setMediaProgress(["MP4 to GIF","Video compressor","Extract audio","Audio converter"].includes(tool.name)); setResults([]); setNotice("Processing locally in your browser…");
+    setProcessing(true); setProgress(0); setMediaProgress(["MP4 to GIF","Video compressor","Extract audio","Audio converter","PDF to Word","PDF to Excel","PDF to PowerPoint","PDF to PPTX"].includes(tool.name)); setResults([]); setNotice("Processing locally in your browser…");
     try {
-      const completed = await processFiles(files, tool.name, { output, quality, password, pdfPageOrder, width: imageWidth, height: imageHeight, rotation, cropMode, textContent: documentText, base64Mode, decodedFormat, ocrFormat, ocrLanguage, pdfRotation, qrFormat, hashAlgorithm, qrText, onProgress: (value) => setProgress(value) });
+      const completed = await processFiles(files, tool.name, { output, quality, password, pdfPageOrder, width: imageWidth, height: imageHeight, rotation, cropMode, textContent: documentText, base64Mode, decodedFormat, ocrFormat, ocrLanguage, pdfRotation, qrFormat, hashAlgorithm, qrText, onProgress: (value, phase) => { setProgress(value); if (phase) setNotice(phase); } });
       setResults(completed);
       setDownloadRun((run) => run + 1);
       completed.forEach((result) => {
