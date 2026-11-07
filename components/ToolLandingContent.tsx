@@ -152,7 +152,7 @@ export default function ToolLandingContent({ tool }: { tool: Tool }) {
         {tool.name === "PDF to Word" && (
           <p className="tool-seo-license">
             PDF-to-DOCX conversion uses a browser-based open-source engine under AGPL-3.0.
-            <a href="/licenses/pdf2docx-wasm-AGPL-3.0.txt" target="_blank" rel="noreferrer">View license</a>
+            <a href="/licenses/AGPL-3.0-PDF2DOCX-WASM.txt" target="_blank" rel="noreferrer">View license</a>
             <a href="https://github.com/jsscheller/pdf2docx-wasm" target="_blank" rel="noreferrer">View corresponding source</a>
           </p>
         )}
