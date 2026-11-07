@@ -186,7 +186,7 @@ export default function WordEditorWorkspace() {
     import("mammoth").then(async mammoth => {
       const converted = await mammoth.convertToHtml(
         { arrayBuffer: await file.arrayBuffer() },
-        { convertImage: mammoth.images.inline(async image => ({
+        { convertImage: mammoth.images.imgElement(async image => ({
           src: "data:" + image.contentType + ";base64," + await image.read("base64"),
         })) },
       );
@@ -226,7 +226,7 @@ export default function WordEditorWorkspace() {
       const converted = await mammoth.convertToHtml(
         { arrayBuffer: await file.arrayBuffer() },
         {
-          convertImage: mammoth.images.inline(async (image) => ({
+          convertImage: mammoth.images.imgElement(async (image) => ({
             src: "data:" + image.contentType + ";base64," + await image.read("base64"),
           })),
         },
