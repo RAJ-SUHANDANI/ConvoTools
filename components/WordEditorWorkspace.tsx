@@ -46,7 +46,28 @@ async function inlineChildren(node: Node, state: { bold?: boolean; italic?: bool
       const src = (child as HTMLImageElement).src;
       if (src.startsWith("data:")) {
         const dimensions = imageDimensions(child as HTMLImageElement);
-        runs.push(new ImageRun({ data: decodeDataUrl(src), transformation: dimensions }));
+        const mime = src.slice(5, src.indexOf(";")).toLowerCase();
+        let imageType: "png" | "jpg" | "gif" | "bmp" = mime.includes("jpeg") ? "jpg" : mime.endsWith("/gif") ? "gif" : mime.endsWith("/bmp") ? "bmp" : "png";
+        let decoded = decodeDataUrl(src);
+        if (!["image/png", "image/jpeg", "image/gif", "image/bmp"].includes(mime)) {
+          const sourceBlob = await (await fetch(src)).blob();
+          const bitmap = await createImageBitmap(sourceBlob);
+          const canvas = document.createElement("canvas");
+          canvas.width = bitmap.width;
+          canvas.height = bitmap.height;
+          const context = canvas.getContext("2d");
+          if (!context) throw new Error("Could not prepare an embedded image for Word.");
+          context.drawImage(bitmap, 0, 0);
+          bitmap.close();
+          const png = await new Promise<Blob>((resolve, reject) => canvas.toBlob(value => value ? resolve(value) : reject(new Error("Could not convert an embedded image to PNG.")), "image/png"));
+          decoded = new Uint8Array(await png.arrayBuffer());
+          imageType = "png";
+          canvas.width = 0;
+          canvas.height = 0;
+        }
+        const safeBytes = new Uint8Array(new ArrayBuffer(decoded.byteLength));
+        safeBytes.set(decoded);
+        runs.push(new ImageRun({ data: safeBytes, type: imageType, transformation: dimensions }));
       } else {
         runs.push(new TextRun({ text: "[External image omitted: embed an image file to include it in DOCX]" }));
       }
