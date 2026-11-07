@@ -1,6 +1,7 @@
 "use client";
 
-import { ChangeEvent, useMemo, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
+import { clearPendingFiles, getPendingFiles } from "@/lib/file-session";
 import { Braces, Check, ChevronDown, ChevronRight, Clipboard, Code2, Download, FileCode2, FileInput, FileSpreadsheet, FileType, Search, TreePine, WandSparkles } from "lucide-react";
 
 type JsonValue = null | boolean | number | string | JsonValue[] | { [key: string]: JsonValue };
@@ -111,6 +112,16 @@ export default function JsonFormatterWorkspace() {
   const [message, setMessage] = useState("Edit JSON or open a .json file. Validation updates as you type.");
   const [outputFormat, setOutputFormat] = useState<"json" | "xml" | "csv" | "min.json">("xml");
   const fileRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const queued = getPendingFiles();
+    if (!queued.length) return;
+    clearPendingFiles();
+    queued[0].text().then(text => {
+      setSource(text);
+      setView("split");
+      setMessage("Loaded " + queued[0].name + " from your workspace. JSON is parsed locally.");
+    }).catch(() => setMessage("Could not read the JSON file selected in your workspace."));
+  }, []);
   const parsed = useMemo(() => parseJson(source), [source]);
   const pretty = useMemo(() => parsed.error ? "" : JSON.stringify(parsed.value, null, 2), [parsed]);
   const compact = useMemo(() => parsed.error ? "" : JSON.stringify(parsed.value), [parsed]);
