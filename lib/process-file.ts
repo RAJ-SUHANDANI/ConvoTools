@@ -100,12 +100,7 @@ async function pdfJsDocument(file:File) {
  pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
  const data = new Uint8Array(await file.arrayBuffer());
  try {
-  return await pdfjs.getDocument({
-   data,
-   isEvalSupported: false,
-   useWorkerFetch: false,
-   stopAtErrors: true
-  }).promise;
+  return await pdfjs.getDocument({ data }).promise;
  } catch (error) {
   const message = error instanceof Error ? error.message : String(error);
   if (/GlobalWorkerOptions\.workerSrc|fake worker|worker.*failed/i.test(message)) {
