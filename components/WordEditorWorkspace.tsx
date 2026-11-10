@@ -207,12 +207,15 @@ export default function WordEditorWorkspace() {
     clearPendingFiles();
     const file = queued[0];
     if (!file.name.toLowerCase().endsWith(".docx")) {
-      setStatus("The selected file is not a DOCX document. Open a .docx file to edit it here.");
+      queueMicrotask(() => setStatus("The selected file is not a DOCX document. Open a .docx file to edit it here."));
       return;
     }
     let active = true;
-    setLoading(true);
-    setStatus("Opening the selected Word document…");
+    queueMicrotask(() => {
+      if (!active) return;
+      setLoading(true);
+      setStatus("Opening the selected Word document…");
+    });
     import("mammoth").then(async mammoth => {
       const converted = await mammoth.convertToHtml(
         { arrayBuffer: await file.arrayBuffer() },
