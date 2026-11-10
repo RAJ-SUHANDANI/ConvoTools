@@ -10,7 +10,7 @@ test("the desk is readable, accessible and fits the viewport", async ({
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "Big ideas.Little file jobs.",
+    "Your files.In good hands.",
   );
   await expect(page.locator(".fd-tool")).toHaveCount(9);
   expect(
