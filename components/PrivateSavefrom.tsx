@@ -92,7 +92,7 @@ export default function PrivateSavefrom() {
 
   return (
     <main className="tool-page savefrom-private-page">
-      <header className="tool-page-header savefrom-header"><BrandLogo className="brand-tool" width={190} priority /><nav aria-label="Main navigation"><Link href="/">Home</Link><Link href="/dashboard">Workspace</Link></nav></header>
+      <header className="tool-page-header savefrom-header"><BrandLogo className="brand-tool" width={190} priority /><nav aria-label="Main navigation"><Link href="/">Home</Link><Link href="/privacy">Privacy</Link><Link href="/dashboard">Workspace</Link></nav></header>
       <motion.section className="savefrom-private-hero" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .5 }}>
         <span className="tool-detail-kicker"><Download size={13} /> MEDIA LINK WORKSPACE</span>
         <h1>Drop the link.<br /><em>Know what you can save.</em></h1>
