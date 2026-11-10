@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { usePathname } from "next/navigation";
 import { ShimmeringText } from "@animate-ui/react/primitives/texts/shimmering";
 import { CountingNumber } from "@animate-ui/react/primitives/texts/counting-number";
 import { FileCheck } from "@/components/animate-ui/icons/file-check";
@@ -17,9 +18,14 @@ export default function IntroGate({ children }: { children: ReactNode }) {
   const [show, setShow] = useState(true);
   const [percent, setPercent] = useState(0);
   const reduce = useReducedMotion();
+  const pathname = usePathname();
 
   useEffect(() => {
     let alive = true;
+    if (pathname !== "/") {
+      queueMicrotask(() => { if (alive) setShow(false); });
+      return () => { alive = false; };
+    }
     const seen = (() => {
       try { return sessionStorage.getItem(SESSION_KEY) === "1"; } catch { return false; }
     })();
@@ -59,13 +65,13 @@ export default function IntroGate({ children }: { children: ReactNode }) {
       clearTimeout(finishTimer);
       clearInterval(progressTimer);
     };
-  }, [reduce]);
+  }, [reduce, pathname]);
 
   return (
     <>
       {children}
       <AnimatePresence>
-        {show && (
+        {show && pathname === "/" && (
           <motion.div
             className="ct-intro"
             key="ct-intro"
