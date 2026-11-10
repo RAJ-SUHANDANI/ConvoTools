@@ -260,6 +260,7 @@ for (const name of names) {
     page.on("pageerror", (error) => errors.push(error.message));
     const response = await page.goto("/tools/" + slug(name));
     expect(response?.status()).toBe(200);
+    await expect(page.locator('html[data-ct-hydrated="true"]')).toHaveCount(1);
     if (locked.includes(name)) {
       await expect(page.getByText(/coming soon/i).first()).toBeVisible();
       expect(
