@@ -78,10 +78,13 @@ export default function DashboardPage() {
 
   useEffect(() => {
     // Keep locale-dependent date formatting out of the server-rendered tree.
-    setDateLabel(new Intl.DateTimeFormat("en-IN", {
-      weekday: "long", day: "numeric", month: "long", timeZone: "Asia/Kolkata",
-    }).format(new Date()).toUpperCase());
-    refreshLocalData();
+    // Browser-only data is read after hydration to avoid server/client divergence.
+    queueMicrotask(() => {
+      setDateLabel(new Intl.DateTimeFormat("en-IN", {
+        weekday: "long", day: "numeric", month: "long", timeZone: "Asia/Kolkata",
+      }).format(new Date()).toUpperCase());
+      refreshLocalData();
+    });
     const onData = () => refreshLocalData();
     window.addEventListener("convotools:local-data", onData);
     window.addEventListener("storage", onData);
