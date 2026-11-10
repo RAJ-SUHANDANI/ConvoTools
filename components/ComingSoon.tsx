@@ -12,7 +12,7 @@ export default function ComingSoon({ toolName }: { toolName: string }) {
     <main className="tool-page coming-soon-page">
       <motion.header className="tool-page-header" initial={{ y: -16, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: .45 }}>
         <BrandLogo className="brand-tool" width={190} priority />
-        <nav><Link href="/#toolkit">All tools</Link><Link href="/dashboard">Workspace</Link><a href="https://github.com/RAJ-SUHANDANI/ConvoTools" target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={12} /></a></nav>
+        <nav><Link href="/#toolkit">All tools</Link><Link href="/privacy">Privacy</Link><Link href="/dashboard">Workspace</Link><a href="https://github.com/RAJ-SUHANDANI/ConvoTools" target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={12} /></a></nav>
         <Link className="tool-header-cta" href="/#toolkit">Explore tools <ArrowUpRight size={13} /></Link>
       </motion.header>
       <Fade asChild><motion.section className="coming-soon-shell" initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .55, ease: [ .22, 1, .36, 1 ] }}>
