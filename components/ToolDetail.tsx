@@ -9,6 +9,10 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import BrandLogo from "@/components/BrandLogo";
+import { Upload as MotionUpload } from "@/components/animate-ui/icons/upload";
+import { FileCheck } from "@/components/animate-ui/icons/file-check";
+import { RippleButton, RippleButtonRipples } from "@animate-ui/react/primitives/buttons/ripple";
+import { Fade } from "@animate-ui/react/primitives/effects/fade";
 import { Button } from "@animate-ui/react/primitives/buttons/button";
 import { SlidingText } from "@animate-ui/react/primitives/texts/sliding";
 import type { ProcessResult } from "@/lib/process-file";
@@ -185,7 +189,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
     <main className="tool-page">
       <motion.header className="tool-page-header" initial={{ y: -18, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
         <BrandLogo className="brand-tool" width={190} priority />
-        <nav><Link href="/#toolkit">All tools</Link><Link href="/dashboard">Workspace</Link><a href="https://github.com/RAJ-SUHANDANI/ConvoTools" target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={12} /></a></nav>
+        <nav><Link href="/#toolkit">All tools</Link><Link href="/privacy">Privacy</Link><Link href="/dashboard">Workspace</Link><a href="https://github.com/RAJ-SUHANDANI/ConvoTools" target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={12} /></a></nav>
         <Link className="tool-header-cta" href="/dashboard">Open workspace <ArrowUpRight size={13} /></Link>
       </motion.header>
 
@@ -205,10 +209,10 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
         </motion.div>
 
         <motion.div className="operation-card" variants={{ hidden: { opacity: 0, y: 18, scale: 0.99 }, visible: { opacity: 1, y: 0, scale: 1 } }} onMouseMove={(event) => { const rect = event.currentTarget.getBoundingClientRect(); event.currentTarget.style.setProperty("--pointer-x", ((event.clientX - rect.left) / rect.width * 100) + "%"); event.currentTarget.style.setProperty("--pointer-y", ((event.clientY - rect.top) / rect.height * 100) + "%"); }} onMouseLeave={(event) => { event.currentTarget.style.setProperty("--pointer-x", "50%"); event.currentTarget.style.setProperty("--pointer-y", "0%"); }}>
-          <div className="operation-card-head"><div><span className="operation-step">STEP 01 / INPUT</span><h2>Add your file</h2><p>Expected format: <b>{tool.inputLabel || "Supported file"}</b></p></div><span className="operation-file-icon"><FileType2 size={21} /></span></div>
+          <div className="operation-card-head"><div><span className="operation-step">STEP 01 / INPUT</span><h2>Add your file</h2><p>Expected format: <b>{tool.inputLabel || "Supported file"}</b></p></div><span className="operation-file-icon"><MotionUpload size={22} animateOnHover /></span></div>
           <input ref={inputRef} type="file" accept={accept} multiple={tool.name !== "Word editor"} className="operation-input" onChange={onChoose} />
           <motion.button className={"operation-drop " + (files.length ? "has-files" : "")} onClick={() => inputRef.current?.click()} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); addFiles(event.dataTransfer.files); }} whileHover={{ scale: 1.006, borderColor: "#438464" }} whileTap={{ scale: 0.995 }}>
-            <span className="operation-upload-icon"><UploadCloud size={25} /></span>
+            <span className="operation-upload-icon"><MotionUpload size={26} animateOnHover /></span>
             <b>{files.length ? "Replace selected files" : "Choose files or drop them here"}</b>
             <small>Multiple files supported · {tool.inputLabel || "Common formats"}</small>
             <span className="operation-browse">Browse files <ArrowUpRight size={13} /></span>
@@ -230,7 +234,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
           {invalidFiles.length > 0 && <div className="format-warning"><FileImage size={15} /><span>This tool expects {tool.inputLabel}. Your selection includes a different file type. Try the universal workspace for matching actions.</span><Link href="/dashboard">Open workspace <ArrowUpRight size={12} /></Link></div>}
 
           <div className="operation-divider" />
-          <div className="operation-card-head settings-head"><div><span className="operation-step">STEP 02 / OUTPUT</span><h2>Choose your settings</h2><p>Adjust the output before preparing your file.</p></div><span className="settings-icon"><Settings2 size={19} /></span></div>
+          <div className="operation-card-head settings-head"><div><span className="operation-step">STEP 02 / OUTPUT</span><h2>Choose your settings</h2><p>Adjust the output before preparing your file.</p></div><span className="settings-icon"><FileCheck size={20} animateOnHover /></span></div>
           {showOutputFormat && <>
           <label className="field-label" htmlFor="output-format">Output format</label>
                     <div className="select-wrap"><select id="output-format" value={output} onChange={(event) => setOutput(event.target.value)}>{(options.includes(defaultOutput(tool)) ? options : [defaultOutput(tool), ...options]).map((option) => <option key={option} value={option}>{option}</option>)}</select><ChevronDown size={15} /></div>
@@ -252,12 +256,12 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
           {tool.name === "Protect PDF" && <><label className="field-label" htmlFor="pdf-password">PDF password</label><input id="pdf-password" className="operation-password" type="password" autoComplete="new-password" minLength={6} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="At least 6 characters" /><small className="operation-hint">The password is applied locally. Keep it safe; it cannot be recovered.</small></>}
           {tool.name === "Organize PDF" && <><label className="field-label" htmlFor="pdf-page-order">Page order / pages to keep</label><input id="pdf-page-order" className="operation-password" type="text" value={pdfPageOrder} onChange={(event) => setPdfPageOrder(event.target.value)} placeholder="Example: 3, 1, 2" /><small className="operation-hint">Enter page numbers in the desired order. Omit a page to remove it. Leave blank to keep the original order.</small><label className="field-label" htmlFor="pdf-rotation">Rotate selected pages</label><div className="select-wrap"><select id="pdf-rotation" value={pdfRotation} onChange={(event) => setPdfRotation(Number(event.target.value))}><option value={0}>No rotation</option><option value={90}>90° clockwise</option><option value={180}>180°</option><option value={270}>270° clockwise</option></select><ChevronDown size={15} /></div></>}
 
-          <Button className="operation-submit" onClick={startOperation} disabled={processing || documentLoading || (files.length > 0 && invalidFiles.length > 0)} tapScale={0.985}><span>{processing ? "Processing…" : isAI ? "Run tool" : <SlidingText text="Process & download" />}</span><ArrowRight size={16} /></Button>
+          <RippleButton className="operation-submit" onClick={startOperation} disabled={processing || documentLoading || (files.length > 0 && invalidFiles.length > 0)} tapScale={0.985}><span>{processing ? "Processing…" : isAI ? "Run tool" : <SlidingText text="Process & download" />}</span><ArrowRight size={16} /><RippleButtonRipples color="rgba(213,250,119,.3)" /></RippleButton>
           {processing && <><LoadingPath /><ProgressMeter progress={progress} determinate={mediaProgress} /></>}
           {downloadRun > 0 && !processing && <DownloadCelebration run={downloadRun} />}
           {notice && <div className="operation-notice" role="status" aria-live="polite"><Sparkles size={14} /> {notice}</div>}
           {results.length > 0 && <motion.div className="operation-results" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .32 }}><b><Check size={14} /> {results.length} output {results.length===1?"file":"files"} ready</b>{results.map((result,index) => <motion.button key={result.filename+index} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: Math.min(index*.035,.35) }} onClick={() => saveProcessedFile(result)}><FileText size={14} /><span>{result.filename}<small>{result.message}</small></span><ArrowUpRight size={13} /></motion.button>)}</motion.div>}
-          <div className="operation-secure"><LockKeyhole size={12} /> Supported tools process locally in this browser. Files are not uploaded to a server.</div>
+          <div className="operation-secure"><LockKeyhole size={12} /> Supported tools process locally in this browser. Files are not uploaded to a server. <Link href="/privacy">Privacy details <ArrowUpRight size={12}/></Link></div>
         </motion.div>
       </motion.section>
       <motion.section className="tool-page-bottom" initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.55 }}>
