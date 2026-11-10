@@ -5,8 +5,7 @@ import { TOOLS, slugify } from "@/lib/tools";
 
 const SITE = "https://convotool.vercel.app";
 
-function answerFor(tool: Tool) {
-  const n = tool.name.toLowerCase();
+export function answerFor(tool: Tool) {
   const input = tool.inputLabel || "your file";
   const output = tool.outputLabel || "the requested format";
   if (tool.name === "PDF to Word") return "Convert a PDF into an editable Word document in your browser. The reconstruction engine rebuilds text, paragraphs, embedded images, detected tables and many vector drawings as Word objects. Complex multi-column layouts, unusual fonts, clipping effects and some graphics may need manual adjustment. Scanned PDFs require OCR.";
@@ -83,7 +82,11 @@ export default function ToolLandingContent({ tool }: { tool: Tool }) {
       url: SITE + "/tools/" + slugify(tool.name),
       description: answer,
       inLanguage: "en-IN",
+      isAccessibleForFree: true,
+      about: tool.category + " file processing",
+      mainEntityOfPage: SITE + "/tools/" + slugify(tool.name),
       provider: { "@type": "Organization", name: "ConvoTools", url: SITE },
+      softwareHelp: { "@type": "CreativeWork", url: SITE + "/privacy", name: "Privacy and file handling" },
     },
     {
       "@context": "https://schema.org",
@@ -93,6 +96,18 @@ export default function ToolLandingContent({ tool }: { tool: Tool }) {
         { "@type": "ListItem", position: 2, name: "Tools", item: SITE + "/#toolkit" },
         { "@type": "ListItem", position: 3, name: tool.name, item: SITE + "/tools/" + slugify(tool.name) },
       ],
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "HowTo",
+      name: "How to use " + tool.name + " in ConvoTools",
+      description: "Step-by-step instructions for the ConvoTools " + tool.name + " browser tool.",
+      url: SITE + "/tools/" + slugify(tool.name),
+      step: [
+        { "@type": "HowToStep", position: 1, name: "Add your file", text: "Choose a compatible " + (tool.inputLabel || "file") + " from your device." },
+        { "@type": "HowToStep", position: 2, name: "Review the settings", text: "Select the available output format and any settings for " + tool.name + "." },
+        { "@type": "HowToStep", position: 3, name: "Process and download", text: "Run the operation and review the result downloaded by your browser." }
+      ]
     },
     {
       "@context": "https://schema.org",
@@ -156,7 +171,19 @@ export default function ToolLandingContent({ tool }: { tool: Tool }) {
             <a href="https://github.com/jsscheller/pdf2docx-wasm" target="_blank" rel="noreferrer">View corresponding source</a>
           </p>
         )}
-        <p className="tool-seo-note">ConvoTools publishes tool-specific format requirements and conversion limitations so people and answer engines can understand what this tool does. Always check the downloaded result before using it in a production workflow.</p>
+        <aside className="tool-trust-guide" aria-label="About this tool and your files">
+          <div>
+            <span className="tool-seo-eyebrow">SOURCE & PRIVACY</span>
+            <h2>Know what happens to your file.</h2>
+            <p>This guide describes the current browser-based implementation and its known format limitations. Your original file remains on your device; exporting creates a separate result. Browser-side conversions do not guarantee identical fonts, layout or output size.</p>
+          </div>
+          <nav aria-label="Source and privacy references">
+            <Link href="/privacy">How ConvoTools handles files <ArrowUpRight size={15} /></Link>
+            <a href="https://github.com/RAJ-SUHANDANI/ConvoTools" target="_blank" rel="noreferrer">Inspect the public source <ArrowUpRight size={15} /></a>
+            <Link href="/about">About ConvoTools <ArrowUpRight size={15} /></Link>
+          </nav>
+        </aside>
+        <p className="tool-seo-note">Conversion capabilities and limitations may differ by file content or browser. Inspect the downloaded result before publishing or sending it to someone else.</p>
       </div>
     </section>
   );
