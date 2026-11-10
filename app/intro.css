@@ -1,0 +1,47 @@
+/* ConvoTools entrance — three actual 3D layers in CSS perspective space. */
+.ct-intro{
+ position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;
+ padding:clamp(24px,4vw,60px);background:#10232c;color:#f9f8ee;
+ overflow:hidden;isolation:isolate;
+}
+.ct-intro-grid{position:absolute;inset:0;pointer-events:none;opacity:.34;z-index:-1;
+ background-image:linear-gradient(#47606a55 1px,transparent 1px),linear-gradient(90deg,#47606a55 1px,transparent 1px);
+ background-size:84px 84px;mask-image:linear-gradient(to bottom,transparent,black 24%,black 72%,transparent);
+}
+.ct-intro:after{content:"";position:absolute;width:700px;height:700px;left:50%;top:43%;z-index:-1;
+ transform:translate(-50%,-50%);border:1px solid #6c8c8f24;border-radius:50%;box-shadow:0 0 0 95px #668c8810,0 0 0 190px #668c8808;pointer-events:none}
+.ct-intro-top,.ct-intro-footer{display:flex;justify-content:space-between;align-items:center;gap:20px;position:relative;z-index:2;
+ font:700 10px var(--mono);letter-spacing:.15em;color:#bed1cf;}
+.ct-intro-mark{font:750 22px var(--display);letter-spacing:-.07em;color:#f7f9f0}
+.ct-intro-spark{display:inline-block;font-size:20px;color:#d3fa72;transform:translate(5px,-7px)}
+.ct-intro-center{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:12px 0 34px}
+.ct-intro-scene{width:300px;height:280px;position:relative;perspective:1050px;perspective-origin:50% 37%}
+.ct-intro-3d{width:210px;height:235px;margin:16px auto 0;position:relative;transform-style:preserve-3d;
+ animation:ct-intro-spin 5s cubic-bezier(.35,.03,.24,.98) infinite alternate}
+.ct-intro-sheet{position:absolute;inset:5px;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;
+ padding:30px 27px;border:1px solid #cbd7c8;border-radius:16px;box-shadow:18px 23px 40px #06171e5e;
+ backface-visibility:visible;transform-style:preserve-3d}
+.ct-intro-sheet span{font:750 27px var(--display);letter-spacing:-.07em}
+.ct-intro-sheet i{display:block;width:100%;height:7px;border-radius:5px;background:currentColor;opacity:.19;margin-top:20px}
+.ct-intro-sheet i:nth-of-type(2){width:72%;margin-top:12px}
+.ct-intro-sheet i:nth-of-type(3){width:87%;margin-top:12px}
+.ct-intro-sheet-a{background:#f6f7ef;color:#334954;transform:translate3d(-27px,-5px,-65px) rotateY(-22deg) rotateZ(-12deg)}
+.ct-intro-sheet-b{background:#ccefc0;color:#24473a;transform:translate3d(20px,9px,-12px) rotateY(13deg) rotateZ(7deg)}
+.ct-intro-sheet-c{background:#dafa75;color:#152d27;transform:translate3d(0,11px,78px) rotateY(-6deg) rotateZ(-5deg);
+ align-items:center;justify-content:center;gap:17px}
+.ct-intro-sheet-c span{font-size:18px;letter-spacing:.13em}
+.ct-intro-shadow{position:absolute;left:17%;right:17%;bottom:0;height:35px;background:#050f15;filter:blur(21px);border-radius:50%;opacity:.65;
+ animation:ct-intro-shadow 5s ease-in-out infinite alternate}
+.ct-intro-eyebrow{font:700 11px var(--mono);letter-spacing:.2em;color:#caf180;margin:6px 0 15px}
+.ct-intro-center h2{font:650 clamp(35px,6vw,67px)/1 var(--display);letter-spacing:-.075em;margin:0 0 15px;color:#fcfdf7}
+.ct-intro-center h2 span{color:#dafa75}
+.ct-intro-subline{font:500 13px var(--sans)}
+.ct-intro-footer{align-items:end}
+.ct-intro-meter{width:min(320px,50vw);display:flex;gap:14px;align-items:center;color:#eff5e7}
+.ct-intro-meter-track{height:3px;flex:1;background:#6582745a;border-radius:5px;overflow:hidden}
+.ct-intro-meter-track i{display:block;width:100%;height:100%;background:#dafa75;transform-origin:left}
+.ct-intro-meter>span{min-width:39px;font:700 13px var(--mono)}
+@keyframes ct-intro-spin{0%{transform:rotateX(7deg) rotateY(-18deg) translateY(4px)}50%{transform:rotateX(-9deg) rotateY(17deg) translateY(-11px)}100%{transform:rotateX(12deg) rotateY(-12deg) translateY(7px)}}
+@keyframes ct-intro-shadow{from{transform:scale(.82);opacity:.38}to{transform:scale(1.13);opacity:.65}}
+@media(max-width:580px){.ct-intro{padding:24px}.ct-intro-top>span:last-child{font-size:9px}.ct-intro-scene{transform:scale(.82);margin:-20px auto}.ct-intro-footer>span:last-child{display:none}.ct-intro-meter{width:100%}}
+@media(prefers-reduced-motion:reduce){.ct-intro-3d,.ct-intro-shadow{animation:none!important}.ct-intro-sheet{transform:none!important}}
