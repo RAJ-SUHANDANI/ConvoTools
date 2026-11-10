@@ -9,6 +9,8 @@ import {
 import { detectFileCategory, formatFileSize, getActionsForFile, type FileAction } from "@/lib/file-actions";
 import FileActionRadial from "@/components/FileActionRadial";
 import { setPendingFiles } from "@/lib/file-session";
+import { Button } from "@animate-ui/react/primitives/buttons/button";
+import { CountingNumber } from "@animate-ui/react/primitives/texts/counting-number";
 
 type Props = {
   files: File[];
@@ -51,7 +53,7 @@ export default function FileActionPanel({ files, onRemove }: Props) {
           <h3>Here&apos;s what you can do with them.</h3>
           <p>We identified each format and matched it with relevant actions.</p>
         </div>
-        <span className="file-total">{files.length} FILE{files.length === 1 ? "" : "S"}</span>
+        <span className="file-total"><CountingNumber number={files.length} /> FILE{files.length === 1 ? "" : "S"}</span>
       </div>
       <div className="detected-files">
         {records.map(({ file, category, options, key }, index) => {
@@ -75,7 +77,7 @@ export default function FileActionPanel({ files, onRemove }: Props) {
                 {activeAction && (
                   <div className="chosen-action">
                     <div><b>{activeAction.label}</b><span>{activeAction.detail}</span></div>
-                    <button onClick={() => openAction(file, activeAction)}>Open tool <ArrowUpRight size={14} /></button>
+                    <Button onClick={() => openAction(file, activeAction)} tapScale={0.97}>Open tool <ArrowUpRight size={14} /></Button>
                   </div>
                 )}
               </div>
