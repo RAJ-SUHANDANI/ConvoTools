@@ -171,7 +171,7 @@ button:disabled{cursor:not-allowed}
 .ps-stage-bar{border-bottom-color:#cadaca!important}
 .ps-tool-row{border-color:#dce3da!important}
 .ps-document-band{border-radius:25px!important;background:#204632!important;color:#f1f5eb!important}
-.ps-document-band :is(h2,p){color:#f1f5eb!important}
+.ps-document-band > div:first-child :is(h2,p){color:#f1f5eb!important}
 .ps-workspace{border-top:1px solid #d6ded3}
 /* Dashboard: working software, not a marketing page. */
 .dashboard-shell{background:#f3f4ed!important;color:#1f3529}
@@ -513,3 +513,58 @@ button:disabled{cursor:not-allowed}
  .json-workbench-stats{font-size:10px!important}
  .json-workbench-tabs button{font-size:11px!important}
 }
+
+/* Contrast refinements from automated WCAG 2.1 AA audit, desktop + mobile. */
+.fd-desk-foot,.fd-desk-foot span{color:#385341!important}
+.fd-results-heading [role="status"]{color:#365342!important}
+.fd-site .fd-tool .fd-tool-type{
+ color:#274832!important;background:#e6eee3!important;
+ border:1px solid #cedccb!important;
+}
+.fd-site .fd-tool .fd-type-pdf{
+ color:#78361f!important;background:#f9e6dc!important;border-color:#ecc7b5!important;
+}
+.fd-journey .fd-inline-link{color:#244f38!important}
+.fd-principle .fd-section-label,.fd-principle .micro-label{
+ color:#d8edce!important;
+}
+.fd-principle > div > p,
+.fd-principle .fd-privacy-note p,
+.fd-principle .fd-privacy-note > span{
+ color:#e0efe2!important;
+}
+.fd-principle .fd-privacy-note{border-left-color:#668a6d!important}
+.fd-principle .fd-inline-link{color:#f1ebc3!important}
+.fd-footer-main > div > p,
+.fd-footer-bottom,
+.fd-footer-bottom > span{
+ color:#d3e5d5!important;
+}
+.fd-footer-bottom{border-top-color:#54735d!important}
+.ps-document-band .ps-index{color:#e4f2d7!important}
+.ps-document-band .ps-editor-sample{
+ background:#fffdf5!important;color:#21392c!important;
+ box-shadow:6px 14px 0 #15342455;
+}
+.ps-editor-sample :is(h3,p,small,span){
+ color:#243b2b!important;
+}
+.ps-editor-sample .ps-highlight{
+ color:#24321f!important;background:#ebefab!important;
+}
+.ps-stage.ps-code{
+ background:#1e352b!important;color:#f1f6ee!important;
+ border-color:#345847!important;
+}
+.ps-code .ps-stage-bar{border-color:#4b745e!important}
+.ps-code .ps-stage-bar > span,
+.ps-code .ps-stage-bar > button{
+ color:#e6f2e8!important;
+}
+.ps-code textarea,
+.ps-code textarea::placeholder,
+.ps-code > div[role="status"]{
+ color:#e1eee4!important;
+}
+.ps-code textarea::placeholder{opacity:1}
+.ps-code > div[role="status"]{border-top-color:#4b745e!important}
