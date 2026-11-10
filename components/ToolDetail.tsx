@@ -96,11 +96,11 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
   useEffect(() => {
     const queued = getPendingFiles();
     if (queued.length) {
-      setFiles(queued);
       clearPendingFiles();
+      queueMicrotask(() => setFiles(queued));
     }
     const slug = slugify(tool.name);
-    setIsFavorite(readFavorites().includes(slug));
+    queueMicrotask(() => setIsFavorite(readFavorites().includes(slug)));
     recordActivity({
       type: "tool",
       title: tool.name,
@@ -111,9 +111,9 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
   }, [tool.name, tool.category]);
 
   useEffect(() => {
-    if (tool.name !== "Word editor" || !files[0]) { setDocumentText(""); return; }
+    if (tool.name !== "Word editor" || !files[0]) return;
     let active = true;
-    setDocumentLoading(true);
+    queueMicrotask(() => { if (active) setDocumentLoading(true); });
     import("mammoth").then(async (mammoth) => {
       const extracted = await mammoth.extractRawText({ arrayBuffer: await files[0].arrayBuffer() });
       if (active) setDocumentText(extracted.value);
