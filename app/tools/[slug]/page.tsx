@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     ? "Open and edit DOCX Word documents online with a browser-based editor. Format text, add images, create lists and tables, then export an editable DOCX file. Files stay in your browser."
     : tool.name === "JSON formatter"
       ? "Format and validate JSON online with a live code editor, collapsible tree viewer, search, minify and convert JSON to XML or CSV. Open and download files in your browser."
-      : answerFor(tool).split(/(?<=[.!?])\\s+/)[0].slice(0, 165);
+      : answerFor(tool).split(/(?<=[.!?])\s+/)[0].slice(0, 165);
   const keywords = [
     tool.name.toLowerCase() + " online",
     tool.name.toLowerCase() + " converter",
