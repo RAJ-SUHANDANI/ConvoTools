@@ -9,6 +9,8 @@ test("the desk is readable, accessible and fits the viewport", async ({
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/");
+  await expect(page.locator('html[data-ct-hydrated="true"]')).toHaveCount(1);
+  await expect(page.locator(".ct-intro")).toHaveCount(0, { timeout: 12_000 });
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Everything");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("your files need.");
   await expect(page.locator(".fd-tool")).toHaveCount(9);
@@ -42,6 +44,8 @@ test("format preview responds to a choice and leads to the matching tool", async
   page,
 }) => {
   await page.goto("/");
+  await expect(page.locator('html[data-ct-hydrated="true"]')).toHaveCount(1);
+  await expect(page.locator(".ct-intro")).toHaveCount(0, { timeout: 12_000 });
   await page.getByRole("button", { name: "PNG JPG", exact: true }).click();
   await expect(page.getByRole("button", { name: "PNG JPG", exact: true })).toHaveAttribute(
     "aria-pressed",
@@ -60,6 +64,8 @@ test("search, filters, empty state and the complete library work", async ({
   page,
 }) => {
   await page.goto("/");
+  await expect(page.locator('html[data-ct-hydrated="true"]')).toHaveCount(1);
+  await expect(page.locator(".ct-intro")).toHaveCount(0, { timeout: 12_000 });
   await page.getByRole("button", { name: "Explore all 42 tools" }).click();
   await expect(page.locator(".fd-tool")).toHaveCount(42);
   await page.getByRole("button", { name: "Images", exact: true }).click();
@@ -86,6 +92,8 @@ test("a selected file survives navigation and produces a valid spreadsheet", asy
   page,
 }) => {
   await page.goto("/");
+  await expect(page.locator('html[data-ct-hydrated="true"]')).toHaveCount(1);
+  await expect(page.locator(".ct-intro")).toHaveCount(0, { timeout: 12_000 });
   await page
     .getByLabel("Choose files for your file desk")
     .setInputFiles({
@@ -122,6 +130,8 @@ test("a selected file survives navigation and produces a valid spreadsheet", asy
 
 test("file removal and empty-file feedback are usable", async ({ page }) => {
   await page.goto("/");
+  await expect(page.locator('html[data-ct-hydrated="true"]')).toHaveCount(1);
+  await expect(page.locator(".ct-intro")).toHaveCount(0, { timeout: 12_000 });
   const picker = page.getByLabel("Choose files for your file desk");
   await picker.setInputFiles({
     name: "empty.txt",
@@ -163,6 +173,8 @@ test("FAQ and mobile navigation expose their state", async ({
   page,
 }, testInfo) => {
   await page.goto("/");
+  await expect(page.locator('html[data-ct-hydrated="true"]')).toHaveCount(1);
+  await expect(page.locator(".ct-intro")).toHaveCount(0, { timeout: 12_000 });
   await page.getByText("Do my files leave my device?", { exact: true }).click();
   await expect(page.locator("details").first()).toHaveAttribute("open", "");
   if (testInfo.project.name === "mobile") {
@@ -183,6 +195,8 @@ test("reduced motion retains content and keyboard search works", async ({
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
+  await expect(page.locator('html[data-ct-hydrated="true"]')).toHaveCount(1);
+  await expect(page.locator(".ct-intro")).toHaveCount(0, { timeout: 12_000 });
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await page.locator("body").press("/");
   await expect(
