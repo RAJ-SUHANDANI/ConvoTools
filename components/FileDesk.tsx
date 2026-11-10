@@ -33,6 +33,10 @@ import {
   X,
 } from "lucide-react";
 import BrandLogo from "@/components/BrandLogo";
+import { Button } from "@animate-ui/react/primitives/buttons/button";
+import { CountingNumber } from "@animate-ui/react/primitives/texts/counting-number";
+import { Fade } from "@animate-ui/react/primitives/effects/fade";
+import { SlidingText } from "@animate-ui/react/primitives/texts/sliding";
 import ProductStory from "@/components/ProductStory";
 import FileActionPanel from "@/components/FileActionPanel";
 import { recordActivity } from "@/lib/activity";
@@ -388,7 +392,7 @@ export default function FileDesk() {
       </header>
       <main id="main-content">
         <section className="fd-hero" aria-labelledby="hero-title">
-          <div className="fd-hero-copy">
+          <Fade asChild><div className="fd-hero-copy">
             <div className="fd-intro">
               <span className="fd-tiny-mark" aria-hidden="true">
                 <span />
@@ -397,18 +401,18 @@ export default function FileDesk() {
               A good place for your files.
             </div>
             <h1 id="hero-title">
-              Big ideas.
+              Your files.
               <br />
-              Little file jobs.
+              In good hands.
             </h1>
             <p>
-              Turn the file you have into the file you need. A whole playground
-              for PDFs, images, documents, data and everything in between.
+              Convert, edit and organize in one considered workspace. PDFs,
+              images, documents, data—everyday file work, made easier.
             </p>
             <div className="fd-hero-actions">
-              <a href="#file-desk" className="fd-button">
-                Start with a file <Plus size={19} />
-              </a>
+              <Button asChild tapScale={0.97}><a href="#file-desk" className="fd-button">
+                <SlidingText text="Start with a file" /> <Plus size={19} />
+              </a></Button>
               <a href="#toolkit" className="fd-secondary-link">
                 Find your tool <ArrowDown size={16} />
               </a>
@@ -417,7 +421,7 @@ export default function FileDesk() {
               <LockKeyhole size={15} />
               <span>Browser-first. No account needed.</span>
             </div>
-          </div>
+          </div></Fade>
           <motion.div
             className="fd-hero-art"
             initial={false}
@@ -429,7 +433,7 @@ export default function FileDesk() {
           <div className="fd-hero-baseline">
             <span>Made for the work between the work.</span>
             <a href="#toolkit">
-              {availableCount} tools to get on with it <ArrowDown size={14} />
+              <CountingNumber number={availableCount} initiallyStable /> tools to get on with it <ArrowDown size={14} />
             </a>
           </div>
         </section>
@@ -539,14 +543,14 @@ export default function FileDesk() {
             aria-label="Filter tools by category"
           >
             {TOOL_CATEGORIES.map((item) => (
-              <button
+              <Button
                 key={item.name}
                 aria-pressed={category === item.name}
                 onClick={() => selectCategory(item.name)}
               >
                 {item.name === "All tools" ? "Everything" : item.name}
                 {item.name === "All tools" && <span>{TOOLS.length}</span>}
-              </button>
+              </Button>
             ))}
           </div>
           <div className="fd-results-heading">
