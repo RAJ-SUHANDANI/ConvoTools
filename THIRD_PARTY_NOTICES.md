@@ -20,3 +20,14 @@ ConvoTools can load the `pdf2docx-wasm` 0.1.0 package in a browser Web Worker fo
 The package bundles PyMuPDF, pdf2docx, python-docx, OpenCV, NumPy, lxml and Pyodide wheels. Review the package's accompanying license notices and corresponding source when redistributing or modifying this engine. The AGPL-3.0 terms may affect distribution and hosted use; obtain legal review before commercial deployment.
 
 The package is loaded only when a user starts PDF-to-DOCX conversion. Other ConvoTools tools do not load this engine.
+
+## Animate UI motion primitives, backgrounds and icons
+
+ConvoTools uses `@animate-ui/react` and locally installed component source from the official Animate UI v2 registry (https://animate-ui.com/docs).
+
+- Upstream project: https://github.com/imskyleen/animate-ui
+- License: MIT (the upstream repository retains the full license text).
+- Adapted source: gradient and hexagon backgrounds; FileCheck, Upload and ArrowRight animated icons.
+- The locally installed source uses a local class-name joiner instead of the separate cn helper.
+
+Motion components implement presentation and transitions. File processing still uses separate ConvoTools conversion engines.
