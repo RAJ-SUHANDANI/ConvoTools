@@ -2,11 +2,13 @@
 
 ## Self-hosted typography
 
-DM Sans and Space Grotesk are distributed through their Fontsource variable-font
-packages under the SIL Open Font License 1.1. Their license texts are included in
-`node_modules/@fontsource-variable/dm-sans/LICENSE` and
-`node_modules/@fontsource-variable/space-grotesk/LICENSE`. Next.js serves the Latin
-variable font files with the application; no Google Fonts request is made.
+The redesign uses self-hosted Manrope and Instrument Sans variable fonts through
+Fontsource, under the SIL Open Font License 1.1. Their license texts are included
+in `node_modules/@fontsource-variable/manrope/LICENSE` and
+`node_modules/@fontsource-variable/instrument-sans/LICENSE`. Next.js serves
+the Latin variable font files with the application. DM Sans and Space Grotesk
+remain declared for compatibility with older product code. No Google Fonts
+request is required.
 
 ## Browser PDF-to-DOCX engine
 
