@@ -21,6 +21,11 @@ export default function IntroGate({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
+    document.documentElement.dataset.ctHydrated = "true";
+    return () => { delete document.documentElement.dataset.ctHydrated; };
+  }, []);
+
+  useEffect(() => {
     let alive = true;
     if (pathname !== "/") {
       queueMicrotask(() => { if (alive) setShow(false); });
