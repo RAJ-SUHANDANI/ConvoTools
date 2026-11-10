@@ -42,8 +42,8 @@ test("format preview responds to a choice and leads to the matching tool", async
   page,
 }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "PNG JPG" }).click();
-  await expect(page.getByRole("button", { name: "PNG JPG" })).toHaveAttribute(
+  await page.getByRole("button", { name: "PNG JPG", exact: true }).click();
+  await expect(page.getByRole("button", { name: "PNG JPG", exact: true })).toHaveAttribute(
     "aria-pressed",
     "true",
   );
