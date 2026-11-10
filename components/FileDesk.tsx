@@ -727,7 +727,7 @@ export default function FileDesk() {
       <footer className="fd-footer">
         <div className="fd-footer-main">
           <div>
-            <BrandLogo width={174} />
+            <BrandLogo variant="inverse" width={174} />
             <p>
               A home for your everyday file jobs.
               <br />
@@ -738,6 +738,8 @@ export default function FileDesk() {
             <a href="#toolkit">Explore the toolkit</a>
             <Link href="/dashboard">Your workspace</Link>
             <a href="#questions">Questions, answered</a>
+            <Link href="/privacy">Privacy & file handling</Link>
+            <Link href="/about">About ConvoTools</Link>
             <a
               href="https://github.com/RAJ-SUHANDANI/ConvoTools"
               target="_blank"
