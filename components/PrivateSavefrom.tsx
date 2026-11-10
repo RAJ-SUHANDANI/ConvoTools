@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowUpRight, ExternalLink, Instagram, Music2, Play, ShieldCheck, Youtube, Download } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import BrandLogo from "@/components/BrandLogo";
+import { Button } from "@animate-ui/react/primitives/buttons/button";
 
 type Platform = "YouTube" | "Instagram" | "TikTok" | "Direct media";
 type Parsed = { platform: Platform; url: string; title: string; id?: string; kind: string; embed?: string; mediaType?: "image" | "video"; extension?: string };
@@ -97,7 +98,7 @@ export default function PrivateSavefrom() {
         <h1>Drop the link.<br /><em>Know what you can save.</em></h1>
         <p>Paste a public post URL to identify its platform, preview supported embeds and open the correct save flow. Direct image and video file URLs can be downloaded in their original quality when the host permits browser access. Social platform links show the platform’s own save options.</p>
         <form className="savefrom-url-form" onSubmit={analyse}>
-          <div className="savefrom-url-control"><Download size={17} /><input type="url" aria-label="Media URL" required value={value} onChange={(event) => setValue(event.target.value)} placeholder="Paste a video, Reel, TikTok or media-file URL…" /><button type="submit">Analyse link <ArrowUpRight size={14} /></button></div>
+          <div className="savefrom-url-control"><Download size={17} /><input type="url" aria-label="Media URL" required value={value} onChange={(event) => setValue(event.target.value)} placeholder="Paste a video, Reel, TikTok or media-file URL…" /><Button type="submit">Analyse link <ArrowUpRight size={14} /></Button></div>
           {error && <small className="savefrom-error" role="alert">{error}</small>}
         </form>
         <div className="savefrom-platform-tags"><span><Youtube size={15} /> YouTube</span><span><Instagram size={15} /> Instagram</span><span><Music2 size={15} /> TikTok</span><span><Download size={15} /> Direct media</span></div>
@@ -109,7 +110,7 @@ export default function PrivateSavefrom() {
               <div className="savefrom-card-head"><b>{parsed.title}</b><span>{parsed.platform.toUpperCase()} · {parsed.kind.toUpperCase()}</span></div>
               {parsed.platform === "Direct media" && parsed.mediaType === "video" ? <video className="savefrom-embed savefrom-direct-preview" src={parsed.url} controls playsInline preload="metadata" onLoadedMetadata={(event) => setMediaDimensions(event.currentTarget.videoWidth + " × " + event.currentTarget.videoHeight)} /> : parsed.platform === "Direct media" && parsed.mediaType === "image" ? <img className="savefrom-embed savefrom-direct-image" src={parsed.url} alt="Preview of the direct image file" onLoad={(event) => setMediaDimensions(event.currentTarget.naturalWidth + " × " + event.currentTarget.naturalHeight)} /> : parsed.embed ? <iframe className="savefrom-embed" src={parsed.embed} title={parsed.platform+" preview"} loading="lazy" allow="encrypted-media; picture-in-picture; web-share" allowFullScreen /> : <div className="savefrom-preview-placeholder"><Play size={24} /><span>This post type may not offer an embedded preview. Open the original post to view it.</span></div>}
               <a className="savefrom-original-link" href={parsed.url} target="_blank" rel="noreferrer">{parsed.platform === "Direct media" ? "Open source file" : "Open original post"} <ExternalLink size={13} /></a>
-              {parsed.platform === "Direct media" && <div className="savefrom-download-panel"><div className="savefrom-download-meta"><span>DOWNLOAD QUALITY</span><b>{mediaDimensions ? "Original · " + mediaDimensions : "Original source quality"}</b><small>Only the quality supplied by this direct file is available. No artificial upscaling.</small></div><button className="savefrom-download-button" type="button" onClick={downloadDirectMedia} disabled={downloading}><Download size={15} /> {downloading ? "Preparing download…" : "Download original file"}</button>{downloadError && <p className="savefrom-download-error" role="alert">{downloadError} <a href={parsed.url} target="_blank" rel="noreferrer">Open source file</a></p>}</div>}
+              {parsed.platform === "Direct media" && <div className="savefrom-download-panel"><div className="savefrom-download-meta"><span>DOWNLOAD QUALITY</span><b>{mediaDimensions ? "Original · " + mediaDimensions : "Original source quality"}</b><small>Only the quality supplied by this direct file is available. No artificial upscaling.</small></div><Button className="savefrom-download-button" type="button" onClick={downloadDirectMedia} disabled={downloading}><Download size={15} /> {downloading ? "Preparing download…" : "Download original file"}</Button>{downloadError && <p className="savefrom-download-error" role="alert">{downloadError} <a href={parsed.url} target="_blank" rel="noreferrer">Open source file</a></p>}</div>}
             </article>
             <article className="savefrom-guide-card">
               <span className="savefrom-guide-label"><ShieldCheck size={14} /> {guide ? "OFFICIAL SAVE ROUTE" : "DIRECT FILE LINK"}</span>
