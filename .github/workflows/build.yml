@@ -1,10 +1,17 @@
-name: Build check
+name: Build and interaction checks
 
 on:
   push:
-    branches: [main]
+    branches: [main, redesign]
   pull_request:
     branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: convotools-build-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -16,10 +23,27 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Install dependencies
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Resolve updated dependency lockfile
+        if: github.ref == 'refs/heads/redesign'
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Persist resolved versions on redesign only
+        if: github.ref == 'refs/heads/redesign'
+        run: |
+          if ! git diff --quiet -- package-lock.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add package-lock.json
+            git commit -m "chore(deps): regenerate reproducible lockfile [skip ci]"
+            git push origin HEAD:redesign
+          fi
+      - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
       - name: Lint source
         run: npm run lint
+      - name: Type-check
+        run: npx tsc --noEmit
       - name: Production build
         run: npm run build
       - name: Install test browser
