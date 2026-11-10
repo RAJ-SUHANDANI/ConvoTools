@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ToolDetail from "@/components/ToolDetail";
 import ComingSoon from "@/components/ComingSoon";
-import ToolLandingContent from "@/components/ToolLandingContent";
+import ToolLandingContent, { answerFor } from "@/components/ToolLandingContent";
 import WordEditorWorkspace from "@/components/WordEditorWorkspace";
 import JsonFormatterWorkspace from "@/components/JsonFormatterWorkspace";
 import EditorShell from "@/components/EditorShell";
@@ -27,12 +27,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     : tool.name === "JSON formatter"
       ? "JSON Formatter & Validator – Tree Viewer, JSON to XML and CSV"
       : null;
-  const title = specialTitle || (tool.name + " Online – " + input + " to " + output + " Converter");
+  const title = specialTitle || (tool.name.toLowerCase().includes("converter") ? tool.name + " – Free Online Converter" : tool.name + " – Free Online File Tool");
   const description = tool.name === "Word editor"
     ? "Open and edit DOCX Word documents online with a browser-based editor. Format text, add images, create lists and tables, then export an editable DOCX file. Files stay in your browser."
     : tool.name === "JSON formatter"
       ? "Format and validate JSON online with a live code editor, collapsible tree viewer, search, minify and convert JSON to XML or CSV. Open and download files in your browser."
-      : "Use the ConvoTools " + tool.name.toLowerCase() + " online tool. Add " + input + ", choose your settings and download " + output + ". See supported formats, steps and conversion limitations.";
+      : answerFor(tool).split(/(?<=[.!?])\\s+/)[0].slice(0, 165);
   const keywords = [
     tool.name.toLowerCase() + " online",
     tool.name.toLowerCase() + " converter",
@@ -47,6 +47,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description,
     keywords,
     alternates: { canonical },
+    category: "technology",
+    applicationName: "ConvoTools",
     robots: isComingSoon
       ? { index: false, follow: true }
       : { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
@@ -57,8 +59,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: "ConvoTools",
       locale: "en_IN",
       type: "website",
+      images: [{ url: "/opengraph-image", alt: tool.name + " online tool from ConvoTools" }],
     },
-    twitter: { card: "summary", title: title + " | ConvoTools", description },
+    twitter: { card: "summary_large_image", title: title + " | ConvoTools", description },
   };
 }
 
