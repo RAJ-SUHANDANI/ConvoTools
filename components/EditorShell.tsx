@@ -12,6 +12,7 @@ export default function EditorShell({
         <BrandLogo width={165} />
         <nav aria-label="Editor navigation">
           <Link href="/#toolkit">All tools</Link>
+          <Link href="/privacy">Privacy</Link>
           <Link href="/dashboard">Your workspace ↗</Link>
         </nav>
       </header>
