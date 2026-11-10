@@ -12,6 +12,10 @@ import {
 } from "lucide-react";
 import FileActionPanel from "@/components/FileActionPanel";
 import BrandLogo from "@/components/BrandLogo";
+import { FileCheck as AnimatedFileCheck } from "@/components/animate-ui/icons/file-check";
+import { Upload as AnimatedUpload } from "@/components/animate-ui/icons/upload";
+import { MorphingText } from "@animate-ui/react/primitives/texts/morphing";
+import { RippleButton, RippleButtonRipples } from "@animate-ui/react/primitives/buttons/ripple";
 import { Button } from "@animate-ui/react/primitives/buttons/button";
 import { CountingNumber } from "@animate-ui/react/primitives/texts/counting-number";
 import { TOOLS, slugify } from "@/lib/tools";
@@ -212,7 +216,7 @@ export default function DashboardPage() {
           {navButton("AI tools")}
         </div>
         <div className="dash-sidebar-bottom">
-          <div className="dash-privacy-card"><ShieldCheck size={17} /><div><b>Local by default</b><span>Your history stays in this browser.</span></div></div>
+          <Link href="/privacy" className="dash-privacy-card"><ShieldCheck size={17} /><div><b>Local by default</b><span>Learn how your files are handled ↗</span></div></Link>
           <button className="dash-nav-item" onClick={() => { setActiveTab("Settings"); setMobileSidebarOpen(false); }}><Settings size={16} /><span>Settings</span></button>
           <Link className="dash-user-card" href="/dashboard">
             <span className="dash-user-avatar">{(profile.name.trim()[0] || "G").toUpperCase()}</span>
@@ -229,7 +233,7 @@ export default function DashboardPage() {
             <div className="dash-breadcrumb"><span>ConvoTools</span><i>/</i><b>{activeTab}</b></div>
           </div>
           <div className="dash-topbar-actions">
-            <span className="dash-local-pill"><i /> LOCAL WORKSPACE</span>
+            <Link href="/privacy" className="dash-local-pill"><i /> PRIVATE WORKSPACE <ArrowUpRight size={12}/></Link>
             <button className="dash-icon-button" aria-label="Activity" onClick={() => setActiveTab("Activity")}><Bell size={16} />{activity.length > 0 && <i />}</button>
             <button className="dash-profile-button" onClick={() => setActiveTab("Settings")}><span className="dash-user-avatar">{(profile.name.trim()[0] || "G").toUpperCase()}</span><span>{profile.name.trim() || "Guest"}</span><ChevronDown size={13} /></button>
           </div>
@@ -241,13 +245,13 @@ export default function DashboardPage() {
               {activeTab === "Overview" && (
                 <>
                   <div className="dashboard-greeting">
-                    <div><span className="section-kicker">YOUR FILE DESK{dateLabel ? " / " + dateLabel : ""}</span><h1>{profile.name.trim() ? "Welcome back, " + profile.name.trim().split(" ")[0] + "." : "Your workspace."}<em> Ready when you are.</em></h1><p>Pick up where you left off, or drop in something new.</p></div>
+                    <div><span className="section-kicker">YOUR FILE DESK{dateLabel ? " / " + dateLabel : ""}</span><h1>{profile.name.trim() ? "Welcome back, " + profile.name.trim().split(" ")[0] + "." : "Your workspace."}<em> Ready when you are.</em></h1><p>Pick up where you left off, or drop in something new. <span className="ct-dashboard-pulse"><MorphingText text={["No setup required.","Just you and your files."]} loop holdDelay={3500}/></span></p></div>
                     <Button className="dash-primary-action" onClick={() => setActiveTab("All tools")}>Explore all tools <ArrowUpRight size={14} /></Button>
                   </div>
 
                   <div className="dash-stat-grid">
-                    <motion.div className="dash-stat-card" whileHover={settings.motion && !reducedMotion ? { y: -4 } : undefined} transition={{ type: "spring", stiffness: 320, damping: 24 }}><span className="dash-stat-icon violet"><Command size={17} /></span><small>TOOLS IN LIBRARY</small><strong><CountingNumber number={TOOLS.length} inView /></strong><span>Across 10 categories</span></motion.div>
-                    <motion.div className="dash-stat-card" whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 320, damping: 24 }}><span className="dash-stat-icon green"><FileImage size={17} /></span><small>FILES ADDED</small><strong><CountingNumber number={uploads.length} inView /></strong><span>Tracked in this browser</span></motion.div>
+                    <motion.div className="dash-stat-card" whileHover={settings.motion && !reducedMotion ? { y: -4 } : undefined} transition={{ type: "spring", stiffness: 320, damping: 24 }}><span className="dash-stat-icon violet"><AnimatedFileCheck size={19} animateOnHover /></span><small>TOOLS IN LIBRARY</small><strong><CountingNumber number={TOOLS.length} inView /></strong><span>Across 10 categories</span></motion.div>
+                    <motion.div className="dash-stat-card" whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 320, damping: 24 }}><span className="dash-stat-icon green"><AnimatedUpload size={19} animateOnHover /></span><small>FILES ADDED</small><strong><CountingNumber number={uploads.length} inView /></strong><span>Tracked in this browser</span></motion.div>
                     <motion.div className="dash-stat-card" whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 320, damping: 24 }}><span className="dash-stat-icon blue"><Activity size={17} /></span><small>TOOLS OPENED</small><strong><CountingNumber number={openedTools.length} inView /></strong><span>Tool pages visited</span></motion.div>
                     <motion.div className="dash-stat-card" whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 320, damping: 24 }}><span className="dash-stat-icon amber"><Heart size={17} /></span><small>FAVORITES</small><strong><CountingNumber number={favorites.length} inView /></strong><span>Your saved shortcuts</span></motion.div>
                   </div>
@@ -257,7 +261,7 @@ export default function DashboardPage() {
                       <div className="dash-card-heading"><div><span className="micro-label">UNIVERSAL WORKSPACE</span><h2>Start with a file.</h2><p>We&apos;ll identify the format and suggest useful next steps.</p></div><span className="dash-heading-symbol"><UploadCloud size={19} /></span></div>
                       <input ref={inputRef} type="file" className="operation-input" multiple onChange={onChoose} />
                       <div className={"dash-upload-zone" + (dragging ? " drag-active" : "")} onDragEnter={(event) => { event.preventDefault(); setDragging(true); }} onDragOver={(event) => event.preventDefault()} onDragLeave={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setDragging(false); }} onDrop={onDrop}>
-                        <span className="dash-upload-icon"><UploadCloud size={22} /></span><b>Drop files here</b><small>PDF, images, Office, video, audio and archives</small><button onClick={() => inputRef.current?.click()}>Browse files <Plus size={14} /></button>
+                        <span className="dash-upload-icon"><AnimatedUpload size={23} animateOnHover /></span><b>Drop files here</b><small>PDF, images, Office, video, audio and archives</small><button onClick={() => inputRef.current?.click()}>Browse files <Plus size={14} /></button>
                       </div>
                       {files.length > 0 && <FileActionPanel files={files} onRemove={(index) => setFiles((current) => current.filter((_, fileIndex) => fileIndex !== index))} />}
                     </section>
