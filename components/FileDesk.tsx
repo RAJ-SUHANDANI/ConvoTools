@@ -33,6 +33,10 @@ import {
   X,
 } from "lucide-react";
 import BrandLogo from "@/components/BrandLogo";
+import { HeroStage, ConversionMotion } from "@/components/StudioMotion";
+import { Upload as MotionUpload } from "@/components/animate-ui/icons/upload";
+import { ArrowRight as MotionArrow } from "@/components/animate-ui/icons/arrow-right";
+import { MorphingText } from "@animate-ui/react/primitives/texts/morphing";
 import { Button } from "@animate-ui/react/primitives/buttons/button";
 import { CountingNumber } from "@animate-ui/react/primitives/texts/counting-number";
 import { Fade } from "@animate-ui/react/primitives/effects/fade";
@@ -354,6 +358,7 @@ export default function FileDesk() {
         <nav className="fd-nav" aria-label="Main navigation">
           <a href="#toolkit">The toolkit</a>
           <a href="#workflow">How it works</a>
+          <Link href="/privacy">Privacy</Link>
           <a href="#questions">Good to know</a>
         </nav>
         <div className="fd-header-actions">
@@ -382,6 +387,7 @@ export default function FileDesk() {
           <a href="#workflow" onClick={closeMenu}>
             How it works
           </a>
+          <Link href="/privacy" onClick={closeMenu}>Privacy</Link>
           <a href="#questions" onClick={closeMenu}>
             Good to know
           </a>
@@ -401,17 +407,16 @@ export default function FileDesk() {
               A good place for your files.
             </div>
             <h1 id="hero-title">
-              Your files.
+              <span className="ct-hero-line">Everything</span>
               <br />
-              In good hands.
+              <span className="ct-hero-line ct-hero-line-accent">your files need.</span>
             </h1>
             <p>
-              Convert, edit and organize in one considered workspace. PDFs,
-              images, documents, data—everyday file work, made easier.
+              One place to convert PDFs, edit documents, transform images, and get the tedious stuff done. Beautifully simple, right in your browser.
             </p>
             <div className="fd-hero-actions">
               <Button asChild tapScale={0.97}><a href="#file-desk" className="fd-button">
-                <SlidingText text="Start with a file" /> <Plus size={19} />
+                <SlidingText text="Start with a file" /> <MotionUpload size={18} animateOnHover />
               </a></Button>
               <a href="#toolkit" className="fd-secondary-link">
                 Find your tool <ArrowDown size={16} />
@@ -428,7 +433,7 @@ export default function FileDesk() {
             animate={reducedMotion ? {} : { y: [12, 0], opacity: [0.6, 1] }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           >
-            <FormatPreview />
+            <HeroStage><FormatPreview /></HeroStage>
           </motion.div>
           <div className="fd-hero-baseline">
             <span>Made for the work between the work.</span>
@@ -437,6 +442,7 @@ export default function FileDesk() {
             </a>
           </div>
         </section>
+        <ConversionMotion />
         <section
           id="file-desk"
           className="fd-desk"
@@ -444,8 +450,8 @@ export default function FileDesk() {
         >
           <div className="fd-desk-heading">
             <div>
-              <span className="fd-section-label">Your file desk</span>
-              <h2 id="desk-title">What are we working with?</h2>
+              <span className="fd-section-label">YOUR STUDIO / START HERE</span>
+              <h2 id="desk-title">Drop it. <em>Make it happen.</em></h2>
             </div>
             <p>Bring a file. We’ll find its next move.</p>
           </div>
@@ -519,7 +525,7 @@ export default function FileDesk() {
               <span className="fd-section-label">
                 One toolkit. Plenty of possibilities.
               </span>
-              <h2 id="library-title">Find your next move.</h2>
+              <h2 id="library-title">Every tool. <em>One place.</em></h2>
             </div>
             <label className="fd-search">
               <Search size={18} />
@@ -599,7 +605,7 @@ export default function FileDesk() {
                       <ArrowRight size={12} />
                       {tool.outputLabel || "File"}
                     </span>
-                    <ArrowUpRight size={18} />
+                    <MotionArrow size={18} animateOnHover />
                   </div>
                 </Link>
               );
