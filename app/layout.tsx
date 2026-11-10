@@ -13,16 +13,16 @@ import IntroGate from "@/components/IntroGate";
 
 const siteUrl = "https://convotool.vercel.app";
 const sansFont = localFont({
-  src: "../node_modules/@fontsource-variable/dm-sans/files/dm-sans-latin-wght-normal.woff2",
-  variable: "--font-dm-sans",
+  src: "../node_modules/@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2",
+  variable: "--font-manrope",
   display: "swap",
   weight: "100 1000",
 });
 const headingFont = localFont({
-  src: "../node_modules/@fontsource-variable/space-grotesk/files/space-grotesk-latin-wght-normal.woff2",
-  variable: "--font-space-grotesk",
+  src: "../node_modules/@fontsource-variable/instrument-sans/files/instrument-sans-latin-wght-normal.woff2",
+  variable: "--font-instrument-sans",
   display: "swap",
-  weight: "300 700",
+  weight: "400 700",
 });
 const structuredData = [
   {
