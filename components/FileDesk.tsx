@@ -36,7 +36,8 @@ import BrandLogo from "@/components/BrandLogo";
 import { HeroStage, ConversionMotion } from "@/components/StudioMotion";
 import { Upload as MotionUpload } from "@/components/animate-ui/icons/upload";
 import { ArrowRight as MotionArrow } from "@/components/animate-ui/icons/arrow-right";
-import { MorphingText } from "@animate-ui/react/primitives/texts/morphing";
+import { RollingText } from "@animate-ui/react/primitives/texts/rolling";
+import { FileCheck } from "@/components/animate-ui/icons/file-check";
 import { Button } from "@animate-ui/react/primitives/buttons/button";
 import { CountingNumber } from "@animate-ui/react/primitives/texts/counting-number";
 import { Fade } from "@animate-ui/react/primitives/effects/fade";
@@ -709,19 +710,19 @@ export default function FileDesk() {
             ))}
           </div>
         </section>
-        <section className="fd-closing">
-          <span>That file isn’t going to fix itself.</span>
-          <h2>
-            Let’s make
-            <br />
-            short work of it.
-          </h2>
-          <a href="#file-desk" className="fd-button">
-            Bring your first file <Plus size={20} />
-          </a>
-          <span className="fd-closing-asterisk" aria-hidden="true">
-            ✳
-          </span>
+        <section className="fd-closing ct-final-stage" aria-labelledby="ct-final-title">
+          <div className="ct-final-copy">
+            <span className="ct-final-kicker"><FileCheck size={20} animateOnHover /> ONE MORE THING BEFORE YOU GO</span>
+            <h2 id="ct-final-title"><RollingText text="Make room for better work." inView /></h2>
+            <p>Whatever is next on your desk, the right tool is already here. Start with a file, see what you can do, and get on with the good part.</p>
+            <a href="#file-desk" className="fd-button">Bring your first file <MotionArrow size={21} animateOnHover /></a>
+          </div>
+          <div className="ct-final-scene" aria-hidden="true">
+            <span className="ct-final-scene-label">FROM THIS</span>
+            <div className="ct-final-card ct-final-card-back"><span>INPUT</span><i/><i/><i/></div>
+            <div className="ct-final-card ct-final-card-front"><FileCheck size={52}/><span>ALL SET.</span></div>
+            <span className="ct-final-scene-label ct-final-scene-label-right">TO DONE.</span>
+          </div>
         </section>
       </main>
       <footer className="fd-footer">
