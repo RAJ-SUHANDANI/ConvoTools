@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import FileActionPanel from "@/components/FileActionPanel";
 import BrandLogo from "@/components/BrandLogo";
+import { Button } from "@animate-ui/react/primitives/buttons/button";
+import { CountingNumber } from "@animate-ui/react/primitives/texts/counting-number";
 import { TOOLS, slugify } from "@/lib/tools";
 import {
   clearActivity, readActivity, readFavorites, readProfile, readSettings,
@@ -237,14 +239,14 @@ export default function DashboardPage() {
                 <>
                   <div className="dashboard-greeting">
                     <div><span className="section-kicker">YOUR FILE DESK{dateLabel ? " / " + dateLabel : ""}</span><h1>{profile.name.trim() ? "Welcome back, " + profile.name.trim().split(" ")[0] + "." : "Your workspace."}<em> Ready when you are.</em></h1><p>Pick up where you left off, or drop in something new.</p></div>
-                    <button className="dash-primary-action" onClick={() => setActiveTab("All tools")}>Explore all tools <ArrowUpRight size={14} /></button>
+                    <Button className="dash-primary-action" onClick={() => setActiveTab("All tools")}>Explore all tools <ArrowUpRight size={14} /></Button>
                   </div>
 
                   <div className="dash-stat-grid">
-                    <motion.div className="dash-stat-card" whileHover={settings.motion && !reducedMotion ? { y: -4 } : undefined} transition={{ type: "spring", stiffness: 320, damping: 24 }}><span className="dash-stat-icon violet"><Command size={17} /></span><small>TOOLS IN LIBRARY</small><strong>{TOOLS.length}</strong><span>Across 10 categories</span></motion.div>
-                    <motion.div className="dash-stat-card" whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 320, damping: 24 }}><span className="dash-stat-icon green"><FileImage size={17} /></span><small>FILES ADDED</small><strong>{uploads.length}</strong><span>Tracked in this browser</span></motion.div>
-                    <motion.div className="dash-stat-card" whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 320, damping: 24 }}><span className="dash-stat-icon blue"><Activity size={17} /></span><small>TOOLS OPENED</small><strong>{openedTools.length}</strong><span>Tool pages visited</span></motion.div>
-                    <motion.div className="dash-stat-card" whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 320, damping: 24 }}><span className="dash-stat-icon amber"><Heart size={17} /></span><small>FAVORITES</small><strong>{favorites.length}</strong><span>Your saved shortcuts</span></motion.div>
+                    <motion.div className="dash-stat-card" whileHover={settings.motion && !reducedMotion ? { y: -4 } : undefined} transition={{ type: "spring", stiffness: 320, damping: 24 }}><span className="dash-stat-icon violet"><Command size={17} /></span><small>TOOLS IN LIBRARY</small><strong><CountingNumber number={TOOLS.length} inView /></strong><span>Across 10 categories</span></motion.div>
+                    <motion.div className="dash-stat-card" whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 320, damping: 24 }}><span className="dash-stat-icon green"><FileImage size={17} /></span><small>FILES ADDED</small><strong><CountingNumber number={uploads.length} inView /></strong><span>Tracked in this browser</span></motion.div>
+                    <motion.div className="dash-stat-card" whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 320, damping: 24 }}><span className="dash-stat-icon blue"><Activity size={17} /></span><small>TOOLS OPENED</small><strong><CountingNumber number={openedTools.length} inView /></strong><span>Tool pages visited</span></motion.div>
+                    <motion.div className="dash-stat-card" whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 320, damping: 24 }}><span className="dash-stat-icon amber"><Heart size={17} /></span><small>FAVORITES</small><strong><CountingNumber number={favorites.length} inView /></strong><span>Your saved shortcuts</span></motion.div>
                   </div>
 
                   <div className="dash-main-grid">
@@ -348,7 +350,7 @@ export default function DashboardPage() {
                       <div className="dash-settings-heading"><span><UserRound size={17} /></span><div><b>Profile</b><small>Personalize this browser workspace.</small></div></div>
                       <label className="dash-field-label">Display name<input value={profile.name} onChange={(event) => setProfile((current) => ({ ...current, name: event.target.value }))} placeholder="Your name" /></label>
                       <label className="dash-field-label">Email (optional)<input value={profile.email} onChange={(event) => setProfile((current) => ({ ...current, email: event.target.value }))} placeholder="you@example.com" type="email" /></label>
-                      <button className="dash-primary-action" onClick={saveProfileChanges}>{profileSaved ? <><Check size={14} /> Saved</> : <>Save profile <ArrowRight size={14} /></>}</button>
+                      <Button className="dash-primary-action" onClick={saveProfileChanges}>{profileSaved ? <><Check size={14} /> Saved</> : <>Save profile <ArrowRight size={14} /></>}</Button>
                     </section>
                     <section className="dash-settings-card">
                       <div className="dash-settings-heading"><span><Gauge size={17} /></span><div><b>Workspace preferences</b><small>Choose how ConvoTools behaves.</small></div></div>
