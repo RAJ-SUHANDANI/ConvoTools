@@ -5,6 +5,8 @@
  * The functionality remains in existing React modules.
  */
 :root{
+  --sans:var(--font-manrope),system-ui,sans-serif;
+  --display:var(--font-instrument-sans),var(--font-manrope),sans-serif;
   --paper:#f5f6f1;--paper-light:#ffffff;--paper-deep:#e9eee7;
   --ink:#142b32;--ink-soft:#384b53;--muted:#627279;--line:#d6e0dd;
   --night:#142931;--night-2:#1d3740;--night-muted:#bbcdd0;
