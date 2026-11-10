@@ -15,6 +15,9 @@ import {
   Volume2,
 } from "lucide-react";
 import { setPendingFiles } from "@/lib/file-session";
+import { Fade } from "@animate-ui/react/primitives/effects/fade";
+import { RippleButton, RippleButtonRipples } from "@animate-ui/react/primitives/buttons/ripple";
+import { MorphingText } from "@animate-ui/react/primitives/texts/morphing";
 
 const rows = [
   ["Field notes", "Design", "12"],
@@ -214,19 +217,19 @@ export default function ProductStory() {
       <section className="ps-chapter ps-pdf" aria-labelledby="pdf-story">
         <div className="ps-copy">
           <span className="ps-index">01 / THE PAPERWORK</span>
-          <h2 id="pdf-story">
+          <Fade inView asChild><h2 id="pdf-story">
             PDFs with
             <br />
             room to move.
-          </h2>
+          </h2></Fade>
           <p>
             Reorder the pages. Join the pieces. Turn a finished PDF back into
             something editable. Your document’s next chapter starts here.
           </p>
-          <button className="ps-primary" onClick={samplePdf} disabled={busy}>
+          <RippleButton className="ps-primary" onClick={samplePdf} disabled={busy} tapScale={0.97}>
             {busy ? "Preparing sample…" : "Open this sample PDF"}
-            <ArrowRight size={18} />
-          </button>
+            <ArrowRight size={18} /><RippleButtonRipples color="rgba(213,250,119,.28)" />
+          </RippleButton>
           <div className="ps-tool-row">
             <ToolLink name="Merge PDF">Merge</ToolLink>
             <ToolLink name="Split PDF">Split</ToolLink>
@@ -281,13 +284,13 @@ export default function ProductStory() {
       <section className="ps-chapter ps-images" aria-labelledby="image-story">
         <div className="ps-copy">
           <span className="ps-index">02 / PICTURE THIS</span>
-          <h2 id="image-story">
+          <Fade inView asChild><h2 id="image-story">
             Right image.
             <br />
             Right size.
             <br />
             <em>Ready to go.</em>
-          </h2>
+          </h2></Fade>
           <p>
             A cover for your next project. A smaller attachment. An image that
             fits the brief. Convert, compress, resize and crop without opening a
@@ -378,23 +381,24 @@ export default function ProductStory() {
       <section className="ps-chapter ps-data" aria-labelledby="data-story">
         <div className="ps-copy">
           <span className="ps-index">04 / BRING SOME ORDER</span>
-          <h2 id="data-story">
+          <Fade inView asChild><h2 id="data-story">
             Messy rows.
             <br />
             Clearer thinking.
-          </h2>
+          </h2></Fade>
           <p>
             Give raw data a little structure. Convert CSVs to spreadsheets,
             remove repeated rows and take a sheet into your next presentation as
             a PDF.
           </p>
-          <button
+          <RippleButton
             className="ps-primary"
+            tapScale={0.97}
             onClick={() => setClean((value) => !value)}
           >
             {clean ? "Restore sample duplicates" : "Try removing duplicates"}
-            {clean ? <RotateCw size={17} /> : <Check size={17} />}
-          </button>
+            {clean ? <RotateCw size={17} /> : <Check size={17} />}<RippleButtonRipples color="rgba(213,250,119,.28)" />
+          </RippleButton>
           <ToolLink name="Remove duplicates">
             Clean your own spreadsheet
           </ToolLink>
@@ -402,7 +406,7 @@ export default function ProductStory() {
         <div className="ps-stage ps-sheet">
           <div className="ps-stage-bar">
             <span>project-tracker.csv</span>
-            <span>{clean ? "3 unique rows" : "4 rows · 1 duplicate"}</span>
+            <span><MorphingText text={clean ? "3 unique rows" : "4 rows · 1 duplicate"} /></span>
           </div>
           <table>
             <thead>
@@ -473,7 +477,7 @@ export default function ProductStory() {
           <p>A few more ways to get your work out into the world.</p>
         </div>
         <div className="ps-delivery-grid">
-          <article>
+          <Fade inView asChild><article>
             <div className="ps-slide-art" aria-hidden="true">
               <span>01 — A NEW PERSPECTIVE</span>
               <strong>
@@ -489,8 +493,8 @@ export default function ProductStory() {
               presentation.
             </p>
             <ToolLink name="PPTX to PDF">Explore presentation tools</ToolLink>
-          </article>
-          <article>
+          </article></Fade>
+          <Fade inView asChild><article>
             <div className="ps-media-art" aria-hidden="true">
               <div>
                 <Play size={26} />
@@ -513,8 +517,8 @@ export default function ProductStory() {
               Larger media takes longer to process.
             </p>
             <ToolLink name="Video compressor">Explore media tools</ToolLink>
-          </article>
-          <article>
+          </article></Fade>
+          <Fade inView asChild><article>
             <div className="ps-zip-art" aria-hidden="true">
               <span>BRIEF.pdf</span>
               <span>COVER.png</span>
@@ -527,17 +531,17 @@ export default function ProductStory() {
               when it comes back.
             </p>
             <ToolLink name="Create ZIP">Create an archive</ToolLink>
-          </article>
+          </article></Fade>
         </div>
       </section>
       <section className="ps-chapter ps-developer" aria-labelledby="dev-story">
         <div className="ps-copy">
           <span className="ps-index">06 / THE TECHNICAL BITS</span>
-          <h2 id="dev-story">
+          <Fade inView asChild><h2 id="dev-story">
             Small tools.
             <br />
             Very useful tricks.
-          </h2>
+          </h2></Fade>
           <p>
             Format JSON, encode Base64, generate hashes and make QR codes.
             Practical utilities for the less glamorous parts of building
