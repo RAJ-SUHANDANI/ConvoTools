@@ -2,12 +2,14 @@
 
 > ConvoTools is a browser-based file workspace with individual tools for PDF, image, document, spreadsheet, presentation, video, audio, archive and developer workflows.
 
-ConvoTools tool pages explain accepted inputs, output formats, the steps to use each tool, and relevant conversion limitations. Each page includes the working tool interface and answers to common questions. Processing is performed in the browser for the supported tools; users should review each page's instructions and output before relying on a converted file.
+ConvoTools tool pages explain accepted inputs, output formats, the steps to use each tool, and relevant conversion limitations. Each page includes the working tool interface and answers to common questions. Processing is performed in the browser for the supported tools; users should review each page's instructions and output before relying on a converted file. The personal dashboard stores only browser-local history metadata, not recoverable copies of uploaded files. Some engines load external library or model resources for local processing and media links can embed external sites. File-fidelity and compression outcomes depend on source content and browser support.
 
 ## Main pages
 
 - [Home](https://convotool.vercel.app/)
 - [Tool library](https://convotool.vercel.app/#toolkit)
+- [About ConvoTools](https://convotool.vercel.app/about) — How the browser-first file toolkit works and what it includes.
+- [Privacy and file handling](https://convotool.vercel.app/privacy) — What is processed locally, what browser data is stored, third-party resources, and how to clear local preferences.
 
 ## Individual tool pages
 
