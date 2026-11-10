@@ -5,8 +5,11 @@ import "./file-desk.css";
 import "./workspace-polish.css";
 import "./product-story.css";
 import "./atelier-redesign.css";
+import "./intro.css";
+import "./studio-v2.css";
 import ScrollProgress from "@/components/ScrollProgress";
 import MotionPolicy from "@/components/MotionPolicy";
+import IntroGate from "@/components/IntroGate";
 
 const siteUrl = "https://convotool.vercel.app";
 const sansFont = localFont({
@@ -29,6 +32,7 @@ const structuredData = [
     url: siteUrl,
     logo: siteUrl + "/convotools-mark.svg",
     founder: { "@type": "Person", name: "Raj Suhandani" },
+    sameAs: ["https://github.com/RAJ-SUHANDANI/ConvoTools"],
   },
   {
     "@context": "https://schema.org",
@@ -47,7 +51,10 @@ const structuredData = [
     operatingSystem: "Any device with a modern web browser",
     url: siteUrl,
     description:
-      "Use browser-based tools to convert, organize and prepare PDFs, images, documents, spreadsheets, presentations, video, audio and developer files.",
+      "Free browser-based PDF, image, document, spreadsheet, media and developer tools. Files are processed locally by supported tools; review each tool's format limitations.",
+    isAccessibleForFree: true,
+    featureList: ["PDF conversion", "Image processing", "Document editing", "Spreadsheet utilities", "Developer tools"],
+    publisher: { "@type": "Organization", name: "ConvoTools", url: siteUrl },
   },
 ];
 
@@ -120,7 +127,7 @@ export default function RootLayout({
         />
         <MotionPolicy>
           <ScrollProgress />
-          {children}
+          <IntroGate>{children}</IntroGate>
         </MotionPolicy>
       </body>
     </html>
