@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import BrandLogo from "@/components/BrandLogo";
+import { Button } from "@animate-ui/react/primitives/buttons/button";
+import { SlidingText } from "@animate-ui/react/primitives/texts/sliding";
 import type { ProcessResult } from "@/lib/process-file";
 import { acceptedInputForTool, detectFileCategory, formatFileSize, isAudioFile, isVideoFile } from "@/lib/file-actions";
 import { clearPendingFiles, getPendingFiles } from "@/lib/file-session";
@@ -205,7 +207,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
         <motion.div className="operation-card" variants={{ hidden: { opacity: 0, y: 18, scale: 0.99 }, visible: { opacity: 1, y: 0, scale: 1 } }} onMouseMove={(event) => { const rect = event.currentTarget.getBoundingClientRect(); event.currentTarget.style.setProperty("--pointer-x", ((event.clientX - rect.left) / rect.width * 100) + "%"); event.currentTarget.style.setProperty("--pointer-y", ((event.clientY - rect.top) / rect.height * 100) + "%"); }} onMouseLeave={(event) => { event.currentTarget.style.setProperty("--pointer-x", "50%"); event.currentTarget.style.setProperty("--pointer-y", "0%"); }}>
           <div className="operation-card-head"><div><span className="operation-step">STEP 01 / INPUT</span><h2>Add your file</h2><p>Expected format: <b>{tool.inputLabel || "Supported file"}</b></p></div><span className="operation-file-icon"><FileType2 size={21} /></span></div>
           <input ref={inputRef} type="file" accept={accept} multiple={tool.name !== "Word editor"} className="operation-input" onChange={onChoose} />
-          <motion.button className={"operation-drop " + (files.length ? "has-files" : "")} onClick={() => inputRef.current?.click()} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); addFiles(event.dataTransfer.files); }} whileHover={{ scale: 1.006, borderColor: "#5259d8" }} whileTap={{ scale: 0.995 }}>
+          <motion.button className={"operation-drop " + (files.length ? "has-files" : "")} onClick={() => inputRef.current?.click()} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); addFiles(event.dataTransfer.files); }} whileHover={{ scale: 1.006, borderColor: "#438464" }} whileTap={{ scale: 0.995 }}>
             <span className="operation-upload-icon"><UploadCloud size={25} /></span>
             <b>{files.length ? "Replace selected files" : "Choose files or drop them here"}</b>
             <small>Multiple files supported · {tool.inputLabel || "Common formats"}</small>
@@ -250,7 +252,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
           {tool.name === "Protect PDF" && <><label className="field-label" htmlFor="pdf-password">PDF password</label><input id="pdf-password" className="operation-password" type="password" autoComplete="new-password" minLength={6} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="At least 6 characters" /><small className="operation-hint">The password is applied locally. Keep it safe; it cannot be recovered.</small></>}
           {tool.name === "Organize PDF" && <><label className="field-label" htmlFor="pdf-page-order">Page order / pages to keep</label><input id="pdf-page-order" className="operation-password" type="text" value={pdfPageOrder} onChange={(event) => setPdfPageOrder(event.target.value)} placeholder="Example: 3, 1, 2" /><small className="operation-hint">Enter page numbers in the desired order. Omit a page to remove it. Leave blank to keep the original order.</small><label className="field-label" htmlFor="pdf-rotation">Rotate selected pages</label><div className="select-wrap"><select id="pdf-rotation" value={pdfRotation} onChange={(event) => setPdfRotation(Number(event.target.value))}><option value={0}>No rotation</option><option value={90}>90° clockwise</option><option value={180}>180°</option><option value={270}>270° clockwise</option></select><ChevronDown size={15} /></div></>}
 
-          <motion.button className="operation-submit" onClick={startOperation} disabled={processing || documentLoading || (files.length > 0 && invalidFiles.length > 0)} whileHover={{ y: -2, boxShadow: "0 10px 24px rgba(82,89,216,.18)" }} whileTap={{ scale: 0.99 }}><span>{processing ? "Processing…" : isAI ? "Run tool" : "Process & download"}</span><ArrowRight size={16} /></motion.button>
+          <Button className="operation-submit" onClick={startOperation} disabled={processing || documentLoading || (files.length > 0 && invalidFiles.length > 0)} tapScale={0.985}><span>{processing ? "Processing…" : isAI ? "Run tool" : <SlidingText text="Process & download" />}</span><ArrowRight size={16} /></Button>
           {processing && <><LoadingPath /><ProgressMeter progress={progress} determinate={mediaProgress} /></>}
           {downloadRun > 0 && !processing && <DownloadCelebration run={downloadRun} />}
           {notice && <div className="operation-notice" role="status" aria-live="polite"><Sparkles size={14} /> {notice}</div>}
