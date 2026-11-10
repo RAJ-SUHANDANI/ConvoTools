@@ -648,3 +648,21 @@ body{background:#f5f6f1;color:#142b32}
 @media(max-width:800px){.fd-closing.ct-final-stage{width:calc(100% - 20px);grid-template-columns:1fr;padding:55px 6% 35px!important;gap:20px;margin-top:60px!important}.ct-final-scene{max-width:550px;width:100%;margin:auto;min-height:290px}.ct-final-card{height:255px}.ct-final-copy h2{font-size:clamp(47px,9vw,69px)!important}}
 @media(max-width:520px){.ct-final-copy h2{font-size:49px!important}.ct-final-copy p{font-size:14px}.ct-final-scene{transform:scale(.87);min-height:250px;margin:-9px auto}.ct-final-scene-label{display:none}}
 @media(prefers-reduced-motion:reduce){.ct-final-card{animation:none!important}}
+
+
+/* WCAG AA contrast audit, desktop and mobile. */
+.ct-motion-overline,.ct-motion-stats span:first-child,.ct-motion-stats strong small,
+.ct-motion-stats-note>span:first-child{color:#315b62!important}
+.ct-motion-sheet small,.ct-motion-sheet-out small{color:#284a42!important}
+.fd-site .ps-document-band > div:first-child > .ps-index{color:#f0ffca!important}
+.ct-content-page .ct-eyebrow,.ct-state-page .ct-eyebrow{color:#245563!important}
+.ct-content-page .ct-page-back{color:#275564!important}
+.ct-content-page .ct-content-hero>p{color:#365b65!important}
+.ct-content-page .ct-page-stamp{color:#335d64!important}
+.ct-content-page .ct-privacy-tile p,
+.ct-content-page .ct-content-sections p,.ct-content-page .ct-content-aside p{color:#395d64!important}
+.ct-tool-privacy-mobile{display:none}
+@media(max-width:760px){
+ .ct-tool-privacy-mobile{display:inline-flex;color:#255963!important;font-weight:750;font-size:12px;margin-left:auto;margin-right:12px}
+ .tool-page-header .tool-header-cta{margin-left:0}
+}
