@@ -156,13 +156,18 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
   const invalidFiles = files.filter((file) => !compatible(tool, file));
 
   const startOperation = async () => {
-    if (!files.length && !(tool.name === "QR generator" && qrText.trim())) { setNotice("Choose a file or enter text before processing."); inputRef.current?.click(); return; }
-    if (tool.name === "Word editor" && files.length > 1) { setNotice("The text editor works with one DOCX file at a time. Choose a single document."); return; }
-    if (invalidFiles.length) { setNotice("One or more files do not match this tool's expected input format."); return; }
+    // A browser can populate a file input before React hydrates (including
+    // restored input selections). Keep the native FileList as a fallback so
+    // the first conversion click never silently loses a selected file.
+    const selectedFiles = files.length ? files : Array.from(inputRef.current?.files ?? []).filter(file => file.size > 0);
+    if (!selectedFiles.length && !(tool.name === "QR generator" && qrText.trim())) { setNotice("Choose a file or enter text before processing."); inputRef.current?.click(); return; }
+    if (!files.length && selectedFiles.length) setFiles(selectedFiles);
+    if (tool.name === "Word editor" && selectedFiles.length > 1) { setNotice("The text editor works with one DOCX file at a time. Choose a single document."); return; }
+    if (selectedFiles.some(file => !compatible(tool, file))) { setNotice("One or more files do not match this tool's expected input format."); return; }
     setProcessing(true); setProgress(0); setMediaProgress(["MP4 to GIF","Video compressor","Extract audio","Audio converter","PDF to Word","PDF to Excel","PDF to PowerPoint","PDF to PPTX"].includes(tool.name)); setResults([]); setNotice("Processing locally in your browser…");
     try {
       const { processFiles, saveProcessedFile } = await import("@/lib/process-file");
-      const completed = await processFiles(files, tool.name, { output, quality, password, pdfPageOrder, width: imageWidth, height: imageHeight, rotation, cropMode, textContent: documentText, base64Mode, decodedFormat, ocrFormat, ocrLanguage, pdfRotation, qrFormat, hashAlgorithm, qrText, onProgress: (value, phase) => { setProgress(value); if (phase) setNotice(phase); } });
+      const completed = await processFiles(selectedFiles, tool.name, { output, quality, password, pdfPageOrder, width: imageWidth, height: imageHeight, rotation, cropMode, textContent: documentText, base64Mode, decodedFormat, ocrFormat, ocrLanguage, pdfRotation, qrFormat, hashAlgorithm, qrText, onProgress: (value, phase) => { setProgress(value); if (phase) setNotice(phase); } });
       setResults(completed);
       setDownloadRun((run) => run + 1);
       completed.forEach((result) => {
@@ -190,7 +195,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
       <motion.header className="tool-page-header" initial={{ y: -18, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
         <BrandLogo className="brand-tool" width={190} priority />
         <nav><Link href="/#toolkit">All tools</Link><Link href="/privacy">Privacy</Link><Link href="/dashboard">Workspace</Link><a href="https://github.com/RAJ-SUHANDANI/ConvoTools" target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={12} /></a></nav>
-        <Link className="tool-header-cta" href="/dashboard">Open workspace <ArrowUpRight size={13} /></Link>
+        <Link className="ct-tool-privacy-mobile" href="/privacy">Privacy</Link><Link className="tool-header-cta" href="/dashboard">Open workspace <ArrowUpRight size={13} /></Link>
       </motion.header>
 
       <motion.div className="tool-breadcrumb" initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1, duration: 0.45 }}><Link href="/">Home</Link><span>/</span><Link href="/#toolkit">Tools</Link><span>/</span><b>{tool.name}</b></motion.div>
