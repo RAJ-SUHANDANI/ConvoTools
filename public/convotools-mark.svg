@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 340">
-  <defs><linearGradient id="ct-violet" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#eda277"/><stop offset=".52" stop-color="#c85a37"/><stop offset="1" stop-color="#993c24"/></linearGradient></defs>
-  <path d="M34 105c0-17 9-31 25-38L205 8c25-10 49 7 49 33v132l-137 55c-23 9-49 3-66-14-12-12-17-25-17-42V105Z" fill="#1b3a2c"/>
+  <defs><linearGradient id="ct-violet" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e9ffae"/><stop offset=".52" stop-color="#d5fa77"/><stop offset="1" stop-color="#8dc865"/></linearGradient></defs>
+  <path d="M34 105c0-17 9-31 25-38L205 8c25-10 49 7 49 33v132l-137 55c-23 9-49 3-66-14-12-12-17-25-17-42V105Z" fill="#132f39"/>
   <path d="m135 127 116-46c26-10 52 7 52 34v130c0 19-10 33-28 40l-126 51c-24 10-48-7-48-33V174c0-21 12-38 34-47Z" fill="url(#ct-violet)"/>
-  <path d="m159 191 74-7m-34-40 39 39-37 43" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="m159 191 74-7m-34-40 39 39-37 43" fill="none" stroke="#173640" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
