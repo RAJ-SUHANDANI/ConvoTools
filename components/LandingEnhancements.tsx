@@ -222,8 +222,8 @@ export function AmbientCursor() {
 
   useEffect(() => {
     if (reducedMotion || !window.matchMedia("(pointer: fine)").matches) return;
-    setEnabled(true);
     const move = (event: PointerEvent) => {
+      setEnabled(true);
       if (event.pointerType !== "mouse") return;
       if (cursorRef.current) {
         cursorRef.current.style.left = event.clientX + "px";
@@ -342,28 +342,18 @@ export function LiveCodeTerminal() {
   const [frame, setFrame] = useState(0);
 
   useEffect(() => {
-    if (reducedMotion) {
-      setFrame(totalCharacters + 30);
-      return;
-    }
+    if (reducedMotion) return;
     const interval = window.setInterval(() => {
       setFrame((current) => current >= totalCharacters + 46 ? 0 : current + 1);
     }, 36);
     return () => window.clearInterval(interval);
   }, [reducedMotion, totalCharacters]);
 
-  let remaining = Math.min(frame, totalCharacters);
+  const effectiveFrame = reducedMotion ? totalCharacters + 30 : frame;
   const rows = liveCodeLines.map((line, index) => {
-    if (remaining > line.length) {
-      remaining -= line.length + 1;
-      return { line, visible: line, active: false, index };
-    }
-    if (remaining >= 0) {
-      const visible = line.slice(0, remaining);
-      remaining = -1;
-      return { line, visible, active: true, index };
-    }
-    return { line, visible: "", active: false, index };
+    const start = liveCodeLines.slice(0, index).reduce((sum, previous) => sum + previous.length + 1, 0);
+    const visibleLength = Math.max(0, Math.min(line.length, effectiveFrame - start));
+    return { line, visible: line.slice(0, visibleLength), active: effectiveFrame >= start && effectiveFrame < start + line.length, index };
   });
 
   return <div className="live-code-editor" aria-label="Animated TypeScript code preview">
