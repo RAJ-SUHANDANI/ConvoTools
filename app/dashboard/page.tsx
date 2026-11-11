@@ -178,6 +178,7 @@ export default function DashboardPage() {
       <button
         key={tab}
         className={activeTab === tab ? "dash-nav-item active" : "dash-nav-item"}
+        aria-current={activeTab === tab ? "page" : undefined}
         onClick={() => { setActiveTab(tab); setMobileSidebarOpen(false); }}
       >
         <Icon size={16} />
@@ -207,6 +208,7 @@ export default function DashboardPage() {
           {navButton("My files")}
           {navButton("Activity")}
           {navButton("Favorites")}
+          {navButton("Settings")}
         </div>
         <div className="dash-nav-group">
           <span className="dash-nav-caption">TOOLBOX</span>
@@ -217,7 +219,6 @@ export default function DashboardPage() {
         </div>
         <div className="dash-sidebar-bottom">
           <Link href="/privacy" className="dash-privacy-card"><ShieldCheck size={17} /><div><b>Local by default</b><span>Learn how your files are handled ↗</span></div></Link>
-          <button className="dash-nav-item" onClick={() => { setActiveTab("Settings"); setMobileSidebarOpen(false); }}><Settings size={16} /><span>Settings</span></button>
           <Link className="dash-user-card" href="/dashboard">
             <span className="dash-user-avatar">{(profile.name.trim()[0] || "G").toUpperCase()}</span>
             <span><b>{profile.name.trim() || "Guest workspace"}</b><small>{profile.email || "Local profile"}</small></span>
