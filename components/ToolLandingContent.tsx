@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { ArrowUpRight, Check, FileText, LockKeyhole } from "lucide-react";
+import { ArrowUpRight, BookOpenText, Check, FileText, Github, LockKeyhole, ShieldCheck } from "lucide-react";
+import { Fade } from "@animate-ui/react/primitives/effects/fade";
+import { ArrowRight as AnimatedArrowRight } from "@/components/animate-ui/icons/arrow-right";
 import type { Tool } from "@/lib/tools";
 import { TOOLS, slugify } from "@/lib/tools";
 
@@ -171,18 +173,43 @@ export default function ToolLandingContent({ tool }: { tool: Tool }) {
             <a href="https://github.com/jsscheller/pdf2docx-wasm" target="_blank" rel="noreferrer">View corresponding source</a>
           </p>
         )}
-        <aside className="tool-trust-guide" aria-label="About this tool and your files">
-          <div>
-            <span className="tool-seo-eyebrow">SOURCE & PRIVACY</span>
-            <h2>Know what happens to your file.</h2>
-            <p>This guide describes the current browser-based implementation and its known format limitations. Your original file remains on your device; exporting creates a separate result. Browser-side conversions do not guarantee identical fonts, layout or output size.</p>
-          </div>
-          <nav aria-label="Source and privacy references">
-            <Link href="/privacy">How ConvoTools handles files <ArrowUpRight size={15} /></Link>
-            <a href="https://github.com/RAJ-SUHANDANI/ConvoTools" target="_blank" rel="noreferrer">Inspect the public source <ArrowUpRight size={15} /></a>
-            <Link href="/about">About ConvoTools <ArrowUpRight size={15} /></Link>
-          </nav>
-        </aside>
+        <Fade inView asChild>
+          <aside className="tool-trust-guide" aria-labelledby="tool-trust-title">
+            <div className="tool-trust-intro">
+              <span className="tool-trust-overline"><ShieldCheck size={15} /> BUILT WITH CLARITY / 001</span>
+              <div className="tool-trust-symbol" aria-hidden="true">
+                <ShieldCheck size={40} strokeWidth={1.4} />
+                <span className="tool-trust-symbol-spark">✳</span>
+              </div>
+              <h2 id="tool-trust-title">Your files.<br /><em>Your call.</em></h2>
+              <p>Supported tools process files in your browser, with no account required. Conversion accuracy depends on the format and source file—check your result before sharing it.</p>
+              <div className="tool-trust-signals" aria-label="Tool privacy highlights">
+                <span><Check size={13} /> Browser-first</span>
+                <span><Check size={13} /> No sign-in</span>
+                <span><Check size={13} /> Clear limitations</span>
+              </div>
+            </div>
+            <nav className="tool-trust-nav" aria-label="Source and privacy references">
+              <span className="tool-trust-nav-label">EXPLORE THE DETAILS</span>
+              <Link className="tool-trust-destination" href="/privacy">
+                <span className="tool-trust-destination-icon"><LockKeyhole size={22} /></span>
+                <span className="tool-trust-destination-copy"><strong>Privacy, without the guesswork</strong><small>How local processing and browser storage work.</small></span>
+                <AnimatedArrowRight className="tool-trust-arrow" size={21} animateOnHover />
+              </Link>
+              <a className="tool-trust-destination" href="https://github.com/RAJ-SUHANDANI/ConvoTools" target="_blank" rel="noopener noreferrer">
+                <span className="tool-trust-destination-icon"><Github size={22} /></span>
+                <span className="tool-trust-destination-copy"><strong>See the actual source</strong><small>Inspect the project and its implementation.</small></span>
+                <AnimatedArrowRight className="tool-trust-arrow" size={21} animateOnHover />
+              </a>
+              <Link className="tool-trust-destination" href="/about">
+                <span className="tool-trust-destination-icon"><BookOpenText size={22} /></span>
+                <span className="tool-trust-destination-copy"><strong>The thinking behind ConvoTools</strong><small>What we build, how it works, and why.</small></span>
+                <AnimatedArrowRight className="tool-trust-arrow" size={21} animateOnHover />
+              </Link>
+              <span className="tool-trust-fineprint">No marketing promises in place of technical details.</span>
+            </nav>
+          </aside>
+        </Fade>
         <p className="tool-seo-note">Conversion capabilities and limitations may differ by file content or browser. Inspect the downloaded result before publishing or sending it to someone else.</p>
       </div>
     </section>
