@@ -199,6 +199,12 @@ export default function WordEditorWorkspace() {
       editorRef.current.innerHTML = INITIAL_HTML;
       editorRef.current.dataset.initialized = "true";
     }
+    // Explicitly mark editor hydration so programmatic/browser-restored file
+    // selections cannot race a still-unhydrated React change handler.
+    if (fileRef.current) fileRef.current.dataset.editorReady = "true";
+    return () => {
+      if (fileRef.current) delete fileRef.current.dataset.editorReady;
+    };
   }, []);
 
   useEffect(() => {
