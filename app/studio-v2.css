@@ -666,3 +666,265 @@ body{background:#f5f6f1;color:#142b32}
  .ct-tool-privacy-mobile{display:inline-flex;color:#255963!important;font-weight:750;font-size:12px;margin-left:auto;margin-right:12px}
  .tool-page-header .tool-header-cta{margin-left:0}
 }
+
+/* POLISH PASS / 11 NOV — Chapter actions, terminal, CTA rhythm. */
+/* Make the spreadsheet demo's two actions a real, wrapping action row. */
+.ps-data .ps-data-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  column-gap: clamp(18px, 2.2vw, 34px);
+  row-gap: 12px;
+  margin-top: 25px;
+}
+.ps-data .ps-data-actions > .ps-primary {
+  flex: 0 0 auto;
+  margin: 0 !important;
+}
+.ps-data .ps-data-actions > .ps-link {
+  display: inline-flex;
+  flex: 0 1 auto;
+  margin: 0 !important;
+  min-height: 48px;
+  padding: 10px 0;
+  white-space: normal;
+}
+/* Keep the final section a complete card, not fused to the footer. */
+.fd-closing.ct-final-stage {
+  margin-bottom: clamp(36px, 5vw, 92px) !important;
+  border-radius: 30px !important;
+}
+/* Animate UI CodeBlock, backed by Shiki, with an editable scratchpad below it. */
+.ct-terminal.ps-code {
+  background: #102831 !important;
+  color: #f0f8f2 !important;
+  border: 1px solid #31505a !important;
+  border-radius: 22px !important;
+  box-shadow: 0 22px 40px #10283120 !important;
+  overflow: hidden;
+  min-width: 0;
+  isolation: isolate;
+}
+.ct-terminal .ct-terminal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 68px;
+  padding: 14px 22px;
+  border-bottom: 1px solid #37545b !important;
+  background: #102832;
+}
+.ct-terminal-header > span:first-child {
+  display: inline-flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 13px;
+  color: #f2fbf5;
+  font-weight: 700;
+}
+.ct-terminal-header small {
+  font: 700 9px var(--mono);
+  letter-spacing: .1em;
+  color: #a8cfbe;
+}
+.ct-terminal-led,
+.ct-terminal-preview-label i {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border-radius: 50%;
+  background: #b8f36b;
+  box-shadow: 0 0 0 4px #b8f36b18;
+}
+.ct-terminal-controls {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+.ct-terminal .ct-terminal-header button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-size: 11px !important;
+  font-weight: 700;
+  line-height: 1.2;
+  min-height: 37px;
+  border-radius: 999px !important;
+  padding: 8px 13px !important;
+  white-space: nowrap;
+}
+.ct-terminal .ct-terminal-replay {
+  border: 1px solid #557078 !important;
+  background: #223f48 !important;
+  color: #e1eee9 !important;
+}
+.ct-terminal .ct-terminal-replay:hover { background: #30535e !important; }
+.ct-terminal .ct-terminal-format {
+  border: 1px solid #d5fa77 !important;
+  background: #d5fa77 !important;
+  color: #18343e !important;
+}
+.ct-terminal .ct-terminal-format:hover { background: #e3ffa2 !important; }
+.ct-terminal-preview {
+  background: radial-gradient(ellipse at 100% 0%, #33585d45, transparent 53%), #132d36;
+  min-height: 250px;
+  padding: 21px 25px 27px;
+  border-bottom: 1px solid #35525b;
+}
+.ct-terminal-preview-label,
+.ct-terminal-editor-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px 14px;
+  color: #b2d7c6;
+  font: 750 10px var(--mono);
+  letter-spacing: .09em;
+}
+.ct-terminal-preview-label span:first-child {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+}
+.ct-terminal-preview-label span:last-child,
+.ct-terminal-editor-label span:last-child {
+  color: #a5c1be;
+  letter-spacing: .02em;
+  font-size: 10px;
+}
+.ct-terminal-codeblock {
+  margin-top: 22px;
+  min-height: 165px;
+  max-height: 290px;
+  overflow: auto;
+  scrollbar-color: #5d7e7d transparent;
+  scroll-behavior: smooth;
+}
+.ct-terminal-codeblock pre {
+  margin: 0 !important;
+  border: 0 !important;
+  min-height: 130px;
+  padding: 0 !important;
+  width: max-content;
+  min-width: 100%;
+  max-width: 100%;
+  background: transparent !important;
+  font: 500 clamp(12px, 1.1vw, 15px)/1.85 var(--mono, ui-monospace, monospace) !important;
+  white-space: pre-wrap;
+  word-break: break-word;
+  tab-size: 2;
+}
+.ct-terminal-codeblock code {
+  font: inherit !important;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.ct-terminal-codeblock[data-writing="true"][data-done="false"] pre code::after {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 1.06em;
+  margin-left: 2px;
+  border-right: 2px solid #d5fa77;
+  vertical-align: -.2em;
+  animation: ct-terminal-caret 900ms steps(1) infinite;
+}
+@keyframes ct-terminal-caret { 50% { border-color: transparent; } }
+.ct-terminal-editor {
+  padding: 18px 24px 17px;
+  background: #19363d;
+}
+.ct-terminal-editor-label { color: #d4efdc; margin-bottom: 11px; }
+.ct-terminal-editor textarea {
+  width: 100%;
+  display: block;
+  min-height: 100px !important;
+  height: 106px;
+  max-height: 280px;
+  resize: vertical;
+  background: #0f2630 !important;
+  border: 1px solid #4b6b70 !important;
+  border-radius: 12px;
+  color: #e2f4de !important;
+  padding: 14px 16px !important;
+  font: 500 12px/1.7 var(--mono, ui-monospace, monospace) !important;
+  outline-offset: 3px !important;
+}
+.ct-terminal-editor textarea:focus-visible {
+  outline: 2px solid #d5fa77 !important;
+  border-color: #d5fa77 !important;
+}
+.ct-terminal > .ct-terminal-status {
+  border-top: 1px solid #426269 !important;
+  padding: 13px 24px !important;
+  color: #d0e3d9 !important;
+  background: #17333d;
+  font-size: 11px !important;
+}
+/* Consistent tactile motion across the application's actual controls.
+   Use the independent CSS scale / translate properties so Motion transforms
+   and drag/drop interfaces are not overwritten. */
+:where(.fd-site, .tool-page, .dashboard-shell, .editor-shell, .word-editor-app,
+       .json-workbench, .ct-content-page, .ct-state-page, .savefrom-private-page)
+  button:not(:disabled):not([aria-disabled="true"]) {
+  -webkit-tap-highlight-color: transparent;
+  transition: scale .18s cubic-bezier(.2,.8,.3,1), filter .18s ease;
+}
+:where(.fd-site, .tool-page, .dashboard-shell, .editor-shell, .word-editor-app,
+       .json-workbench, .ct-content-page, .ct-state-page, .savefrom-private-page)
+  button:not(:disabled):active { scale: .96; }
+:where(.fd-site, .tool-page, .dashboard-shell, .editor-shell, .word-editor-app,
+       .json-workbench, .ct-content-page, .ct-state-page, .savefrom-private-page)
+  button:not(:disabled):hover { filter: brightness(1.035); }
+:where(.fd-site, .tool-page, .dashboard-shell, .editor-shell, .word-editor-app,
+       .json-workbench, .ct-content-page, .ct-state-page, .savefrom-private-page)
+  :is(.ps-link,.ps-sheet-export,.fd-button,.fd-workspace-link,.ct-motion-go,.tool-header-cta,.dash-primary-action,.operation-submit,.ct-subpage-nav-cta,.ct-final-copy .fd-button) {
+  transition: translate .22s cubic-bezier(.2,.8,.3,1), box-shadow .22s ease, color .22s ease;
+}
+:where(.fd-site, .tool-page, .dashboard-shell, .editor-shell, .word-editor-app,
+       .json-workbench, .ct-content-page, .ct-state-page, .savefrom-private-page)
+  :is(.ps-link,.ps-sheet-export,.fd-button,.fd-workspace-link,.ct-motion-go,.tool-header-cta,.dash-primary-action,.operation-submit,.ct-subpage-nav-cta):hover {
+  translate: 0 -2px;
+}
+:where(.fd-site, .tool-page, .dashboard-shell, .editor-shell, .word-editor-app,
+       .json-workbench, .ct-content-page, .ct-state-page, .savefrom-private-page)
+  :is(.ps-link,.ps-sheet-export,.fd-button,.fd-workspace-link,.ct-motion-go,.tool-header-cta,.dash-primary-action,.operation-submit,.ct-subpage-nav-cta):active {
+  translate: 0 0;
+}
+:where(.fd-site, .tool-page, .dashboard-shell)
+  :is(.ps-link,.ps-sheet-export,.ct-motion-go,.fd-button,.dash-primary-action,.operation-submit) > svg:last-child {
+  transition: translate .22s cubic-bezier(.2,.8,.3,1), rotate .22s ease;
+}
+:where(.fd-site, .tool-page, .dashboard-shell)
+  :is(.ps-link,.ps-sheet-export,.ct-motion-go,.fd-button,.dash-primary-action,.operation-submit):hover > svg:last-child {
+  translate: 4px 0;
+}
+@media(max-width:620px) {
+  .ps-data .ps-data-actions { align-items: stretch; flex-direction: column; gap: 14px; }
+  .ps-data .ps-data-actions > .ps-primary { align-self: flex-start; }
+  .ps-data .ps-data-actions > .ps-link { align-self: flex-start; }
+  .ct-terminal .ct-terminal-header { align-items: flex-start; padding: 16px; }
+  .ct-terminal-header > span:first-child { align-self: center; }
+  .ct-terminal-controls { gap: 6px; }
+  .ct-terminal .ct-terminal-header button { min-height: 34px; padding: 8px 9px !important; }
+  .ct-terminal-preview { padding: 19px 16px; min-height: 205px; }
+  .ct-terminal-codeblock { min-height: 140px; }
+  .ct-terminal-editor { padding: 16px; }
+  .ct-terminal-editor-label span:last-child { display: none; }
+  .fd-closing.ct-final-stage { margin-bottom: 42px !important; border-radius: 22px !important; }
+}
+@media(prefers-reduced-motion:reduce) {
+  :where(.fd-site, .tool-page, .dashboard-shell, .editor-shell, .word-editor-app,
+         .json-workbench, .ct-content-page, .ct-state-page, .savefrom-private-page)
+    :is(button, a):hover { translate: none !important; }
+  :where(.fd-site, .tool-page, .dashboard-shell, .editor-shell, .word-editor-app,
+         .json-workbench, .ct-content-page, .ct-state-page, .savefrom-private-page)
+    button:active { scale: 1 !important; }
+  .ct-terminal-codeblock[data-writing="true"][data-done="false"] pre code::after { animation: none !important; }
+}
