@@ -276,9 +276,12 @@ for (const name of names) {
       return;
     }
     if (name === "Word editor") {
+      // The editable canvas and its file input hydrate independently of the
+      // global shell; do not dispatch a synthetic change before React is ready.
+      await expect(page.locator('.word-editor-canvas[data-initialized="true"]')).toBeVisible();
+      await expect(page.locator('input[data-editor-ready="true"]')).toHaveCount(1);
       await page
-        .locator('input[type="file"]')
-        .first()
+        .locator('input[data-editor-ready="true"]')
         .setInputFiles(fixtures.docx);
       await expect(
         page.getByLabel("Editable Word document canvas"),
