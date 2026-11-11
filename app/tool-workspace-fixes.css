@@ -465,3 +465,49 @@
   .tool-seo-content .tool-trust-destination:hover,
   .tool-trust-destination:hover .tool-trust-arrow{translate:none!important}
 }
+
+
+/* WCAG 2.1 AA / converter labels — tested against both light panels.
+ * Keep all body-sized helper text at >=4.5:1, including mobile. */
+.tool-page .tool-breadcrumb a {
+  color:#28515c!important;
+  font-weight:650;
+  text-decoration:underline;
+  text-decoration-color:#a3bcb7;
+  text-decoration-thickness:1px;
+  text-underline-offset:3px;
+}
+.tool-page .tool-breadcrumb a:hover {
+  color:#173942!important;
+  text-decoration-color:currentColor;
+}
+.tool-page .operation-card-head .operation-step,
+.tool-page .settings-head .operation-step {
+  color:#295662!important;
+}
+.tool-page .operation-card-head > div > p,
+.tool-page .settings-head > div > p,
+.tool-page .settings-head p {
+  color:#365762!important;
+}
+.tool-page .operation-drop > small {
+  color:#34545b!important;
+}
+.tool-page .operation-secure {
+  color:#31525c!important;
+  font-size:12px!important;
+  line-height:1.65!important;
+}
+.tool-page .operation-secure a {
+  color:#1c5368!important;
+  font-weight:700;
+  text-underline-offset:3px;
+}
+.tool-page .tool-seo-how li small {
+  color:#35555e!important;
+  font-size:13px!important;
+  line-height:1.7!important;
+}
+.tool-page .tool-seo-how li b {
+  color:#295560!important;
+}
