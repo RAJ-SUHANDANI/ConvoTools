@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import "@fontsource-variable/manrope/wght.css";
+import "@fontsource-variable/instrument-sans/wght.css";
 import "./globals.css";
 import "./file-desk.css";
 import "./workspace-polish.css";
@@ -12,18 +13,6 @@ import MotionPolicy from "@/components/MotionPolicy";
 import IntroGate from "@/components/IntroGate";
 
 const siteUrl = "https://convotool.vercel.app";
-const sansFont = localFont({
-  src: "../node_modules/@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2",
-  variable: "--font-manrope",
-  display: "swap",
-  weight: "100 1000",
-});
-const headingFont = localFont({
-  src: "../node_modules/@fontsource-variable/instrument-sans/files/instrument-sans-latin-wght-normal.woff2",
-  variable: "--font-instrument-sans",
-  display: "swap",
-  weight: "400 700",
-});
 const structuredData = [
   {
     "@context": "https://schema.org",
@@ -116,10 +105,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="en-IN"
-      className={`${sansFont.variable} ${headingFont.variable}`}
-    >
+    <html lang="en-IN">
       <body>
         <script
           type="application/ld+json"
