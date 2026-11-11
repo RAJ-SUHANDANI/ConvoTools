@@ -30,6 +30,20 @@ test("converter intro stays readable and the privacy guide is designed, responsi
   await expect(trust.getByRole("link", { name: /thinking behind ConvoTools/ })).toHaveAttribute("href", "/about");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 
+  // Motion runs on initial navigation and in-view reveals. Contrast must be
+  // measured after content reaches its intended, fully opaque visual state;
+  // otherwise axe can sample a translucent frame and falsely flag the page.
+  for (const selector of [
+    ".tool-page-header",
+    ".tool-breadcrumb",
+    ".tool-detail-layout",
+    ".tool-detail-intro",
+    ".operation-card",
+    ".tool-trust-guide",
+  ]) {
+    await expect(page.locator(selector)).toHaveCSS("opacity", "1", { timeout: 15_000 });
+  }
+  await page.waitForTimeout(300);
   const audit = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
   expect(audit.violations.map(({ id, nodes }) => ({ id, targets: nodes.map(n => n.target) }))).toEqual([]);
 });
