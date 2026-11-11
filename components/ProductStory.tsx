@@ -18,6 +18,7 @@ import { setPendingFiles } from "@/lib/file-session";
 import { Fade } from "@animate-ui/react/primitives/effects/fade";
 import { RippleButton, RippleButtonRipples } from "@animate-ui/react/primitives/buttons/ripple";
 import { MorphingText } from "@animate-ui/react/primitives/texts/morphing";
+import { CodeBlock } from "@animate-ui/react/primitives/code-block";
 
 const rows = [
   ["Field notes", "Design", "12"],
@@ -60,6 +61,12 @@ export default function ProductStory() {
     '{"project":"Something good","files":["brief.pdf","cover.png"],"ready":true}',
   );
   const [jsonMessage, setJsonMessage] = useState("");
+  // The animated preview is a snapshot; edits remain in the functional textarea.
+  // Restart highlighting only when the user formats or replays the example.
+  const [terminalCode, setTerminalCode] = useState(
+    '{\n  "project": "Something good",\n  "files": ["brief.pdf", "cover.png"],\n  "ready": true\n}',
+  );
+  const [terminalRun, setTerminalRun] = useState(0);
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
   useEffect(() => {
@@ -391,17 +398,20 @@ export default function ProductStory() {
             remove repeated rows and take a sheet into your next presentation as
             a PDF.
           </p>
-          <RippleButton
-            className="ps-primary"
-            tapScale={0.97}
-            onClick={() => setClean((value) => !value)}
-          >
-            {clean ? "Restore sample duplicates" : "Try removing duplicates"}
-            {clean ? <RotateCw size={17} /> : <Check size={17} />}<RippleButtonRipples color="rgba(213,250,119,.28)" />
-          </RippleButton>
-          <ToolLink name="Remove duplicates">
-            Clean your own spreadsheet
-          </ToolLink>
+          <div className="ps-data-actions">
+            <RippleButton
+              className="ps-primary"
+              tapScale={0.97}
+              onClick={() => setClean((value) => !value)}
+            >
+              {clean ? "Restore sample duplicates" : "Try removing duplicates"}
+              {clean ? <RotateCw size={17} /> : <Check size={17} />}
+              <RippleButtonRipples color="rgba(213,250,119,.28)" />
+            </RippleButton>
+            <ToolLink name="Remove duplicates">
+              Clean your own spreadsheet
+            </ToolLink>
+          </div>
         </div>
         <div className="ps-stage ps-sheet">
           <div className="ps-stage-bar">
@@ -551,35 +561,70 @@ export default function ProductStory() {
             Open the full JSON workspace
           </ToolLink>
         </div>
-        <div className="ps-stage ps-code">
-          <div className="ps-stage-bar">
-            <span>scratchpad.json</span>
-            <button
-              onClick={() => {
-                try {
-                  setJson(JSON.stringify(JSON.parse(json), null, 2));
-                  setJsonMessage("Valid JSON. Formatted with 2 spaces.");
-                } catch {
-                  setJsonMessage(
-                    "That JSON needs a fix. Check the quotes and commas.",
-                  );
-                }
-              }}
-            >
-              Format JSON ↗
-            </button>
+        <div className="ps-stage ps-code ct-terminal">
+          <div className="ps-stage-bar ct-terminal-header">
+            <span><i className="ct-terminal-led" aria-hidden="true" /> scratchpad.json <small>LIVE / JSON</small></span>
+            <div className="ct-terminal-controls">
+              <button type="button" className="ct-terminal-replay" onClick={() => setTerminalRun(run => run + 1)} aria-label="Replay code animation">
+                <RotateCw size={14} /> Replay
+              </button>
+              <RippleButton
+                type="button"
+                className="ct-terminal-format"
+                tapScale={0.96}
+                onClick={() => {
+                  try {
+                    const formatted = JSON.stringify(JSON.parse(json), null, 2);
+                    setJson(formatted);
+                    setTerminalCode(formatted);
+                    setTerminalRun(run => run + 1);
+                    setJsonMessage("Valid JSON. Formatted with 2 spaces.");
+                  } catch {
+                    setJsonMessage("That JSON needs a fix. Check the quotes and commas.");
+                  }
+                }}
+              >
+                Format JSON <ArrowRight size={15} />
+                <RippleButtonRipples color="rgba(213,250,119,.23)" />
+              </RippleButton>
+            </div>
           </div>
-          <label className="fd-sr-only" htmlFor="sample-json">
-            Try formatting JSON
-          </label>
-          <textarea
-            id="sample-json"
-            value={json}
-            onChange={(e) => setJson(e.target.value)}
-            spellCheck={false}
-          />
-          <div role="status">
-            {jsonMessage || "Try editing the sample, then format it."}
+          <div className="ct-terminal-preview" aria-label="Animated syntax-highlighted JSON example">
+            <div className="ct-terminal-preview-label">
+              <span><i aria-hidden="true" /> ANIMATED OUTPUT</span>
+              <span>SHIKI + ANIMATE UI</span>
+            </div>
+            <CodeBlock
+              key={terminalRun}
+              code={terminalCode}
+              lang="json"
+              theme="dark"
+              writing
+              inView
+              inViewOnce
+              duration={3100}
+              className="ct-terminal-codeblock"
+            />
+          </div>
+          <div className="ct-terminal-editor">
+            <div className="ct-terminal-editor-label">
+              <span>YOUR INPUT / EDITABLE</span>
+              <span>Try changing the JSON, then format it above</span>
+            </div>
+            <label className="fd-sr-only" htmlFor="sample-json">
+              Try formatting JSON
+            </label>
+            <textarea
+              id="sample-json"
+              value={json}
+              onChange={(e) => setJson(e.target.value)}
+              spellCheck={false}
+              autoCapitalize="off"
+              autoCorrect="off"
+            />
+          </div>
+          <div role="status" className="ct-terminal-status" aria-live="polite">
+            {jsonMessage || "Edit the sample, format it, or replay the animation."}
           </div>
         </div>
       </section>
