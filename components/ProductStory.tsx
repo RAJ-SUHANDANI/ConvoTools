@@ -19,6 +19,7 @@ import { Fade } from "@animate-ui/react/primitives/effects/fade";
 import { RippleButton, RippleButtonRipples } from "@animate-ui/react/primitives/buttons/ripple";
 import { MorphingText } from "@animate-ui/react/primitives/texts/morphing";
 import { CodeBlock } from "@animate-ui/react/primitives/code-block";
+import { ArrowRight as AnimatedArrowRight } from "@/components/animate-ui/icons/arrow-right";
 
 const rows = [
   ["Field notes", "Design", "12"],
@@ -46,7 +47,7 @@ function ToolLink({
       }
     >
       {children}
-      <ArrowRight size={17} />
+      <AnimatedArrowRight size={18} animateOnHover />
     </Link>
   );
 }
@@ -342,9 +343,9 @@ export default function ProductStory() {
                 <option value={1200}>1200 × 1200</option>
               </select>
             </label>
-            <button onClick={downloadPoster} aria-label="Download sample image">
-              <Download size={20} />
-            </button>
+            <RippleButton type="button" onClick={downloadPoster} aria-label="Download sample image" tapScale={0.95}>
+              <Download size={20} /><RippleButtonRipples color="rgba(213,250,119,.3)" />
+            </RippleButton>
           </div>
         </div>
       </section>
@@ -452,8 +453,9 @@ export default function ProductStory() {
               "A duplicate can be easy to miss. Try the button."
             )}
           </div>
-          <button
+          <RippleButton
             className="ps-sheet-export"
+            tapScale={0.98}
             onClick={() =>
               openSample(
                 "csv-to-xlsx",
@@ -472,8 +474,9 @@ export default function ProductStory() {
             }
           >
             Open this CSV in the converter
-            <ArrowRight size={17} />
-          </button>
+            <AnimatedArrowRight size={18} animateOnHover />
+            <RippleButtonRipples color="rgba(213,250,119,.32)" />
+          </RippleButton>
         </div>
       </section>
       <section className="ps-delivery">
