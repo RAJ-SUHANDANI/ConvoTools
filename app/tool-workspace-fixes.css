@@ -503,11 +503,14 @@
   font-weight:700;
   text-underline-offset:3px;
 }
-.tool-page .tool-seo-how li small {
+/* The indexed guide is a sibling of <main class="tool-page">,
+ * not its descendant: scope this contrast correction to the actual section. */
+.tool-seo-content .tool-seo-how li span > small {
   color:#35555e!important;
   font-size:13px!important;
   line-height:1.7!important;
+  opacity:1!important;
 }
-.tool-page .tool-seo-how li b {
+.tool-seo-content .tool-seo-how li > b {
   color:#295560!important;
 }
