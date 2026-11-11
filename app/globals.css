@@ -18,8 +18,8 @@
   --lime:#c8f169;
   --green:#2f785c;
   --mono:ui-monospace,monospace;
-  --sans:var(--font-dm-sans),sans-serif;
-  --display:var(--font-space-grotesk),sans-serif;
+  --sans:"Manrope Variable",system-ui,sans-serif;
+  --display:"Instrument Sans Variable","Manrope Variable",system-ui,sans-serif;
   --serif:var(--display);
 }
 *{box-sizing:border-box}
