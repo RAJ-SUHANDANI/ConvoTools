@@ -89,11 +89,21 @@ export function saveProfile(profile: ProfileData) {
 }
 
 export function readSettings(): UserSettings {
-  return safeRead<UserSettings>(SETTINGS_KEY, { saveHistory: true, motion: true });
+  return safeRead<UserSettings>(SETTINGS_KEY, { saveHistory: false, motion: true });
 }
 
 export function saveSettings(settings: UserSettings) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  if (!settings.saveHistory) window.localStorage.removeItem(ACTIVITY_KEY);
+  announceChange();
+}
+
+/** Removes only ConvoTools-owned workspace keys, never unrelated site storage. */
+export function clearLocalWorkspace() {
+  if (typeof window === "undefined") return;
+  for (const key of [ACTIVITY_KEY, FAVORITES_KEY, PROFILE_KEY, SETTINGS_KEY]) {
+    window.localStorage.removeItem(key);
+  }
   announceChange();
 }
