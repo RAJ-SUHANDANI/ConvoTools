@@ -130,7 +130,7 @@ export default function PrivateSavefrom() {
         )}
       </AnimatePresence>
       <aside className="savefrom-legal-note"><ShieldCheck size={17} /><div><b>Platform-respecting behaviour.</b><p>This page does not bypass private accounts, DRM, login restrictions, watermarks or creator-disabled downloads. It does not scrape page source or extract platform media streams. Only save media that you own or are authorized to use.</p></div></aside>
-      <footer className="savefrom-private-footer"><Link href="/"><ArrowLeft size={13} /> Return to ConvoTools</Link><span>MEDIA LINKS · OPENED FROM THEIR ORIGINAL SOURCE</span></footer>
+      <footer className="savefrom-private-footer"><Link href="/"><ArrowLeft size={13} /> Return to ConvoTools</Link><Link href="/terms">Terms of use</Link><Link href="/cookies">Storage & embeds</Link><span>MEDIA LINKS · OPENED FROM THEIR ORIGINAL SOURCE</span></footer>
     </main>
   );
 }
