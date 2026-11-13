@@ -26,6 +26,6 @@ export default function AboutPage(){
    ].map(({icon:Icon,title,text})=><Fade inView key={title}><article><Icon size={24}/><h2>{title}</h2><p>{text}</p></article></Fade>)}
   </div>
   <section className="ct-about-outro"><span className="ct-eyebrow">THOUGHTFULLY PRACTICAL</span><h2><RollingText text="The small jobs matter." inView /></h2><p>Browse the tools, find the format you need, or start by dropping in a file. ConvoTools is designed for the work, not the setup.</p><div><Link href="/#toolkit">Browse all tools <ArrowUpRight size={18}/></Link><Link href="/privacy">Read our privacy approach <ArrowUpRight size={18}/></Link></div></section>
- </div><footer className="ct-subpage-footer"><span>© 2026 ConvoTools</span><nav><Link href="/">Home</Link><Link href="/privacy">Privacy</Link><a href="https://github.com/RAJ-SUHANDANI/ConvoTools" target="_blank" rel="noreferrer">Source</a></nav></footer>
+ </div><footer className="ct-subpage-footer"><span>© 2026 ConvoTools</span><nav><Link href="/">Home</Link><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link><Link href="/cookies">Storage</Link><Link href="/contact">Contact</Link><Link href="/accessibility">Accessibility</Link><Link href="/licenses">Licenses</Link><a href="https://github.com/RAJ-SUHANDANI/ConvoTools" target="_blank" rel="noreferrer">Source</a></nav></footer>
  </main>;
 }
