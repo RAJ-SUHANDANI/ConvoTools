@@ -402,6 +402,6 @@ function EmptyPanel({ icon, title, copy }: { icon: React.ReactNode; title: strin
 
 function SettingSwitch({ title, description, value, onChange }: { title: string; description: string; value: boolean; onChange: (value: boolean) => void }) {
   return (
-    <div className="dash-switch-row"><span><b>{title}</b><small>{description}</small></span><button className={"dash-switch" + (value ? " on" : "")} role="switch" aria-checked={value} onClick={() => onChange(!value)}><i /></button></div>
+    <div className="dash-switch-row"><span><b>{title}</b><small>{description}</small></span><button className={"dash-switch" + (value ? " on" : "")} role="switch" aria-label={title} aria-checked={value} onClick={() => onChange(!value)}><i /></button></div>
   );
 }
