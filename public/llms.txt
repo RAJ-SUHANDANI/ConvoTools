@@ -10,6 +10,11 @@ ConvoTools tool pages explain accepted inputs, output formats, the steps to use 
 - [Tool library](https://convotool.vercel.app/#toolkit)
 - [About ConvoTools](https://convotool.vercel.app/about) — How the browser-first file toolkit works and what it includes.
 - [Privacy and file handling](https://convotool.vercel.app/privacy) — What is processed locally, what browser data is stored, third-party resources, and how to clear local preferences.
+- [Terms of use](https://convotool.vercel.app/terms) — Acceptable use, ownership, processing limitations and legal boundaries.
+- [Cookies and storage](https://convotool.vercel.app/cookies) — Functional storage keys, optional history and external media previews.
+- [Contact and reports](https://convotool.vercel.app/contact) — Public support and rights/copyright reporting information.
+- [Accessibility](https://convotool.vercel.app/accessibility) — Keyboard, motion and inclusive design commitments.
+- [Open-source licensing](https://convotool.vercel.app/licenses) — AGPL PDF engine and other third-party notices.
 
 ## Individual tool pages
 
