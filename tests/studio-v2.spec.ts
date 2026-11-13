@@ -25,7 +25,7 @@ test("the 3D entrance does not block use of the page", async ({ page }) => {
 test("privacy and about provide searchable, accessible answers", async ({ page }) => {
   await page.goto("/privacy");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Privacy");
-  await expect(page.getByRole("heading", { name: /What ConvoTools stores/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /What data is handled, and why/ })).toBeVisible();
   await expect(page.locator("script[type='application/ld+json']")).not.toHaveCount(0);
   const audit = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
