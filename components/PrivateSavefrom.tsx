@@ -48,6 +48,7 @@ export default function PrivateSavefrom() {
   const [error, setError] = useState("");
   const [downloadError, setDownloadError] = useState("");
   const [downloading, setDownloading] = useState(false);
+  const [allowExternalPreview, setAllowExternalPreview] = useState(false);
   const [mediaDimensions, setMediaDimensions] = useState("");
   const parsed = useMemo(() => submitted ? parseInput(submitted) : null, [submitted]);
   const guide = parsed && parsed.platform !== "Direct media" ? guides[parsed.platform] : null;
@@ -56,7 +57,7 @@ export default function PrivateSavefrom() {
     event.preventDefault(); setError("");
     const parsedValue = parseInput(value);
     if (!parsedValue) { setSubmitted(""); setError("Use a supported YouTube video, Instagram Reel/post, TikTok video/photo or direct media-file URL."); return; }
-    setDownloadError(""); setMediaDimensions(""); setSubmitted(parsedValue.url);
+    setDownloadError(""); setMediaDimensions(""); setAllowExternalPreview(false); setSubmitted(parsedValue.url);
   }
   async function downloadDirectMedia() {
     if (!parsed || parsed.platform !== "Direct media") return;
@@ -65,7 +66,10 @@ export default function PrivateSavefrom() {
     try {
       const response = await fetch(parsed.url, { mode: "cors", credentials: "omit" });
       if (!response.ok) throw new Error("The media host returned HTTP " + response.status + ".");
+      const reportedSize = Number(response.headers.get("content-length") || 0);
+      if (reportedSize > 200 * 1024 * 1024) throw new Error("This file exceeds the 200 MB direct-download limit.");
       const blob = await response.blob();
+      if (blob.size > 200 * 1024 * 1024) throw new Error("This file exceeds the 200 MB direct-download limit.");
       if (!blob.size) throw new Error("The source returned an empty file.");
       if (!blob.type.startsWith("image/") && !blob.type.startsWith("video/") && !["application/octet-stream", ""].includes(blob.type)) {
         throw new Error("The source did not return a recognized image or video file.");
@@ -108,13 +112,19 @@ export default function PrivateSavefrom() {
           <motion.section className="savefrom-result-layout" key={parsed.platform+parsed.url} initial={{ opacity: 0, y: 13 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -7 }}>
             <article className="savefrom-preview-card">
               <div className="savefrom-card-head"><b>{parsed.title}</b><span>{parsed.platform.toUpperCase()} · {parsed.kind.toUpperCase()}</span></div>
-              {parsed.platform === "Direct media" && parsed.mediaType === "video" ? <video className="savefrom-embed savefrom-direct-preview" src={parsed.url} controls playsInline preload="metadata" onLoadedMetadata={(event) => setMediaDimensions(event.currentTarget.videoWidth + " × " + event.currentTarget.videoHeight)} /> : parsed.platform === "Direct media" && parsed.mediaType === "image" ? <img className="savefrom-embed savefrom-direct-image" src={parsed.url} alt="Preview of the direct image file" onLoad={(event) => setMediaDimensions(event.currentTarget.naturalWidth + " × " + event.currentTarget.naturalHeight)} /> : parsed.embed ? <iframe className="savefrom-embed" src={parsed.embed} title={parsed.platform+" preview"} loading="lazy" allow="encrypted-media; picture-in-picture; web-share" allowFullScreen /> : <div className="savefrom-preview-placeholder"><Play size={24} /><span>This post type may not offer an embedded preview. Open the original post to view it.</span></div>}
+              {!allowExternalPreview && (parsed.embed || parsed.platform === "Direct media") ? <div className="savefrom-preview-consent">
+                <span className="savefrom-consent-icon"><ShieldCheck size={25}/></span>
+                <h2>Preview from {parsed.platform}?</h2>
+                <p>Loading this preview connects your browser directly to {parsed.platform === "Direct media" ? "the external file host" : parsed.platform}. That provider may receive your IP address and browser information and may use its own cookies or tracking. You can continue without loading it.</p>
+                <Button type="button" onClick={() => setAllowExternalPreview(true)}><Play size={15}/> Load external preview</Button>
+                <Link href="/cookies">How external previews work <ArrowUpRight size={13}/></Link>
+              </div> : parsed.platform === "Direct media" && parsed.mediaType === "video" ? <video className="savefrom-embed savefrom-direct-preview" src={parsed.url} controls playsInline preload="metadata" onLoadedMetadata={(event) => setMediaDimensions(event.currentTarget.videoWidth + " × " + event.currentTarget.videoHeight)} /> : parsed.platform === "Direct media" && parsed.mediaType === "image" ? <img className="savefrom-embed savefrom-direct-image" src={parsed.url} alt="Preview of the direct image file" onLoad={(event) => setMediaDimensions(event.currentTarget.naturalWidth + " × " + event.currentTarget.naturalHeight)} /> : parsed.embed ? <iframe className="savefrom-embed" src={parsed.embed} title={parsed.platform+" preview"} loading="lazy" referrerPolicy="strict-origin-when-cross-origin" allow="encrypted-media; picture-in-picture; web-share" allowFullScreen /> : <div className="savefrom-preview-placeholder"><Play size={24}/><span>This post type may not offer an embedded preview. Open the original post to view it.</span></div>}
               <a className="savefrom-original-link" href={parsed.url} target="_blank" rel="noreferrer">{parsed.platform === "Direct media" ? "Open source file" : "Open original post"} <ExternalLink size={13} /></a>
               {parsed.platform === "Direct media" && <div className="savefrom-download-panel"><div className="savefrom-download-meta"><span>DOWNLOAD QUALITY</span><b>{mediaDimensions ? "Original · " + mediaDimensions : "Original source quality"}</b><small>Only the quality supplied by this direct file is available. No artificial upscaling.</small></div><Button className="savefrom-download-button" type="button" onClick={downloadDirectMedia} disabled={downloading}><Download size={15} /> {downloading ? "Preparing download…" : "Download original file"}</Button>{downloadError && <p className="savefrom-download-error" role="alert">{downloadError} <a href={parsed.url} target="_blank" rel="noreferrer">Open source file</a></p>}</div>}
             </article>
             <article className="savefrom-guide-card">
               <span className="savefrom-guide-label"><ShieldCheck size={14} /> {guide ? "OFFICIAL SAVE ROUTE" : "DIRECT FILE LINK"}</span>
-              {guide ? <><h2>{guide.title}</h2><p>{guide.detail}</p><ol>{guide.steps.map((step,index)=><li key={index}><span>0{index+1}</span>{step}</li>)}</ol><a className="savefrom-help-link" href={guide.href} target="_blank" rel="noreferrer">{guide.label} <ArrowUpRight size={13} /></a></> : <><h2>Download the original media file.</h2><p>This direct image or video URL points to a media file. Use the download control to save the original file when its host permits browser access. The original resolution is preserved.</p><p className="savefrom-guidance-note">Only use direct links for files you own, have permission to save, or are licensed to download.</p></>}
+              {guide ? <><h2>{guide.title}</h2><p>{guide.detail}</p><ol>{guide.steps.map((step,index)=><li key={index}><span>0{index+1}</span>{step}</li>)}</ol><a className="savefrom-help-link" href={guide.href} target="_blank" rel="noreferrer">{guide.label} <ArrowUpRight size={13} /></a></> : <><h2>Download the original media file.</h2><p>This direct image or video URL points to a media file. Use the download control to save the original file when its host permits browser access. The original resolution is preserved.</p><p className="savefrom-guidance-note">Only use direct links for files you own, have permission to save, or are licensed to download. The direct-download button connects to that host; it does not bypass platform restrictions.</p></>}
             </article>
           </motion.section>
         )}
