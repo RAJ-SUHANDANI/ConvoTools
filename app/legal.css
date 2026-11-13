@@ -51,3 +51,11 @@
 @media(prefers-reduced-motion:reduce){
  .ct-legal-detail .ct-legal-shortcuts a:hover{translate:none}
 }
+
+.ct-tool-legal-nav{display:flex;flex-wrap:wrap;align-items:center;gap:11px 23px;margin:44px 0 13px;padding:23px 0;
+ border-top:1px solid #d4e1da;border-bottom:1px solid #d4e1da}
+.ct-tool-legal-nav a{display:inline-flex;align-items:center;min-height:36px;color:#285563;font:750 12px var(--sans);
+ text-decoration:none;transition:color .2s,translate .2s}
+.ct-tool-legal-nav a:hover{color:#156e78;translate:0 -2px;text-decoration:underline;text-underline-offset:3px}
+.ct-tool-legal-nav a:focus-visible{outline:3px solid #266c78;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){.ct-tool-legal-nav a:hover{translate:none}}
