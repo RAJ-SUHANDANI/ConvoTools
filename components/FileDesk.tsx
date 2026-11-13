@@ -741,6 +741,11 @@ export default function FileDesk() {
             <a href="#questions">Questions, answered</a>
             <Link href="/privacy">Privacy & file handling</Link>
             <Link href="/about">About ConvoTools</Link>
+            <Link href="/terms">Terms of use</Link>
+            <Link href="/cookies">Cookies & storage</Link>
+            <Link href="/accessibility">Accessibility</Link>
+            <Link href="/licenses">Open-source licenses</Link>
+            <Link href="/contact">Contact & support</Link>
             <a
               href="https://github.com/RAJ-SUHANDANI/ConvoTools"
               target="_blank"
