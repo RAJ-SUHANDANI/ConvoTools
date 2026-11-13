@@ -210,6 +210,13 @@ export default function ToolLandingContent({ tool }: { tool: Tool }) {
             </nav>
           </aside>
         </Fade>
+        <nav className="ct-tool-legal-nav" aria-label="Tool legal and support information">
+          <Link href="/terms">Terms of use</Link>
+          <Link href="/cookies">Cookies & storage</Link>
+          <Link href="/accessibility">Accessibility</Link>
+          <Link href="/licenses">Open-source licenses</Link>
+          <Link href="/contact">Contact & support</Link>
+        </nav>
         <p className="tool-seo-note">Conversion capabilities and limitations may differ by file content or browser. Inspect the downloaded result before publishing or sending it to someone else.</p>
       </div>
     </section>
