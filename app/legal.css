@@ -59,3 +59,9 @@
 .ct-tool-legal-nav a:hover{color:#156e78;translate:0 -2px;text-decoration:underline;text-underline-offset:3px}
 .ct-tool-legal-nav a:focus-visible{outline:3px solid #266c78;outline-offset:3px}
 @media(prefers-reduced-motion:reduce){.ct-tool-legal-nav a:hover{translate:none}}
+
+/* Higher-contrast section numbers for every policy page (WCAG AA). */
+.ct-legal-detail .ct-content-sections .ct-legal-section > span {
+  color:#24535c!important;
+  font-weight:800!important;
+}
