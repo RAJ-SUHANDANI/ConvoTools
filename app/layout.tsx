@@ -9,6 +9,7 @@ import "./atelier-redesign.css";
 import "./intro.css";
 import "./studio-v2.css";
 import "./tool-workspace-fixes.css";
+import "./legal.css";
 import ScrollProgress from "@/components/ScrollProgress";
 import MotionPolicy from "@/components/MotionPolicy";
 import IntroGate from "@/components/IntroGate";
