@@ -41,6 +41,7 @@ export default function LegalDocument({ eyebrow, heading, accent, description, r
             <Link href="/contact">Contact & support <ArrowUpRight size={14}/></Link>
             <Link href="/accessibility">Accessibility <ArrowUpRight size={14}/></Link>
             <Link href="/licenses">Open-source notices <ArrowUpRight size={14}/></Link>
+            <a href="https://github.com/RAJ-SUHANDANI/ConvoTools/issues" target="_blank" rel="noreferrer">Public support & reports <ArrowUpRight size={14}/></a>
           </div>
         </div>
         <div className="ct-content-sections">
