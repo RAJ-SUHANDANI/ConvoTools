@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import LegalDocument, {type LegalSection} from "@/components/LegalDocument";
 export const metadata:Metadata={title:"Contact, Support & Reports | ConvoTools",description:"Contact the ConvoTools project maintainer, report accessibility bugs, request corrections or flag copyright and security concerns.",alternates:{canonical:"/contact"}};
 const repo="https://github.com/RAJ-SUHANDANI/ConvoTools";
