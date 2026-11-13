@@ -20,7 +20,7 @@ import { Button } from "@animate-ui/react/primitives/buttons/button";
 import { CountingNumber } from "@animate-ui/react/primitives/texts/counting-number";
 import { TOOLS, slugify } from "@/lib/tools";
 import {
-  clearActivity, readActivity, readFavorites, readProfile, readSettings,
+  clearActivity, clearLocalWorkspace, readActivity, readFavorites, readProfile, readSettings,
   recordActivity, saveFavorites, saveProfile, saveSettings,
   type ActivityItem, type ProfileData, type UserSettings
 } from "@/lib/activity";
@@ -64,10 +64,11 @@ export default function DashboardPage() {
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [profile, setProfile] = useState<ProfileData>({ name: "", email: "" });
-  const [settings, setSettings] = useState<UserSettings>({ saveHistory: true, motion: true });
+  const [settings, setSettings] = useState<UserSettings>({ saveHistory: false, motion: true });
   const [files, setFiles] = useState<File[]>([]);
   const [dragging, setDragging] = useState(false);
   const [profileSaved, setProfileSaved] = useState(false);
+  const [confirmClearWorkspace, setConfirmClearWorkspace] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [fileSearch, setFileSearch] = useState("");
   const [toolSearch, setToolSearch] = useState("");
@@ -160,6 +161,7 @@ export default function DashboardPage() {
     const next = { ...settings, ...patch };
     setSettings(next);
     saveSettings(next);
+    if (patch.saveHistory === false) setActivity([]);
   };
 
   const saveProfileChanges = () => {
@@ -357,7 +359,7 @@ export default function DashboardPage() {
                     <section className="dash-settings-card">
                       <div className="dash-settings-heading"><span><UserRound size={17} /></span><div><b>Profile</b><small>Personalize this browser workspace.</small></div></div>
                       <label className="dash-field-label">Display name<input value={profile.name} onChange={(event) => setProfile((current) => ({ ...current, name: event.target.value }))} placeholder="Your name" /></label>
-                      <label className="dash-field-label">Email (optional)<input value={profile.email} onChange={(event) => setProfile((current) => ({ ...current, email: event.target.value }))} placeholder="you@example.com" type="email" /></label>
+                      <label className="dash-field-label">Email (optional)<input value={profile.email} onChange={(event) => setProfile((current) => ({ ...current, email: event.target.value }))} placeholder="you@example.com" type="email" autoComplete="off" /></label><p className="ct-settings-privacy-help">Optional profile details stay in this browser. This is not a cloud account or a contact form. <Link href="/privacy">Read the privacy policy.</Link></p>
                       <Button className="dash-primary-action" onClick={saveProfileChanges}>{profileSaved ? <><Check size={14} /> Saved</> : <>Save profile <ArrowRight size={14} /></>}</Button>
                     </section>
                     <section className="dash-settings-card">
@@ -367,8 +369,9 @@ export default function DashboardPage() {
                     </section>
                     <section className="dash-settings-card dash-security-card">
                       <div className="dash-settings-heading"><span><ShieldCheck size={17} /></span><div><b>Privacy & storage</b><small>Local browser data only. No account is connected.</small></div></div>
-                      <p>ConvoTools currently stores activity, favorites and profile preferences in local browser storage. Uploaded file contents are not stored by this dashboard.</p>
-                      <button className="dash-danger-button" onClick={() => { clearActivity(); saveFavorites([]); setActivity([]); setFavorites([]); }}>Clear local history & favorites <X size={13} /></button>
+                      <p>Workspace data stays in local browser storage. History of filenames and opened tools is optional and off by default for new visitors. Files themselves are not saved by the activity log.</p>
+                      <p className="ct-settings-privacy-help"><Link href="/cookies">Cookies & storage details</Link> · <Link href="/privacy">Privacy policy</Link></p>
+                      {!confirmClearWorkspace ? <button className="dash-danger-button" onClick={() => setConfirmClearWorkspace(true)}>Clear all local workspace data <X size={13}/></button> : <div className="ct-clear-confirm" role="group" aria-label="Confirm clearing local workspace"><p>This clears your local profile, preferences, favorites and activity. Downloaded files on your device are not deleted.</p><button className="dash-danger-button" onClick={() => { clearLocalWorkspace(); setActivity([]); setFavorites([]); setProfile({name:"",email:""}); setSettings({saveHistory:false,motion:true}); setConfirmClearWorkspace(false); }}>Yes, clear workspace <X size={13}/></button><button className="dash-quiet-button" onClick={() => setConfirmClearWorkspace(false)}>Cancel</button></div>}
                     </section>
                   </div>
                 </section>
