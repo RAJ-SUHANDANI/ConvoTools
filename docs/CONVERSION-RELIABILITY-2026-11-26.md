@@ -22,3 +22,5 @@ Regression tests use real chooser events and inspect exported PDF page counts an
 The 25- and 50-image tests use 1800×2400 PNG inputs and inspect every PDF page's count/dimensions. Both mobile viewport emulation and a 256 MB JavaScript-heap Chromium configuration are used; this does not substitute for the user's physical phone or original images. Landing and dashboard tests verify that all 50 selections reach the converter. Image conversion tests inspect a 50-file ZIP and exercise a manual individual save.
 
 The existing 100-check suite passed before the additional batch coverage. Policy accessibility audits now wait for visible Fade wrappers to reach full opacity, matching the existing converter audit's settled-animation approach; no accessibility rules are disabled. AI lab availability is unchanged.
+
+A clean Linux CI install also exposed an ONNX Runtime 1.21 CUDA installer downloading a removed GPU release archive (HTTP 404). CI and Vercel now set the installer's supported `ONNXRUNTIME_NODE_INSTALL_CUDA=skip` option. This browser application does not use server CUDA; ordinary dependency install scripts and browser/WASM runtimes remain enabled.

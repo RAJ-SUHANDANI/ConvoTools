@@ -39,6 +39,8 @@ jobs:
             git push origin HEAD:redesign
           fi
       - name: Install locked dependencies
+        env:
+          ONNXRUNTIME_NODE_INSTALL_CUDA: skip
         run: npm ci --no-audit --no-fund
       - name: Lint source
         run: npm run lint
