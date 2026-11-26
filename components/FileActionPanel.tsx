@@ -44,6 +44,7 @@ export default function FileActionPanel({ files, onRemove }: Props) {
     setPendingFiles([file]);
     router.push("/tools/" + action.toolSlug);
   };
+  const imageFiles = records.filter(record => record.category === "Images").map(record => record.file);
 
   return (
     <div className="file-action-panel">
@@ -55,6 +56,10 @@ export default function FileActionPanel({ files, onRemove }: Props) {
         </div>
         <span className="file-total"><CountingNumber number={files.length} /> FILE{files.length === 1 ? "" : "S"}</span>
       </div>
+      {imageFiles.length > 1 && <Button className="file-batch-pdf" onClick={() => {
+        setPendingFiles(imageFiles);
+        router.push("/tools/image-to-pdf");
+      }}>Combine {imageFiles.length} images into PDF <ArrowUpRight size={16}/></Button>}
       <div className="detected-files">
         {records.map(({ file, category, options, key }, index) => {
           const Icon = fileIcon(category);

@@ -514,3 +514,5 @@
 .tool-seo-content .tool-seo-how li > b {
   color:#295560!important;
 }
+.operation-results .operation-download-help { margin: 0; color: #35555e; font: 13px/1.6 var(--sans); }
+.file-batch-pdf { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; margin: 0 0 20px; padding: 12px 18px; border: 1px solid #254d42; border-radius: 8px; background: #16313a; color: #fafff4; font: 600 14px/1.4 var(--sans); cursor: pointer; }

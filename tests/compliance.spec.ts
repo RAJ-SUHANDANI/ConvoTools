@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { waitForPolicyReveals } from "./audit-ready";
 
 const legalPages: Array<{ path: string; heading: RegExp }> = [
   { path: "/privacy", heading: /Privacy should be simple/ },
@@ -18,6 +19,7 @@ for (const {path,heading} of legalPages) {
     await expect(page.getByRole("link",{name:/Terms of use/}).first()).toBeVisible();
     await expect(page.getByRole("link",{name:/Contact & support/}).first()).toBeVisible();
     await expect(page.locator(".ct-content-sections section").first()).toBeVisible();
+    await waitForPolicyReveals(page);
     const audit=await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21aa"]).analyze();
     expect(audit.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)}))).toEqual([]);
   });

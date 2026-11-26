@@ -32,6 +32,7 @@ import {
   Upload,
   X,
 } from "lucide-react";
+import { MAX_BATCH_FILES } from "@/lib/file-limits";
 import BrandLogo from "@/components/BrandLogo";
 import { HeroStage, ConversionMotion } from "@/components/StudioMotion";
 import { Upload as MotionUpload } from "@/components/animate-ui/icons/upload";
@@ -84,7 +85,7 @@ const faq = [
   ],
   [
     "Can I work with more than one file?",
-    "Yes. The file desk accepts up to 30 files at a time and suggests actions for each format. Batch processing depends on the tool; Merge PDF and Create ZIP are useful places to start.",
+    "Yes. The file desk accepts up to 50 files at a time and suggests actions for each format. Batch processing depends on the tool; Merge PDF and Create ZIP are useful places to start.",
   ],
   [
     "What is available in the AI lab?",
@@ -300,10 +301,10 @@ export default function FileDesk() {
   const addFiles = (incoming: FileList | File[]) => {
     const items = Array.from(incoming);
     const valid = items.filter((file) => file.size > 0);
-    const accepted = valid.slice(0, Math.max(0, 30 - files.length));
+    const accepted = valid.slice(0, Math.max(0, MAX_BATCH_FILES - files.length));
     setNotice(
       valid.length > accepted.length
-        ? "The desk holds 30 files. Remove a file to add another."
+        ? "The desk holds 50 files. Remove a file to add another."
         : valid.length < items.length
           ? "Empty files were skipped. Choose a file with content to continue."
           : "",
@@ -502,7 +503,7 @@ export default function FileDesk() {
               <ShieldCheck size={14} /> File selection stays in this browser
               session
             </span>
-            <span>Up to 30 files · Processing varies by tool</span>
+            <span>Up to 50 files · Processing varies by tool</span>
           </div>
           <p className="fd-file-notice" role="status">
             {notice}

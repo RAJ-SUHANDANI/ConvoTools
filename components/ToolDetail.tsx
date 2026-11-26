@@ -16,6 +16,7 @@ import { Fade } from "@animate-ui/react/primitives/effects/fade";
 import { Button } from "@animate-ui/react/primitives/buttons/button";
 import { SlidingText } from "@animate-ui/react/primitives/texts/sliding";
 import type { ProcessResult } from "@/lib/process-file";
+import { archiveToolResults, downloadToolResult, runToolOperation } from "@/lib/tool-operation";
 import { acceptedInputForTool, detectFileCategory, formatFileSize, isAudioFile, isVideoFile } from "@/lib/file-actions";
 import { clearPendingFiles, getPendingFiles } from "@/lib/file-session";
 import { readFavorites, recordActivity, saveFavorites } from "@/lib/activity";
@@ -69,6 +70,7 @@ function compatible(tool: ToolData, file: File) {
 
 export default function ToolDetail({ tool }: { tool: ToolData }) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [output, setOutput] = useState(defaultOutput(tool));
   const [quality, setQuality] = useState<"Smaller file" | "Balanced" | "Best quality">("Balanced");
@@ -94,8 +96,15 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
   const [progress, setProgress] = useState(0);
   const [downloadRun, setDownloadRun] = useState(0);
   const [results, setResults] = useState<ProcessResult[]>([]);
+  const [batchArchive, setBatchArchive] = useState<ProcessResult | null>(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const accept = useMemo(() => acceptedInputForTool(tool.inputLabel || "", tool.category), [tool]);
+
+  useEffect(() => {
+    if (!results.length || processing) return;
+    const frame = requestAnimationFrame(() => resultsRef.current?.scrollIntoView({ block: "center", behavior: "instant" }));
+    return () => cancelAnimationFrame(frame);
+  }, [results, processing]);
 
   useEffect(() => {
     const queued = getPendingFiles();
@@ -136,7 +145,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
       description: "Added to " + tool.name,
     }));
     setFiles(next);
-    setResults([]);
+    setResults([]); setBatchArchive(null);
     setNotice("");
   };
 
@@ -164,25 +173,32 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
     if (!files.length && selectedFiles.length) setFiles(selectedFiles);
     if (tool.name === "Word editor" && selectedFiles.length > 1) { setNotice("The text editor works with one DOCX file at a time. Choose a single document."); return; }
     if (selectedFiles.some(file => !compatible(tool, file))) { setNotice("One or more files do not match this tool's expected input format."); return; }
-    setProcessing(true); setProgress(0); setMediaProgress(["MP4 to GIF","Video compressor","Extract audio","Audio converter","PDF to Word","PDF to Excel","PDF to PowerPoint","PDF to PPTX"].includes(tool.name)); setResults([]); setNotice("Processing locally in your browser…");
+    setProcessing(true); setProgress(0); setMediaProgress(tool.category === "Images" || ["Image to PDF","MP4 to GIF","Video compressor","Extract audio","Audio converter","PDF to Word","PDF to Excel","PDF to PowerPoint","PDF to PPTX"].includes(tool.name)); setResults([]); setBatchArchive(null); setNotice("Processing locally in your browser…");
     try {
-      const { processFiles, saveProcessedFile } = await import("@/lib/process-file");
-      const completed = await processFiles(selectedFiles, tool.name, { output, quality, password, pdfPageOrder, width: imageWidth, height: imageHeight, rotation, cropMode, textContent: documentText, base64Mode, decodedFormat, ocrFormat, ocrLanguage, pdfRotation, qrFormat, hashAlgorithm, qrText, onProgress: (value, phase) => { setProgress(value); if (phase) setNotice(phase); } });
+      const completed = await runToolOperation(selectedFiles, tool.name, { output, quality, password, pdfPageOrder, width: imageWidth, height: imageHeight, rotation, cropMode, textContent: documentText, base64Mode, decodedFormat, ocrFormat, ocrLanguage, pdfRotation, qrFormat, hashAlgorithm, qrText, onProgress: (value, phase) => { setProgress(value); if (phase) setNotice(phase); } });
       setResults(completed);
       setDownloadRun((run) => run + 1);
       completed.forEach((result) => {
-        saveProcessedFile(result);
         recordActivity({ type: "tool", title: tool.name + " completed", description: result.filename + " · " + result.message, category: tool.category, toolSlug: slugify(tool.name) });
       });
-      setProgress(1); setNotice(completed.length + " output " + (completed.length === 1 ? "file is" : "files are") + " ready. Your download" + (completed.length === 1 ? " has" : "s have") + " started.");
+      if (completed.length > 1) {
+        setNotice("Your files are ready. Preparing one ZIP download…");
+        try {
+          const archive = await archiveToolResults(completed, slugify(tool.name) + "-results.zip");
+          setBatchArchive(archive); downloadToolResult(archive);
+        } catch (error) {
+          setNotice("Your files are ready. " + (error instanceof Error ? error.message : "Save the individual files below."));
+          return;
+        }
+      } else downloadToolResult(completed[0]);
+      setProgress(1); setNotice(completed.length === 1 ? "1 output file is ready. Your download has started." : completed.length + " output files are ready. Your ZIP download has started; you can also save files individually below.");
     } catch (error) { setNotice(error instanceof Error ? error.message : "Something went wrong while processing this file."); }
     finally { setProcessing(false); }
   };
 
   const saveProcessedFile = async (result: ProcessResult) => {
     try {
-      const engine = await import("@/lib/process-file");
-      engine.saveProcessedFile(result);
+      downloadToolResult(result);
     } catch { setNotice("The download could not start. Please try the output file again."); }
   };
 
@@ -265,7 +281,7 @@ export default function ToolDetail({ tool }: { tool: ToolData }) {
           {processing && <><LoadingPath /><ProgressMeter progress={progress} determinate={mediaProgress} /></>}
           {downloadRun > 0 && !processing && <DownloadCelebration run={downloadRun} />}
           {notice && <div className="operation-notice" role="status" aria-live="polite"><Sparkles size={14} /> {notice}</div>}
-          {results.length > 0 && <motion.div className="operation-results" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .32 }}><b><Check size={14} /> {results.length} output {results.length===1?"file":"files"} ready</b>{results.map((result,index) => <motion.button key={result.filename+index} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: Math.min(index*.035,.35) }} onClick={() => saveProcessedFile(result)}><FileText size={14} /><span>{result.filename}<small>{result.message}</small></span><ArrowUpRight size={13} /></motion.button>)}</motion.div>}
+          {results.length > 0 && <motion.div ref={resultsRef} className="operation-results" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .32 }}><b><Check size={14} /> {results.length} output {results.length===1?"file":"files"} ready</b><p className="operation-download-help">If your download did not start, choose a file below to save it.</p>{batchArchive && <button className="operation-batch-download" onClick={() => downloadToolResult(batchArchive)}>Download all {results.length} files (ZIP) <ArrowUpRight size={16}/></button>}{results.map((result,index) => <motion.button key={result.filename+index} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: Math.min(index*.035,.35) }} onClick={() => saveProcessedFile(result)}><FileText size={14} /><span>{result.filename}<small>{result.message}</small></span><ArrowUpRight size={13} /></motion.button>)}</motion.div>}
           <div className="operation-secure"><LockKeyhole size={12} /> Supported tools process locally in this browser. Files are not uploaded to a server. <Link href="/privacy">Privacy details <ArrowUpRight size={12}/></Link></div>
         </motion.div>
       </motion.section>

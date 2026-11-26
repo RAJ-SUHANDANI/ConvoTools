@@ -10,6 +10,7 @@ import {
   LockKeyhole, LogOut, Menu, Plus, Search, Settings, ShieldCheck,
   Sparkles, Star, UploadCloud, UserRound, WandSparkles, X, Zap
 } from "lucide-react";
+import { MAX_BATCH_FILES } from "@/lib/file-limits";
 import FileActionPanel from "@/components/FileActionPanel";
 import BrandLogo from "@/components/BrandLogo";
 import { FileCheck as AnimatedFileCheck } from "@/components/animate-ui/icons/file-check";
@@ -137,7 +138,7 @@ export default function DashboardPage() {
       size: file.size,
       description: "Added from the dashboard workspace",
     }));
-    setFiles((current) => [...current, ...next].slice(0, 30));
+    setFiles((current) => [...current, ...next].slice(0, MAX_BATCH_FILES));
   };
 
   const onChoose = (event: ChangeEvent<HTMLInputElement>) => {

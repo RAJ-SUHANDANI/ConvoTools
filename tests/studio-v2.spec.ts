@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { waitForPolicyReveals } from "./audit-ready";
 
 test("the interactive Animate UI studio changes the real tool destination", async ({ page }) => {
   await page.goto("/");
@@ -27,6 +28,7 @@ test("privacy and about provide searchable, accessible answers", async ({ page }
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Privacy");
   await expect(page.getByRole("heading", { name: /What data is handled, and why/ })).toBeVisible();
   await expect(page.locator("script[type='application/ld+json']")).not.toHaveCount(0);
+  await waitForPolicyReveals(page);
   const audit = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
     .analyze();

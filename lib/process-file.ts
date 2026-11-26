@@ -1,4 +1,5 @@
 "use client";
+import { imagesToPdf } from "./image-to-pdf";
 import JSZip from "jszip";
 import { PDFDocument, degrees } from "pdf-lib";
 import * as XLSX from "xlsx";
@@ -26,6 +27,7 @@ async function image(file:File,tool:string,options:ProcessOptions):Promise<Proce
  const mime=fmt==="JPG"||fmt==="JPEG"?"image/jpeg":fmt==="WEBP"?"image/webp":"image/png";
  const quality=options.quality==="Smaller file"?.62:options.quality==="Best quality"?.96:.84;
  const blob=await new Promise<Blob>((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error("Image export failed.")),mime,quality));
+ canvas.width=0;canvas.height=0;
  return result(blob,name(file,mime==="image/jpeg"?"jpg":mime==="image/webp"?"webp":"png"),"Image converted locally in your browser.");
 }
 
@@ -46,7 +48,7 @@ async function compressPdfRaster(file:File,preset:ProcessOptions["quality"]):Pro
 }
 
 async function pdf(files:File[],tool:string,options:ProcessOptions):Promise<ProcessResult[]>{
- if(tool==="Image to PDF"){const doc=await PDFDocument.create();for(const file of files){const bitmap=await createImageBitmap(file);const canvas=document.createElement("canvas");canvas.width=bitmap.width;canvas.height=bitmap.height;const ctx=canvas.getContext("2d");if(!ctx)throw new Error("Image canvas is unavailable.");ctx.drawImage(bitmap,0,0);bitmap.close();const png=await new Promise<Blob>((resolve,reject)=>canvas.toBlob(value=>value?resolve(value):reject(new Error("Could not prepare an image for PDF.")),"image/png"));const image=await doc.embedPng(await png.arrayBuffer());const page=doc.addPage([image.width,image.height]);page.drawImage(image,{x:0,y:0,width:image.width,height:image.height});canvas.width=0;canvas.height=0;}return [result(bytesBlob(await doc.save(),"application/pdf"),"images-combined.pdf","Images converted and combined into one PDF.")];}
+ if(tool==="Image to PDF")return imagesToPdf(files,options);
  if(tool==="Merge PDF"){const doc=await PDFDocument.create();for(const f of files){const src=await PDFDocument.load(await f.arrayBuffer());(await doc.copyPages(src,src.getPageIndices())).forEach(p=>doc.addPage(p));}return [result(bytesBlob(await doc.save(),"application/pdf"),"merged.pdf","PDFs merged in selection order.")];}
  if(tool==="Split PDF"){const src=await PDFDocument.load(await files[0].arrayBuffer());const zip=new JSZip();const count=src.getPageCount();const input=options.pdfPageOrder?.trim();const indices=input?input.split(/[,\s]+/).filter(Boolean).map(Number).map(n=>n-1):Array.from({length:count},(_,i)=>i);if(!indices.length||indices.some(n=>!Number.isInteger(n)||n<0||n>=count)||new Set(indices).size!==indices.length)throw new Error("Enter valid page numbers once each. Example: 1, 3, 5.");for(const i of indices){const part=await PDFDocument.create();const [page]=await part.copyPages(src,[i]);part.addPage(page);zip.file("page-"+String(i+1).padStart(3,"0")+".pdf",await part.save());}return [result(await zip.generateAsync({type:"blob"}),name(files[0],"zip"),indices.length+" selected pages exported to a ZIP.")];}
  if(tool==="Compress PDF")return [await compressPdfRaster(files[0],options.quality)];
@@ -655,12 +657,12 @@ async function extractDocumentText(file:File):Promise<string>{
  throw new Error("This document format is not supported by the local converter.");
 }
 
-async function mapFileResults(files:File[],operation:(file:File)=>Promise<ProcessResult[]>):Promise<ProcessResult[]>{const output:ProcessResult[]=[];for(const file of files)output.push(...await operation(file));return output;}
+async function mapFileResults(files:File[],operation:(file:File,index:number)=>Promise<ProcessResult[]>):Promise<ProcessResult[]>{const output:ProcessResult[]=[];for(const [index,file] of files.entries())output.push(...await operation(file,index));return output;}
 
 export async function processFiles(files:File[],tool:string,options:ProcessOptions={}):Promise<ProcessResult[]>{
  if(["Image enhancer","Background remover","Photo restoration","OCR extractor"].includes(tool))throw new Error("This AI tool is temporarily locked and marked Coming soon.");
  if(!files.length&&!(tool==="QR generator"&&options.qrText?.trim()))throw new Error("Choose at least one file or enter text to generate a QR code.");
- if(["PNG to JPG","JPG to PNG","PNG to WEBP","WEBP converter","Image compressor","Resize image","Crop & rotate"].includes(tool))return Promise.all(files.map(f=>image(f,tool,options)));
+ if(["PNG to JPG","JPG to PNG","PNG to WEBP","WEBP converter","Image compressor","Resize image","Crop & rotate"].includes(tool))return mapFileResults(files,async (file,index)=>{options.onProgress?.(.05+.9*index/files.length,"Converting image "+(index+1)+" of "+files.length+": "+file.name);return [await image(file,tool,options)];});
  if(["Image to PDF","Merge PDF"].includes(tool))return pdf(files,tool,options);
  if(["Split PDF","Compress PDF","Organize PDF"].includes(tool))return mapFileResults(files,file=>pdf([file],tool,options));
  if(tool==="Protect PDF"){const password=options.password?.trim();if(!password||password.length<6)throw new Error("Enter a password with at least 6 characters.");return mapFileResults(files,async file=>{const {PDFDocument:SecurePDF}=await import("@cantoo/pdf-lib");const doc=await SecurePDF.load(await file.arrayBuffer());doc.encrypt({userPassword:password,ownerPassword:password+"-"+crypto.randomUUID()});return [result(bytesBlob(await doc.save(),"application/pdf"),name(file,"pdf"),"PDF encrypted with AES-256 password protection.")];});}
