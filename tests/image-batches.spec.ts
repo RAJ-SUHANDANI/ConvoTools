@@ -47,8 +47,12 @@ for (const entry of ["/", "/dashboard"]) {
     await page.goto(entry);
     await expect(page.locator('html[data-ct-hydrated="true"]')).toHaveCount(1);
     if (entry === "/") await expect(page.locator(".ct-intro")).toHaveCount(0, { timeout: 12_000 });
-    const input = entry === "/" ? page.getByLabel("Choose files for your file desk") : page.locator('input[type="file"]').first();
-    await input.setInputFiles(files(50, tiny));
+    // A global shell hydration marker can precede the dashboard boundary.
+    // Open the native picker through its React button so a synthetic change
+    // cannot land before that workspace's event handlers have attached.
+    const chooser = page.waitForEvent("filechooser");
+    await page.getByRole("button", { name: entry === "/" ? /^Choose files$/ : /^Browse files/ }).click();
+    await (await chooser).setFiles(files(50, tiny));
     await expect(page.locator(".detected-file-name strong")).toHaveCount(50);
     await page.getByRole("button", { name: "Combine 50 images into PDF" }).click();
     await expect(page).toHaveURL(/\/tools\/image-to-pdf$/);
